@@ -3,8 +3,8 @@
 -- =============================================
 
 -- 1. Create the database
-CREATE DATABASE IF NOT EXISTS campus_events;
-USE campus_events;
+CREATE DATABASE IF NOT EXISTS agucampusevents;
+USE agucampusevents;
 
 -- 2. Users table
 CREATE TABLE IF NOT EXISTS users (

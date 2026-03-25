@@ -11,6 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Routes
+const authRoutes = require('./routes/authRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+
 // Test route
 app.get('/', (req, res) => {
     res.json({ message: 'Campus Event Organizer API is running! 🎉' });
