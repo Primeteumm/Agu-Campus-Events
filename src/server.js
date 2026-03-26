@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./config/db');
@@ -11,16 +12,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Serve static files (HTML, CSS, JS) from public folder
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// API Routes
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
-
-// Test route
-app.get('/', (req, res) => {
-    res.json({ message: 'Campus Event Organizer API is running! 🎉' });
-});
 
 // Start server
 const PORT = process.env.PORT || 3000;

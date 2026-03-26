@@ -1,0 +1,392 @@
+/* ===========================
+   CSS Reset & Base
+   =========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ===========================
+   Navbar
+   =========================== */
+.navbar {
+    background-color: #1565c0;
+    padding: 16px 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Login Button */
+.btn-login {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.btn-login:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.btn-login .icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Logged-in user display */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ffffff;
+}
+
+.user-info .user-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 80, 80, 0.2);
+    border: 1px solid rgba(255, 80, 80, 0.4);
+    color: #ff8a8a;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 80, 80, 0.35);
+}
+
+.btn-logout .icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: rotate(15deg);
+}
+
+.theme-toggle .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+body.light-theme .theme-toggle .icon-sun { display: block; }
+body.light-theme .theme-toggle .icon-moon { display: none; }
+
+/* ===========================
+   Main Content
+   =========================== */
+.main-content {
+    padding: 40px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.welcome-text {
+    font-size: 1.2rem;
+    color: #b0b0b0;
+    transition: color 0.4s ease;
+}
+
+/* ===========================
+   Light Theme
+   =========================== */
+body.light-theme {
+    background-color: #f0f2f5;
+    color: #1a1a2e;
+}
+
+body.light-theme .welcome-text {
+    color: #555;
+}
+
+body.light-theme .modal-card {
+    background: #ffffff;
+    color: #1a1a2e;
+}
+
+body.light-theme .modal-subtitle {
+    color: #777;
+}
+
+body.light-theme .form-group input {
+    background: #f0f2f5;
+    border-color: #d0d0d0;
+    color: #1a1a2e;
+}
+
+body.light-theme .form-group input::placeholder {
+    color: #999;
+}
+
+body.light-theme .switch-text {
+    color: #777;
+}
+
+/* ===========================
+   Modal Overlay
+   =========================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===========================
+   Card Flip Container
+   =========================== */
+.modal-card-container {
+    width: 400px;
+    min-height: 460px;
+    perspective: 1000px;
+    position: relative;
+}
+
+.modal-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px 36px;
+    background: #16213e;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    backface-visibility: hidden;
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+/* Front card (Login) */
+.card-front {
+    transform: rotateY(0deg);
+    opacity: 1;
+}
+
+/* Back card (Signup) */
+.card-back {
+    transform: rotateY(180deg);
+    opacity: 0;
+}
+
+/* Flipped state */
+.modal-card-container.flipped .card-front {
+    transform: rotateY(-180deg);
+    opacity: 0;
+}
+
+.modal-card-container.flipped .card-back {
+    transform: rotateY(0deg);
+    opacity: 1;
+}
+
+/* ===========================
+   Modal Content
+   =========================== */
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+.modal-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+body.light-theme .modal-title {
+    color: #1a1a2e;
+}
+
+.modal-subtitle {
+    font-size: 0.9rem;
+    color: #8a8a9a;
+    margin-bottom: 28px;
+}
+
+/* ===========================
+   Auth Form
+   =========================== */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-icon {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: #6a6a7a;
+    pointer-events: none;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input::placeholder {
+    color: #5a5a6a;
+}
+
+.form-group input:focus {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.2);
+}
+
+.form-error {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    min-height: 20px;
+    margin: 0;
+}
+
+.form-success {
+    color: #51cf66;
+    font-size: 0.85rem;
+    min-height: 20px;
+    margin: 0;
+}
+
+.btn-submit {
+    padding: 14px;
+    background: #1565c0;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.15s;
+}
+
+.btn-submit:hover {
+    background: #1976d2;
+}
+
+.btn-submit:active {
+    transform: scale(0.98);
+}
+
+/* ===========================
+   Switch Text (bottom of card)
+   =========================== */
+.switch-text {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.88rem;
+    color: #7a7a8a;
+}
+
+.switch-link {
+    color: #42a5f5;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.switch-link:hover {
+    color: #90caf9;
+    text-decoration: underline;
+}

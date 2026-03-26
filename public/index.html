@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGU Campus Events</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">AGU Campus Events</div>
+        <div class="navbar-actions">
+            <button class="btn-login" id="openAuthModal">
+                <i data-lucide="log-in" class="icon"></i>
+                <span>Login</span>
+            </button>
+            <button class="theme-toggle" id="themeToggle" title="Tema Değiştir">
+                <i data-lucide="moon" class="icon icon-moon"></i>
+                <i data-lucide="sun" class="icon icon-sun"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <p class="welcome-text">Etkinliklere hoş geldiniz!</p>
+    </main>
+
+    <!-- Auth Modal Overlay -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-card-container" id="cardContainer">
+            <!-- Login Card (Front) -->
+            <div class="modal-card card-front">
+                <button class="modal-close" id="closeLogin">&times;</button>
+                <h2 class="modal-title">Welcome Back</h2>
+                <p class="modal-subtitle">Login to your account</p>
+
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <i data-lucide="mail" class="form-icon"></i>
+                        <input type="email" id="loginEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <i data-lucide="lock" class="form-icon"></i>
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                    </div>
+                    <p class="form-error" id="loginError"></p>
+                    <button type="submit" class="btn-submit">Login</button>
+                </form>
+
+                <p class="switch-text">
+                    Don't have an account yet?
+                    <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
+                </p>
+            </div>
+
+            <!-- Signup Card (Back) -->
+            <div class="modal-card card-back">
+                <button class="modal-close" id="closeSignup">&times;</button>
+                <h2 class="modal-title">Create Account</h2>
+                <p class="modal-subtitle">Sign up to get started</p>
+
+                <form id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <i data-lucide="user" class="form-icon"></i>
+                        <input type="text" id="signupName" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <i data-lucide="mail" class="form-icon"></i>
+                        <input type="email" id="signupEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <i data-lucide="lock" class="form-icon"></i>
+                        <input type="password" id="signupPassword" placeholder="Password" required>
+                    </div>
+                    <p class="form-error" id="signupError"></p>
+                    <p class="form-success" id="signupSuccess"></p>
+                    <button type="submit" class="btn-submit">Sign Up</button>
+                </form>
+
+                <p class="switch-text">
+                    Already have an account?
+                    <a href="#" id="goToLogin" class="switch-link">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logged-in user info (hidden by default) -->
+    <script src="/js/auth.js"></script>
+    <script>
+        // Apply saved theme
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light') document.body.classList.add('light-theme');
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+    </script>
+</body>
+</html>
