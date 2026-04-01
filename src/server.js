@@ -21,10 +21,14 @@ const eventRoutes = require('./routes/eventRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 
-// Start server
-const PORT = process.env.PORT || 3000;
+// Start server locally only if run directly
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, async () => {
+        console.log(`🚀 Server is running on http://localhost:${PORT}`);
+        await testConnection();
+    });
+}
 
-app.listen(PORT, async () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-    await testConnection();
-});
+// Export the app for Vercel
+module.exports = app;
