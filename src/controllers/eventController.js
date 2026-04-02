@@ -38,7 +38,8 @@ const createEvent = async (req, res) => {
 const getAllEvents = async (req, res) => {
     try {
         const [events] = await pool.query(`
-            SELECT e.*, u.name AS organizer_name 
+            SELECT e.*, u.name AS organizer_name,
+                   (SELECT COUNT(*) FROM event_participants ep WHERE ep.event_id = e.id) AS participant_count
             FROM events e 
             JOIN users u ON e.organizer_id = u.id 
             ORDER BY e.date ASC
@@ -133,4 +134,41 @@ const joinEvent = async (req, res) => {
     }
 };
 
-module.exports = { createEvent, getAllEvents, getEventById, joinEvent };
+// GET /api/events/my-joins — Get event IDs that the user has joined (auth required)
+const getMyJoinedEvents = async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT event_id FROM event_participants WHERE user_id = ?',
+            [req.user.id]
+        );
+        const eventIds = rows.map(r => r.event_id);
+        res.json({ joinedEventIds: eventIds });
+    } catch (error) {
+        console.error('Get my joins error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// DELETE /api/events/:id/join — Leave an event (auth required)
+const leaveEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const [result] = await pool.query(
+            'DELETE FROM event_participants WHERE user_id = ? AND event_id = ?',
+            [userId, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ message: 'You are not a participant of this event' });
+        }
+
+        res.json({ message: 'Successfully left the event' });
+    } catch (error) {
+        console.error('Leave event error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents };

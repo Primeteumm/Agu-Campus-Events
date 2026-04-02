@@ -126,11 +126,21 @@ body {
     height: 20px;
 }
 
-.theme-toggle .icon-sun { display: none; }
-.theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun {
+    display: none;
+}
 
-body.light-theme .theme-toggle .icon-sun { display: block; }
-body.light-theme .theme-toggle .icon-moon { display: none; }
+.theme-toggle .icon-moon {
+    display: block;
+}
+
+body.light-theme .theme-toggle .icon-sun {
+    display: block;
+}
+
+body.light-theme .theme-toggle .icon-moon {
+    display: none;
+}
 
 /* ===========================
    Main Content
@@ -389,4 +399,422 @@ body.light-theme .modal-title {
 .switch-link:hover {
     color: #90caf9;
     text-decoration: underline;
+}
+
+/* ===========================
+   Events Toolbar
+   =========================== */
+.events-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.events-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e0e0e0;
+    transition: color 0.4s ease;
+}
+
+body.light-theme .events-title {
+    color: #1a1a2e;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.view-btn {
+    background: none;
+    border: none;
+    color: #777;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.view-btn .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.view-btn.active {
+    background: #1565c0;
+    color: #ffffff;
+}
+
+.view-btn:not(.active):hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+}
+
+body.light-theme .view-toggle {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .view-btn:not(.active):hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #333;
+}
+
+/* ===========================
+   Loading / Empty State
+   =========================== */
+.loading-text,
+.no-events {
+    text-align: center;
+    color: #777;
+    font-size: 1rem;
+    padding: 60px 0;
+}
+
+/* ===========================
+   List View
+   =========================== */
+.event-list-header {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 80px;
+    padding: 12px 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .event-list-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.event-list-row {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 80px;
+    align-items: center;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.event-list-row:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(4px);
+}
+
+body.light-theme .event-list-row {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .event-list-row:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.event-list-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.event-list-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #e0e0e0;
+}
+
+body.light-theme .event-list-title {
+    color: #1a1a2e;
+}
+
+.event-list-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: #888;
+}
+
+.event-list-details {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.event-list-date,
+.event-list-location,
+.event-list-capacity {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: #999;
+}
+
+body.light-theme .event-list-date,
+body.light-theme .event-list-location,
+body.light-theme .event-list-capacity {
+    color: #666;
+}
+
+.meta-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.event-list-capacity.full,
+.full {
+    color: #ff6b6b;
+}
+
+/* ===========================
+   Join Button
+   =========================== */
+.btn-join {
+    padding: 8px 16px;
+    background: #1565c0;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 34px;
+}
+
+.btn-join:hover:not(.disabled):not(.joined) {
+    background: #1976d2;
+    transform: scale(1.03);
+}
+
+.btn-join:active:not(.disabled):not(.joined) {
+    transform: scale(0.97);
+}
+
+.btn-join.disabled {
+    background: #333;
+    color: #777;
+    cursor: not-allowed;
+}
+
+body.light-theme .btn-join.disabled {
+    background: #ddd;
+    color: #999;
+}
+
+.btn-join.joined {
+    background: #2e7d32;
+    cursor: pointer;
+}
+
+.btn-join.joined:hover {
+    background: #c62828;
+}
+
+/* Hide "Joined ✓" text and show "Leave" on hover */
+.btn-join.joined .join-text-leave { display: none; }
+.btn-join.joined .join-text-default { display: inline-block; line-height: 1; }
+.btn-join.joined:hover .join-text-leave { display: inline-block; line-height: 1; }
+.btn-join.joined:hover .join-text-default { display: none; }
+
+/* Join Tooltip (list view) */
+.join-tooltip {
+    position: absolute;
+    right: 90px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2a2a4a;
+    color: #ff8a8a;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: tooltipIn 0.25s ease;
+    z-index: 10;
+}
+
+body.light-theme .join-tooltip {
+    background: #ffffff;
+    color: #e53935;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes tooltipIn {
+    from { opacity: 0; transform: translateY(-50%) translateX(8px); }
+    to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.join-tooltip.fade-out {
+    animation: tooltipOut 0.25s ease forwards;
+}
+
+@keyframes tooltipOut {
+    from { opacity: 1; transform: translateY(-50%) translateX(0); }
+    to { opacity: 0; transform: translateY(-50%) translateX(8px); }
+}
+
+/* ===========================
+   Grid View
+   =========================== */
+.events-container.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.event-grid-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-grid-card {
+    background: #16213e;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    z-index: 2;
+}
+
+body.light-theme .event-grid-card {
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.event-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+}
+
+body.light-theme .event-card-title {
+    color: #1a1a2e;
+}
+
+.event-card-desc {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 16px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+body.light-theme .event-card-desc {
+    color: #777;
+}
+
+.event-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.event-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #999;
+}
+
+body.light-theme .event-card-meta span {
+    color: #666;
+}
+
+/* Grid Join Button */
+.grid-join {
+    width: 100%;
+    padding: 9px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+    margin-top: 4px;
+}
+
+/* ===========================
+   Desktop: Hover Slide-Up Effect
+   =========================== */
+@media (hover: hover) and (min-width: 769px) {
+    .grid-join {
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+
+    .event-grid-wrapper:hover .event-grid-card {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    body.light-theme .event-grid-wrapper:hover .event-grid-card {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-grid-wrapper:hover .grid-join {
+        opacity: 1;
+        transform: translateY(0px);
+        pointer-events: auto;
+    }
+}
+
+/* ===========================
+   Mobile: Always Show Join Button
+   =========================== */
+@media (max-width: 768px) {
+    .grid-join {
+        margin-top: -2px;
+        opacity: 1;
+        transform: none;
+    }
+
+    /* List view mobile */
+    .event-list-header {
+        display: none;
+    }
+
+    .event-list-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .event-list-details {
+        gap: 12px;
+    }
+
+    .btn-join.list-join {
+        width: 100%;
+        text-align: center;
+    }
+
+    .events-container.grid-view {
+        grid-template-columns: 1fr;
+    }
 }
