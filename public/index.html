@@ -25,7 +25,23 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <p class="welcome-text">Etkinliklere hoş geldiniz!</p>
+        <!-- Events Toolbar -->
+        <div class="events-toolbar">
+            <h2 class="events-title">Upcoming Events</h2>
+            <div class="view-toggle">
+                <button class="view-btn active" id="listViewBtn" title="List View">
+                    <i data-lucide="list" class="icon"></i>
+                </button>
+                <button class="view-btn" id="gridViewBtn" title="Grid View">
+                    <i data-lucide="layout-grid" class="icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Events Container -->
+        <div class="events-container list-view" id="eventsContainer">
+            <p class="loading-text">Loading events...</p>
+        </div>
     </main>
 
     <!-- Auth Modal Overlay -->
@@ -88,7 +104,7 @@
         </div>
     </div>
 
-    <!-- Logged-in user info (hidden by default) -->
+    <script src="/js/events.js"></script>
     <script src="/js/auth.js"></script>
     <script>
         // Apply saved theme
