@@ -1,21 +1,25 @@
-const jwt = require('jsonwebtoken');
+const { supabase } = require('../supabase');
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-    // Get token from Authorization header
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // "Bearer TOKEN"
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
-
+const verifyToken = async (req, res, next) => {
     try {
-        // Verify token and attach user info to request
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        const authHeader = req.headers.authorization;
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Access denied. No token provided.' });
+        }
+
+        const { data, error } = await supabase.auth.getUser(token);
+
+        if (error || !data.user) {
+            return res.status(403).json({ message: 'Invalid or expired token.' });
+        }
+
+        req.user = { id: data.user.id, email: data.user.email };
+        req.accessToken = token;
         next();
-    } catch (error) {
+    } catch (err) {
+        console.error('verifyToken:', err);
         return res.status(403).json({ message: 'Invalid or expired token.' });
     }
 };

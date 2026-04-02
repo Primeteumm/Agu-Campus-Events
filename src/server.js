@@ -3,32 +3,39 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const { testConnection } = require('./config/db');
 
-// Initialize Express app
+const { supabase } = require('./supabase'); 
+
+
 const app = express();
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Serve static files (HTML, CSS, JS) from public folder
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// API Routes
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/users', userRoutes);
 
-// Start server locally only if run directly
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, async () => {
         console.log(`🚀 Server is running on http://localhost:${PORT}`);
-        await testConnection();
+        
+        
+        const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
+        if (error) {
+            console.error('❌ Supabase bağlantı hatası:', error.message);
+        } else {
+            console.log('✅ Supabase bağlantısı başarılı! AGU Campus Events hazır.');
+        }
     });
 }
 
-// Export the app for Vercel
 module.exports = app;

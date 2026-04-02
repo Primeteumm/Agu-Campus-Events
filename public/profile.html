@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGU Campus Events</title>
+    <title>Profile Settings — AGU Campus Events</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div class="app-shell">
         <nav class="navbar">
-            <div class="navbar-brand">AGU Campus Events</div>
+            <a href="/" class="navbar-brand navbar-brand-link">AGU Campus Events</a>
             <div class="navbar-actions">
-                <button class="btn-login" id="openAuthModal">
+                <button class="btn-login" id="openAuthModal" type="button">
                     <i data-lucide="log-in" class="icon"></i>
                     <span>Login</span>
                 </button>
-                <button class="theme-toggle" id="themeToggle" title="Tema Değiştir">
+                <button class="theme-toggle" id="themeToggle" title="Tema Değiştir" type="button">
                     <i data-lucide="moon" class="icon icon-moon"></i>
                     <i data-lucide="sun" class="icon icon-sun"></i>
                 </button>
@@ -31,7 +31,7 @@
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to see your profile and roles.</p>
+                        <p class="profile-guest-hint">Sign in to manage your profile.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -40,29 +40,71 @@
                     </div>
                     <div class="profile-name-block" id="profileDisplayName"></div>
                     <div class="profile-roles" id="profileRoles"></div>
-                    <a href="/profile.html" class="profile-settings-link">
+                    <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="settings" class="icon"></i>
                         Profile settings
-                    </a>
+                    </span>
                 </div>
             </aside>
 
             <div class="app-main">
-                <main class="main-content">
-                    <div class="events-toolbar">
-                        <h2 class="events-title">Upcoming Events</h2>
-                        <div class="view-toggle">
-                            <button class="view-btn active" id="listViewBtn" title="List View">
-                                <i data-lucide="list" class="icon"></i>
-                            </button>
-                            <button class="view-btn" id="gridViewBtn" title="Grid View">
-                                <i data-lucide="layout-grid" class="icon"></i>
-                            </button>
-                        </div>
+                <main class="main-content profile-page">
+                    <div id="profileGate" class="profile-gate">
+                        <p class="profile-gate-text">Please sign in to view your profile settings.</p>
+                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
                     </div>
 
-                    <div class="events-container list-view" id="eventsContainer">
-                        <p class="loading-text">Loading events...</p>
+                    <div id="profileContent" class="hidden">
+                        <h2 class="profile-page-title">User Profile Information</h2>
+
+                        <section class="settings-card">
+                            <h3 class="settings-card-title">Account overview</h3>
+                            <dl class="profile-dl">
+                                <div><dt>First name</dt><dd id="roFirstName">—</dd></div>
+                                <div><dt>Last name</dt><dd id="roLastName">—</dd></div>
+                                <div><dt>Email address</dt><dd id="roEmail">—</dd></div>
+                                <div><dt>Roles</dt><dd id="roRoles">—</dd></div>
+                                <div><dt>Member since</dt><dd id="roCreated">—</dd></div>
+                            </dl>
+                        </section>
+
+                        <section class="settings-card">
+                            <h3 class="settings-card-title">Edit username &amp; password</h3>
+                            <p class="settings-hint">Your email address cannot be changed.</p>
+                            <form id="profileForm" class="profile-form">
+                                <div class="form-group profile-form-group">
+                                    <label for="editUsername">Username</label>
+                                    <input type="text" id="editUsername" name="username" autocomplete="username" required>
+                                </div>
+                                <div class="form-group profile-form-group">
+                                    <label for="editEmail">Email address</label>
+                                    <input type="email" id="editEmail" readonly tabindex="-1" aria-readonly="true" class="input-readonly">
+                                </div>
+                                <div class="form-group profile-form-group">
+                                    <label for="currentPassword">Current password</label>
+                                    <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" placeholder="Required only to change password">
+                                </div>
+                                <div class="form-group profile-form-group">
+                                    <label for="newPassword">New password</label>
+                                    <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" placeholder="Leave blank to keep current password">
+                                </div>
+                                <p class="form-error" id="profileFormError"></p>
+                                <p class="form-success" id="profileFormSuccess"></p>
+                                <button type="submit" class="btn-submit">Save changes</button>
+                            </form>
+                        </section>
+
+                        <section class="settings-card hidden" id="clubPromoteSection">
+                            <h3 class="settings-card-title">Club Member assignment</h3>
+                            <p class="settings-hint">As Club President or Club Vice President, you can assign the Club Member role to another user.</p>
+                            <div class="promote-row">
+                                <input type="email" id="lookupEmail" class="promote-input" placeholder="User email address" autocomplete="email">
+                                <button type="button" class="btn-submit promote-btn" id="lookupBtn">Find user</button>
+                            </div>
+                            <p class="form-error" id="lookupError"></p>
+                            <div id="lookupResult" class="lookup-result hidden"></div>
+                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member role</button>
+                        </section>
                     </div>
                 </main>
             </div>
@@ -72,10 +114,9 @@
     <div class="modal-overlay" id="authModal">
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
-                <button class="modal-close" id="closeLogin">&times;</button>
+                <button class="modal-close" id="closeLogin" type="button">&times;</button>
                 <h2 class="modal-title">Welcome Back</h2>
                 <p class="modal-subtitle">Login to your account</p>
-
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
@@ -88,18 +129,15 @@
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
                 </form>
-
                 <p class="switch-text">
                     Don't have an account yet?
                     <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
                 </p>
             </div>
-
             <div class="modal-card card-back">
-                <button class="modal-close" id="closeSignup">&times;</button>
+                <button class="modal-close" id="closeSignup" type="button">&times;</button>
                 <h2 class="modal-title">Create Account</h2>
                 <p class="modal-subtitle">Sign up to get started</p>
-
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -146,7 +184,6 @@
                     <p class="form-success" id="signupSuccess"></p>
                     <button type="submit" class="btn-submit">Sign Up</button>
                 </form>
-
                 <p class="switch-text">
                     Already have an account?
                     <a href="#" id="goToLogin" class="switch-link">Login</a>
@@ -156,14 +193,12 @@
     </div>
 
     <script src="/js/user.js"></script>
-    <script src="/js/events.js"></script>
     <script src="/js/auth.js"></script>
+    <script src="/js/profile.js"></script>
     <script>
         const saved = localStorage.getItem('theme');
         if (saved === 'light') document.body.classList.add('light-theme');
-
         lucide.createIcons();
-
         document.getElementById('themeToggle').addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const isLight = document.body.classList.contains('light-theme');

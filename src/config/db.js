@@ -1,3 +1,6 @@
+/**
+ * Legacy MySQL pool — the app uses Supabase (see src/supabase.js). Kept only if you still run MySQL tooling.
+ */
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 

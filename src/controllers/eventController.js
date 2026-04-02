@@ -1,32 +1,109 @@
-const { pool } = require('../config/db');
+const { supabase, createSupabaseForToken, getSupabaseAdmin } = require('../supabase');
 
-// POST /api/events — Create a new event (auth required)
+/** Prefer service role for public aggregates (organizer names, counts) when set. */
+function dbReader() {
+    return getSupabaseAdmin() || supabase;
+}
+
+/** Supports `date`, `event_date`, or `starts_at` column names in `events`. */
+function eventDateValue(row) {
+    return row.date ?? row.event_date ?? row.starts_at ?? null;
+}
+
+function buildInsertDatePayload(bodyDate) {
+    return {
+        date: bodyDate,
+        event_date: bodyDate,
+        starts_at: bodyDate,
+    };
+}
+
+async function mapEventsWithMeta(rawEvents) {
+    if (!rawEvents?.length) return [];
+
+    const reader = dbReader();
+    const orgIds = [...new Set(rawEvents.map((e) => e.organizer_id).filter(Boolean))];
+    const evIds = rawEvents.map((e) => e.id);
+
+    const { data: profs } = await reader.from('profiles').select('id, first_name, last_name').in('id', orgIds);
+
+    const orgMap = Object.fromEntries((profs || []).map((p) => [p.id, p]));
+
+    const { data: parts } = await reader.from('event_participants').select('event_id').in('event_id', evIds);
+
+    const countMap = {};
+    for (const p of parts || []) {
+        countMap[p.event_id] = (countMap[p.event_id] || 0) + 1;
+    }
+
+    return rawEvents.map((e) => {
+        const o = orgMap[e.organizer_id];
+        const oname = o ? `${o.first_name || ''} ${o.last_name || ''}`.trim() : 'Unknown';
+        const dv = eventDateValue(e);
+        return {
+            ...e,
+            date: dv,
+            organizer_name: oname || 'Unknown',
+            participant_count: countMap[e.id] || 0,
+        };
+    });
+}
+
+// POST /api/events
 const createEvent = async (req, res) => {
     try {
         const { title, description, date, location, capacity } = req.body;
 
-        // Validate input
         if (!title || !date || !location) {
             return res.status(400).json({ message: 'Title, date, and location are required' });
         }
 
-        // Insert event with organizer_id from JWT token
-        const [result] = await pool.query(
-            'INSERT INTO events (title, description, date, location, capacity, organizer_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [title, description || null, date, location, capacity || 50, req.user.id]
-        );
+        if (!req.accessToken) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+
+        const base = {
+            title,
+            description: description || null,
+            location,
+            capacity: Number(capacity) || 50,
+            organizer_id: req.user.id,
+        };
+
+        let row = null;
+        let lastError = null;
+
+        for (const key of ['date', 'event_date', 'starts_at']) {
+            const { data, error } = await sb
+                .from('events')
+                .insert({ ...base, [key]: date })
+                .select()
+                .single();
+            if (!error && data) {
+                row = data;
+                break;
+            }
+            lastError = error;
+        }
+
+        if (!row) {
+            console.error('Create event error:', lastError);
+            return res.status(400).json({ message: lastError?.message || 'Could not create event' });
+        }
 
         res.status(201).json({
             message: 'Event created successfully!',
             event: {
-                id: result.insertId,
+                id: row.id,
                 title,
                 description,
-                date,
+                date: eventDateValue(row),
                 location,
-                capacity: capacity || 50,
-                organizer_id: req.user.id
-            }
+                capacity: Number(capacity) || 50,
+                organizer_id: req.user.id,
+            },
         });
     } catch (error) {
         console.error('Create event error:', error);
@@ -34,17 +111,26 @@ const createEvent = async (req, res) => {
     }
 };
 
-// GET /api/events — Get all events (public)
+// GET /api/events
 const getAllEvents = async (req, res) => {
     try {
-        const [events] = await pool.query(`
-            SELECT e.*, u.name AS organizer_name,
-                   (SELECT COUNT(*) FROM event_participants ep WHERE ep.event_id = e.id) AS participant_count
-            FROM events e 
-            JOIN users u ON e.organizer_id = u.id 
-            ORDER BY e.date ASC
-        `);
+        const reader = dbReader();
+        const { data: raw, error } = await reader.from('events').select('*').order('date', { ascending: true });
 
+        if (error) {
+            const { data: raw2, error: err2 } = await reader
+                .from('events')
+                .select('*')
+                .order('event_date', { ascending: true });
+            if (err2) {
+                console.error('Get events error:', error.message, err2.message);
+                return res.status(500).json({ message: 'Server error' });
+            }
+            const events = await mapEventsWithMeta(raw2 || []);
+            return res.json({ events });
+        }
+
+        const events = await mapEventsWithMeta(raw || []);
         res.json({ events });
     } catch (error) {
         console.error('Get events error:', error);
@@ -52,80 +138,81 @@ const getAllEvents = async (req, res) => {
     }
 };
 
-// GET /api/events/:id — Get event details (public)
+// GET /api/events/:id
 const getEventById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Get event with organizer name
-        const [events] = await pool.query(`
-            SELECT e.*, u.name AS organizer_name 
-            FROM events e 
-            JOIN users u ON e.organizer_id = u.id 
-            WHERE e.id = ?
-        `, [id]);
+        const { data: ev, error } = await dbReader().from('events').select('*').eq('id', id).maybeSingle();
 
-        if (events.length === 0) {
+        if (error || !ev) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        // Get participant count
-        const [participants] = await pool.query(
-            'SELECT COUNT(*) AS participant_count FROM event_participants WHERE event_id = ?',
-            [id]
-        );
+        const mapped = (await mapEventsWithMeta([ev]))[0];
 
-        res.json({
-            event: {
-                ...events[0],
-                participant_count: participants[0].participant_count
-            }
-        });
+        res.json({ event: mapped });
     } catch (error) {
         console.error('Get event error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-// POST /api/events/:id/join — Join an event (auth required)
+// POST /api/events/:id/join
 const joinEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
 
-        // Check if event exists
-        const [events] = await pool.query('SELECT * FROM events WHERE id = ?', [id]);
-        if (events.length === 0) {
+        if (!req.accessToken) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+
+        const { data: event, error: evErr } = await sb.from('events').select('*').eq('id', id).maybeSingle();
+
+        if (evErr || !event) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        const event = events[0];
+        const { count, error: cntErr } = await sb
+            .from('event_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', id);
 
-        // Check capacity
-        const [participants] = await pool.query(
-            'SELECT COUNT(*) AS count FROM event_participants WHERE event_id = ?',
-            [id]
-        );
+        if (cntErr) {
+            console.error('Join count error:', cntErr);
+            return res.status(500).json({ message: 'Server error' });
+        }
 
-        if (participants[0].count >= event.capacity) {
+        if ((count || 0) >= event.capacity) {
             return res.status(400).json({ message: 'Event is full. No more spots available.' });
         }
 
-        // Check if user already joined
-        const [existing] = await pool.query(
-            'SELECT id FROM event_participants WHERE user_id = ? AND event_id = ?',
-            [userId, id]
-        );
+        const { data: existing } = await sb
+            .from('event_participants')
+            .select('event_id')
+            .eq('event_id', id)
+            .eq('user_id', userId)
+            .maybeSingle();
 
-        if (existing.length > 0) {
+        if (existing) {
             return res.status(400).json({ message: 'You have already joined this event' });
         }
 
-        // Join event
-        await pool.query(
-            'INSERT INTO event_participants (user_id, event_id) VALUES (?, ?)',
-            [userId, id]
-        );
+        const { error: insErr } = await sb.from('event_participants').insert({
+            user_id: userId,
+            event_id: id,
+        });
+
+        if (insErr) {
+            if (insErr.code === '23505') {
+                return res.status(400).json({ message: 'You have already joined this event' });
+            }
+            console.error('Join insert error:', insErr);
+            return res.status(400).json({ message: insErr.message });
+        }
 
         res.status(201).json({ message: 'Successfully joined the event!' });
     } catch (error) {
@@ -134,14 +221,23 @@ const joinEvent = async (req, res) => {
     }
 };
 
-// GET /api/events/my-joins — Get event IDs that the user has joined (auth required)
+// GET /api/events/my-joins
 const getMyJoinedEvents = async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT event_id FROM event_participants WHERE user_id = ?',
-            [req.user.id]
-        );
-        const eventIds = rows.map(r => r.event_id);
+        if (!req.accessToken) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+
+        const { data: rows, error } = await sb.from('event_participants').select('event_id').eq('user_id', req.user.id);
+
+        if (error) {
+            console.error('Get my joins error:', error);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        const eventIds = (rows || []).map((r) => r.event_id);
         res.json({ joinedEventIds: eventIds });
     } catch (error) {
         console.error('Get my joins error:', error);
@@ -149,18 +245,31 @@ const getMyJoinedEvents = async (req, res) => {
     }
 };
 
-// DELETE /api/events/:id/join — Leave an event (auth required)
+// DELETE /api/events/:id/join
 const leaveEvent = async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
 
-        const [result] = await pool.query(
-            'DELETE FROM event_participants WHERE user_id = ? AND event_id = ?',
-            [userId, id]
-        );
+        if (!req.accessToken) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
 
-        if (result.affectedRows === 0) {
+        const sb = createSupabaseForToken(req.accessToken);
+
+        const { data, error } = await sb
+            .from('event_participants')
+            .delete()
+            .eq('user_id', userId)
+            .eq('event_id', id)
+            .select();
+
+        if (error) {
+            console.error('Leave event error:', error);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+        if (!data?.length) {
             return res.status(400).json({ message: 'You are not a participant of this event' });
         }
 

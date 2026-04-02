@@ -1,3 +1,6 @@
+/**
+ * Events API — backed by Supabase tables `events` and `event_participants` (+ `profiles` for organizer names).
+ */
 const express = require('express');
 const router = express.Router();
 const { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents } = require('../controllers/eventController');

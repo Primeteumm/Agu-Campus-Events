@@ -1,4 +1,4 @@
-const EVENTS_API = 'http://localhost:3000/api/events';
+const EVENTS_API = '/api/events';
 
 // ===========================
 // DOM Elements
