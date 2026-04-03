@@ -2,6 +2,12 @@
     const API = '/api';
     let lookedUpUserId = null;
 
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str ?? '';
+        return d.innerHTML;
+    }
+
     function headers() {
         return {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -111,7 +117,7 @@
 
             populate(user);
 
-            if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
+            if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
         } catch {
             // API failed — keep showing cached form data
         }

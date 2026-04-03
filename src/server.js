@@ -18,10 +18,12 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;

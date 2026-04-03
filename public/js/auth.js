@@ -76,7 +76,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         closeModal();
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
-        if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
@@ -114,7 +113,6 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         closeModal();
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
-        if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
@@ -136,20 +134,27 @@ function updateNavbar() {
         const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
         const userInfo = document.createElement('div');
         userInfo.className = 'user-info';
-        userInfo.innerHTML = `
-            <span class="user-name">${displayName}</span>
-            <button class="btn-logout" id="logoutBtn" type="button">
-                <i data-lucide="log-out" class="icon"></i>
-                <span>Logout</span>
-            </button>
-        `;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'user-name';
+        nameSpan.textContent = displayName;
+
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'btn-logout';
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.type = 'button';
+        logoutBtn.innerHTML = '<i data-lucide="log-out" class="icon"></i><span>Logout</span>';
+
+        userInfo.appendChild(nameSpan);
+        userInfo.appendChild(logoutBtn);
+
         const themeBtn = actionsDiv.querySelector('.theme-toggle');
         if (themeBtn) actionsDiv.insertBefore(userInfo, themeBtn);
         else actionsDiv.appendChild(userInfo);
 
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+        logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -163,6 +168,6 @@ function updateNavbar() {
 }
 
 updateNavbar();
-if (typeof refreshProfileFromServer === 'function') {
-    refreshProfileFromServer();
+if (typeof syncSidebarFromStorage === 'function') {
+    syncSidebarFromStorage();
 }

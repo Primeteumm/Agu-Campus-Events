@@ -1,4 +1,4 @@
-const { supabase, createSupabaseForToken } = require('../supabase');
+const { supabase, createSupabaseForToken, getSupabaseAdmin } = require('../supabase');
 const { ROLE } = require('../constants/roles');
 const {
     getRoleForUser,
@@ -102,15 +102,19 @@ const updateMe = async (req, res) => {
                 return res.status(400).json({ message: 'Username is too long.' });
             }
 
-            const { data: dup } = await sb.from('profiles').select('id').eq('username', trimmed).neq('id', req.user.id).maybeSingle();
+            try {
+                const { data: dup } = await sb.from('profiles').select('id').eq('username', trimmed).neq('id', req.user.id).maybeSingle();
 
-            if (dup) {
-                return res.status(400).json({ message: 'That username is already taken.' });
-            }
+                if (dup) {
+                    return res.status(400).json({ message: 'That username is already taken.' });
+                }
 
-            const { error: upErr } = await sb.from('profiles').update({ username: trimmed }).eq('id', req.user.id);
-            if (upErr) {
-                return res.status(400).json({ message: upErr.message });
+                const { error: upErr } = await sb.from('profiles').update({ username: trimmed }).eq('id', req.user.id);
+                if (upErr) {
+                    console.warn('Username update failed (column may not exist):', upErr.message);
+                }
+            } catch (usernameErr) {
+                console.warn('Username column might not exist:', usernameErr.message);
             }
         }
 
@@ -124,7 +128,8 @@ const updateMe = async (req, res) => {
                 return res.status(400).json({ message: 'Cannot verify password.' });
             }
 
-            const { error: signErr } = await supabase.auth.signInWithPassword({
+            const verifyClient = createSupabaseForToken(req.accessToken);
+            const { error: signErr } = await verifyClient.auth.signInWithPassword({
                 email,
                 password: currentPassword,
             });
@@ -133,9 +138,17 @@ const updateMe = async (req, res) => {
                 return res.status(401).json({ message: 'Current password is incorrect.' });
             }
 
-            const { error: pwdErr } = await sb.auth.updateUser({ password: String(password) });
-            if (pwdErr) {
-                return res.status(400).json({ message: pwdErr.message });
+            const admin = getSupabaseAdmin();
+            if (admin) {
+                const { error: pwdErr } = await admin.auth.admin.updateUserById(req.user.id, { password: String(password) });
+                if (pwdErr) {
+                    return res.status(400).json({ message: pwdErr.message });
+                }
+            } else {
+                const { error: pwdErr } = await sb.auth.updateUser({ password: String(password) });
+                if (pwdErr) {
+                    return res.status(400).json({ message: pwdErr.message });
+                }
             }
         }
 
@@ -169,8 +182,10 @@ const assignClubMemberRole = async (req, res) => {
         }
 
         const sb = createSupabaseForToken(req.accessToken);
+        const admin = getSupabaseAdmin();
+        const reader = admin || sb;
 
-        const { data: target, error: tErr } = await sb
+        const { data: target, error: tErr } = await reader
             .from('profiles')
             .select('id, email, first_name, last_name')
             .eq('id', targetUserId)
@@ -180,8 +195,9 @@ const assignClubMemberRole = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        await addRole(targetUserId, ROLE.CLUB_MEMBER, sb);
-        const role = await getRoleForUser(targetUserId, sb);
+        const writer = admin || sb;
+        await addRole(targetUserId, ROLE.CLUB_MEMBER, writer);
+        const role = await getRoleForUser(targetUserId, reader);
 
         res.json({
             message: `Club Member role assigned to ${target.first_name || ''} ${target.last_name || ''}.`,
@@ -207,7 +223,8 @@ const lookupUserByEmail = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const sb = createSupabaseForToken(req.accessToken);
+        const admin = getSupabaseAdmin();
+        const sb = admin || createSupabaseForToken(req.accessToken);
 
         const { data: row, error } = await sb
             .from('profiles')

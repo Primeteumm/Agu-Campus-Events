@@ -1,15 +1,15 @@
 const EVENTS_API = '/api/events';
 
-// ===========================
-// DOM Elements
-// ===========================
 const eventsContainer = document.getElementById('eventsContainer');
 const listViewBtn = document.getElementById('listViewBtn');
 const gridViewBtn = document.getElementById('gridViewBtn');
 
-// ===========================
-// View Toggle
-// ===========================
+function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str ?? '';
+    return d.innerHTML;
+}
+
 listViewBtn.addEventListener('click', () => {
     eventsContainer.classList.remove('grid-view');
     eventsContainer.classList.add('list-view');
@@ -26,15 +26,11 @@ gridViewBtn.addEventListener('click', () => {
     localStorage.setItem('eventsView', 'grid');
 });
 
-// Restore saved view
 const savedView = localStorage.getItem('eventsView');
 if (savedView === 'grid') {
     gridViewBtn.click();
 }
 
-// ===========================
-// Format Date
-// ===========================
 function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString('tr-TR', {
@@ -46,9 +42,6 @@ function formatDate(dateStr) {
     });
 }
 
-// ===========================
-// Join Event
-// ===========================
 async function joinEvent(eventId, btn) {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -86,9 +79,8 @@ async function joinEvent(eventId, btn) {
         btn.innerHTML = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
         btn.classList.add('joined');
         btn.disabled = false;
-        btn.setAttribute('onclick', `leaveEvent(${eventId}, this)`);
+        btn.setAttribute('onclick', `leaveEvent('${eventId}', this)`);
 
-        // Update participant count in the same card/row
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
@@ -114,9 +106,6 @@ async function joinEvent(eventId, btn) {
     }
 }
 
-// ===========================
-// Leave Event
-// ===========================
 async function leaveEvent(eventId, btn) {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -137,13 +126,11 @@ async function leaveEvent(eventId, btn) {
             return;
         }
 
-        // Revert to Join button
         btn.textContent = btn.classList.contains('list-join') ? 'Join' : 'Join Event';
         btn.classList.remove('joined');
         btn.disabled = false;
-        btn.setAttribute('onclick', `joinEvent(${eventId}, this)`);
+        btn.setAttribute('onclick', `joinEvent('${eventId}', this)`);
 
-        // Update participant count
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
@@ -163,9 +150,7 @@ async function leaveEvent(eventId, btn) {
     }
 }
 
-// Show tooltip next to a button (list view)
 function showTooltip(btn, message) {
-    // Remove existing tooltip
     const old = btn.parentElement.querySelector('.join-tooltip');
     if (old) old.remove();
 
@@ -175,16 +160,12 @@ function showTooltip(btn, message) {
     btn.parentElement.style.position = 'relative';
     btn.parentElement.appendChild(tooltip);
 
-    // Fade out then remove
     setTimeout(() => {
         tooltip.classList.add('fade-out');
         setTimeout(() => tooltip.remove(), 250);
     }, 2000);
 }
 
-// ===========================
-// Render Events - List View
-// ===========================
 function renderListItem(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
     const isJoined = joinedIds.has(event.id);
@@ -193,12 +174,12 @@ function renderListItem(event, joinedIds) {
     let btnText = 'Join';
     let btnDisabled = '';
 
-    let btnOnclick = `joinEvent(${event.id}, this)`;
+    let btnOnclick = `joinEvent('${event.id}', this)`;
 
     if (isJoined) {
         btnClass += ' joined';
         btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
-        btnOnclick = `leaveEvent(${event.id}, this)`;
+        btnOnclick = `leaveEvent('${event.id}', this)`;
     } else if (isFull) {
         btnClass += ' disabled';
         btnText = 'Full';
@@ -208,20 +189,20 @@ function renderListItem(event, joinedIds) {
     return `
         <div class="event-list-row">
             <div class="event-list-info">
-                <span class="event-list-title">${event.title}</span>
+                <span class="event-list-title">${esc(event.title)}</span>
                 <span class="event-list-meta">
                     <i data-lucide="user" class="meta-icon"></i>
-                    ${event.organizer_name}
+                    ${esc(event.organizer_name)}
                 </span>
             </div>
             <div class="event-list-details">
                 <span class="event-list-date">
                     <i data-lucide="calendar" class="meta-icon"></i>
-                    ${formatDate(event.date)}
+                    ${esc(formatDate(event.date))}
                 </span>
                 <span class="event-list-location">
                     <i data-lucide="map-pin" class="meta-icon"></i>
-                    ${event.location}
+                    ${esc(event.location)}
                 </span>
                 <span class="event-list-capacity ${isFull ? 'full' : ''}">
                     <i data-lucide="users" class="meta-icon"></i>
@@ -237,9 +218,6 @@ function renderListItem(event, joinedIds) {
     `;
 }
 
-// ===========================
-// Render Events - Grid View
-// ===========================
 function renderGridCard(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
     const isJoined = joinedIds.has(event.id);
@@ -248,12 +226,12 @@ function renderGridCard(event, joinedIds) {
     let btnText = 'Join Event';
     let btnDisabled = '';
 
-    let btnOnclick = `joinEvent(${event.id}, this)`;
+    let btnOnclick = `joinEvent('${event.id}', this)`;
 
     if (isJoined) {
         btnClass += ' joined';
         btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
-        btnOnclick = `leaveEvent(${event.id}, this)`;
+        btnOnclick = `leaveEvent('${event.id}', this)`;
     } else if (isFull) {
         btnClass += ' disabled';
         btnText = 'Full';
@@ -263,12 +241,12 @@ function renderGridCard(event, joinedIds) {
     return `
         <div class="event-grid-wrapper">
             <div class="event-grid-card">
-                <h3 class="event-card-title">${event.title}</h3>
-                <p class="event-card-desc">${event.description || 'No description available.'}</p>
+                <h3 class="event-card-title">${esc(event.title)}</h3>
+                <p class="event-card-desc">${esc(event.description || 'No description available.')}</p>
                 <div class="event-card-meta">
-                    <span><i data-lucide="calendar" class="meta-icon"></i> ${formatDate(event.date)}</span>
-                    <span><i data-lucide="map-pin" class="meta-icon"></i> ${event.location}</span>
-                    <span><i data-lucide="user" class="meta-icon"></i> ${event.organizer_name}</span>
+                    <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(event.date))}</span>
+                    <span><i data-lucide="map-pin" class="meta-icon"></i> ${esc(event.location)}</span>
+                    <span><i data-lucide="user" class="meta-icon"></i> ${esc(event.organizer_name)}</span>
                     <span class="${isFull ? 'full' : ''}"><i data-lucide="users" class="meta-icon"></i> ${event.participant_count}/${event.capacity}</span>
                 </div>
             </div>
@@ -281,9 +259,6 @@ function renderGridCard(event, joinedIds) {
     `;
 }
 
-// ===========================
-// Fetch Joined Event IDs
-// ===========================
 async function fetchJoinedIds() {
     const token = localStorage.getItem('token');
     if (!token) return new Set();
@@ -300,9 +275,6 @@ async function fetchJoinedIds() {
     }
 }
 
-// ===========================
-// Load & Render Events
-// ===========================
 async function loadEvents() {
     try {
         const [eventsRes, joinedIds] = await Promise.all([
@@ -339,10 +311,7 @@ async function loadEvents() {
     }
 }
 
-// Re-render on view change
 listViewBtn.addEventListener('click', loadEvents);
 gridViewBtn.addEventListener('click', loadEvents);
 
-// Load on page ready
 loadEvents();
-

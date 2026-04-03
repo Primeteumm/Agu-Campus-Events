@@ -1,4 +1,4 @@
-const { supabase, createSupabaseForToken } = require('../supabase');
+const { supabase, createSupabaseForToken, getSupabaseAdmin } = require('../supabase');
 const { DEFAULT_ACCOUNT_ROLES } = require('../constants/roles');
 const {
     getRoleForUser,
@@ -55,6 +55,7 @@ const register = async (req, res) => {
                 data: {
                     first_name,
                     last_name,
+                    account_type: type,
                 },
             },
         });
@@ -94,7 +95,17 @@ const register = async (req, res) => {
             .eq('id', user.id)
             .maybeSingle();
 
-        const finalRole = profile?.role || defaultRole;
+        let finalRole = profile?.role || defaultRole;
+
+        if (profile && profile.role !== defaultRole) {
+            const admin = getSupabaseAdmin();
+            const client = admin || sb;
+            const { error: roleErr } = await client
+                .from('profiles')
+                .update({ role: defaultRole })
+                .eq('id', user.id);
+            if (!roleErr) finalRole = defaultRole;
+        }
 
         return res.status(201).json({
             success: true,

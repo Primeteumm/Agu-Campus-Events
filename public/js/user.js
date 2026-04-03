@@ -105,6 +105,16 @@ function showGuestSidebar() {
     const userEl = document.getElementById('profileCardUser');
     if (guestEl) guestEl.classList.remove('hidden');
     if (userEl) userEl.classList.add('hidden');
+    const adminLink = document.getElementById('sidebarAdminLink');
+    if (adminLink) adminLink.classList.add('hidden');
+}
+
+function updateAdminLinkVisibility(user) {
+    const link = document.getElementById('sidebarAdminLink');
+    if (!link) return;
+    const role = user?.role || (user?.roles && user.roles[0]) || '';
+    const canSee = role === 'teacher' || role === 'club_president';
+    link.classList.toggle('hidden', !canSee);
 }
 
 function showUserSidebar(user) {
@@ -112,6 +122,7 @@ function showUserSidebar(user) {
     const userEl = document.getElementById('profileCardUser');
     if (!guestEl || !userEl) return;
     renderProfileSidebar(user);
+    updateAdminLinkVisibility(user);
     guestEl.classList.add('hidden');
     userEl.classList.remove('hidden');
 }
