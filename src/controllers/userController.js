@@ -1,9 +1,9 @@
 const { supabase, createSupabaseForToken } = require('../supabase');
 const { ROLE } = require('../constants/roles');
 const {
-    getRoleRowsForUser,
+    getRoleForUser,
     addRole,
-    rolesToDisplayLabels,
+    roleToDisplayLabel,
     canAssignClubMember,
 } = require('../utils/userRoles');
 
@@ -21,7 +21,8 @@ async function fetchProfile(client, id) {
     return data;
 }
 
-function mapProfileToUser(profile, roles, canPromote) {
+function mapProfileToUser(profile, role, canPromote) {
+    const r = role || profile.role || 'student';
     return {
         id: profile.id,
         username: profile.username,
@@ -30,8 +31,9 @@ function mapProfileToUser(profile, roles, canPromote) {
         email: profile.email,
         avatarUrl: profile.avatar_url || buildAvatarUrl(profile.first_name, profile.last_name),
         createdAt: profile.created_at,
-        roles,
-        roleLabels: rolesToDisplayLabels(roles),
+        role: r,
+        roles: [r],
+        roleLabels: [roleToDisplayLabel(r)],
         canAssignClubMember: canPromote,
     };
 }
@@ -50,11 +52,11 @@ const getMe = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const roles = await getRoleRowsForUser(req.user.id, sb);
+        const role = await getRoleForUser(req.user.id, sb);
         const canPromote = await canAssignClubMember(req.user.id, sb);
 
         res.json({
-            user: mapProfileToUser(profile, roles.length ? roles : ['student'], canPromote),
+            user: mapProfileToUser(profile, role || 'student', canPromote),
         });
     } catch (error) {
         console.error('getMe error:', error);
@@ -73,12 +75,22 @@ const updateMe = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const { username, password, currentPassword } = req.body;
+        const { username, first_name, last_name, password, currentPassword } = req.body;
         const sb = createSupabaseForToken(req.accessToken);
 
         const profile = await fetchProfile(sb, req.user.id);
         if (!profile) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        const nameUpdates = {};
+        if (first_name !== undefined) nameUpdates.first_name = String(first_name).trim();
+        if (last_name !== undefined) nameUpdates.last_name = String(last_name).trim();
+        if (Object.keys(nameUpdates).length > 0) {
+            const { error: nameErr } = await sb.from('profiles').update(nameUpdates).eq('id', req.user.id);
+            if (nameErr) {
+                return res.status(400).json({ message: nameErr.message });
+            }
         }
 
         if (username !== undefined && username !== null) {
@@ -128,12 +140,12 @@ const updateMe = async (req, res) => {
         }
 
         const updated = await fetchProfile(sb, req.user.id);
-        const roles = await getRoleRowsForUser(req.user.id, sb);
+        const role = await getRoleForUser(req.user.id, sb);
         const canPromote = await canAssignClubMember(req.user.id, sb);
 
         res.json({
             message: 'Profile updated successfully.',
-            user: mapProfileToUser(updated, roles.length ? roles : ['student'], canPromote),
+            user: mapProfileToUser(updated, role || 'student', canPromote),
         });
     } catch (error) {
         console.error('updateMe error:', error);
@@ -169,13 +181,13 @@ const assignClubMemberRole = async (req, res) => {
         }
 
         await addRole(targetUserId, ROLE.CLUB_MEMBER, sb);
-        const roles = await getRoleRowsForUser(targetUserId, sb);
+        const role = await getRoleForUser(targetUserId, sb);
 
         res.json({
             message: `Club Member role assigned to ${target.first_name || ''} ${target.last_name || ''}.`,
             userId: targetUserId,
-            roles,
-            roleLabels: rolesToDisplayLabels(roles),
+            role,
+            roleLabels: [roleToDisplayLabel(role)],
         });
     } catch (error) {
         console.error('assignClubMemberRole error:', error);
@@ -199,7 +211,7 @@ const lookupUserByEmail = async (req, res) => {
 
         const { data: row, error } = await sb
             .from('profiles')
-            .select('id, first_name, last_name, email')
+            .select('id, first_name, last_name, email, role')
             .ilike('email', q)
             .maybeSingle();
 
@@ -207,15 +219,16 @@ const lookupUserByEmail = async (req, res) => {
             return res.status(404).json({ message: 'No user with that email.' });
         }
 
-        const roles = await getRoleRowsForUser(row.id, sb);
+        const r = row.role || 'student';
         res.json({
             user: {
                 id: row.id,
                 firstName: row.first_name,
                 lastName: row.last_name,
                 email: row.email,
-                roles,
-                roleLabels: rolesToDisplayLabels(roles),
+                role: r,
+                roles: [r],
+                roleLabels: [roleToDisplayLabel(r)],
             },
         });
     } catch (error) {

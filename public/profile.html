@@ -49,54 +49,74 @@
 
             <div class="app-main">
                 <main class="main-content profile-page">
-                    <div id="profileGate" class="profile-gate">
+
+                    <div id="profileGate" class="profile-gate hidden">
                         <p class="profile-gate-text">Please sign in to view your profile settings.</p>
                         <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
                     </div>
 
                     <div id="profileContent" class="hidden">
-                        <h2 class="profile-page-title">User Profile Information</h2>
+                        <h2 class="profile-page-title">Profile Settings</h2>
 
-                        <section class="settings-card">
-                            <h3 class="settings-card-title">Account overview</h3>
-                            <dl class="profile-dl">
-                                <div><dt>First name</dt><dd id="roFirstName">—</dd></div>
-                                <div><dt>Last name</dt><dd id="roLastName">—</dd></div>
-                                <div><dt>Email address</dt><dd id="roEmail">—</dd></div>
-                                <div><dt>Roles</dt><dd id="roRoles">—</dd></div>
-                                <div><dt>Member since</dt><dd id="roCreated">—</dd></div>
-                            </dl>
+                        <!-- Avatar card -->
+                        <section class="settings-card ps-avatar-card">
+                            <div class="ps-avatar" id="psAvatar">US</div>
+                            <div class="ps-avatar-info">
+                                <div class="ps-avatar-name" id="psDisplayName">User</div>
+                                <span class="ps-role-badge" id="psRoleBadge">Student</span>
+                            </div>
                         </section>
 
+                        <!-- Form -->
                         <section class="settings-card">
-                            <h3 class="settings-card-title">Edit username &amp; password</h3>
-                            <p class="settings-hint">Your email address cannot be changed.</p>
-                            <form id="profileForm" class="profile-form">
-                                <div class="form-group profile-form-group">
+                            <h3 class="settings-card-title">Personal Information</h3>
+                            <form id="profileForm" class="ps-form">
+                                <div class="ps-field">
+                                    <label for="editFirstName">First Name</label>
+                                    <input type="text" id="editFirstName" name="first_name" autocomplete="given-name" required placeholder="First name">
+                                </div>
+                                <div class="ps-field">
+                                    <label for="editLastName">Last Name</label>
+                                    <input type="text" id="editLastName" name="last_name" autocomplete="family-name" placeholder="Last name">
+                                </div>
+                                <div class="ps-field">
                                     <label for="editUsername">Username</label>
-                                    <input type="text" id="editUsername" name="username" autocomplete="username" required>
+                                    <input type="text" id="editUsername" name="username" autocomplete="username" placeholder="Username">
                                 </div>
-                                <div class="form-group profile-form-group">
-                                    <label for="editEmail">Email address</label>
-                                    <input type="email" id="editEmail" readonly tabindex="-1" aria-readonly="true" class="input-readonly">
+
+                                <div class="ps-field">
+                                    <label for="editEmail">Email Address <span class="ps-lock-icon"><i data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
+                                    <input type="email" id="editEmail" disabled readonly tabindex="-1" class="ps-locked">
                                 </div>
-                                <div class="form-group profile-form-group">
-                                    <label for="currentPassword">Current password</label>
-                                    <input type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" placeholder="Required only to change password">
+                                <div class="ps-field">
+                                    <label for="editRole">Role <span class="ps-lock-icon"><i data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
+                                    <input type="text" id="editRole" disabled readonly tabindex="-1" class="ps-locked">
                                 </div>
-                                <div class="form-group profile-form-group">
-                                    <label for="newPassword">New password</label>
-                                    <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" placeholder="Leave blank to keep current password">
+
+                                <div class="ps-divider"></div>
+
+                                <h3 class="settings-card-title">Change Password</h3>
+                                <div class="ps-field">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" autocomplete="current-password" placeholder="Required to change password">
                                 </div>
+                                <div class="ps-field">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" autocomplete="new-password" placeholder="Leave blank to keep current">
+                                </div>
+
                                 <p class="form-error" id="profileFormError"></p>
                                 <p class="form-success" id="profileFormSuccess"></p>
-                                <button type="submit" class="btn-submit">Save changes</button>
+                                <button type="submit" class="btn-submit ps-save-btn">
+                                    <i data-lucide="save" style="width:16px;height:16px;"></i>
+                                    Save Changes
+                                </button>
                             </form>
                         </section>
 
                         <section class="settings-card hidden" id="clubPromoteSection">
-                            <h3 class="settings-card-title">Club Member assignment</h3>
-                            <p class="settings-hint">As Club President or Club Vice President, you can assign the Club Member role to another user.</p>
+                            <h3 class="settings-card-title">Club Member Assignment</h3>
+                            <p class="settings-hint">As Club President or Vice President you can assign the Club Member role.</p>
                             <div class="promote-row">
                                 <input type="email" id="lookupEmail" class="promote-input" placeholder="User email address" autocomplete="email">
                                 <button type="button" class="btn-submit promote-btn" id="lookupBtn">Find user</button>
@@ -106,6 +126,8 @@
                             <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member role</button>
                         </section>
                     </div>
+
+                    <div id="profileToast" class="ps-toast"></div>
                 </main>
             </div>
         </div>

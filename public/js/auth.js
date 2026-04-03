@@ -42,6 +42,15 @@ function clearErrors() {
     document.getElementById('signupSuccess').textContent = '';
 }
 
+function saveSessionAndRedirect(data) {
+    const tok = data.token || data.access_token;
+    if (tok) localStorage.setItem('token', tok);
+    if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+    if (typeof persistUser === 'function') persistUser(data.user);
+    else localStorage.setItem('user', JSON.stringify(data.user));
+}
+
+// ── Login ──
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
@@ -63,20 +72,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             return;
         }
 
-        localStorage.setItem('token', data.token);
-        if (typeof persistUser === 'function') persistUser(data.user);
-        else localStorage.setItem('user', JSON.stringify(data.user));
+        saveSessionAndRedirect(data);
         closeModal();
         updateNavbar();
-        if (typeof refreshProfileFromServer === 'function') {
-            await refreshProfileFromServer();
-        }
+        if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
+        if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }
 });
 
+// ── Register (no email verification) ──
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const firstName = document.getElementById('signupFirstName').value.trim();
@@ -93,13 +100,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         const res = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                firstName,
-                lastName,
-                email,
-                password,
-                accountType,
-            }),
+            body: JSON.stringify({ firstName, lastName, email, password, accountType }),
         });
 
         const data = await res.json();
@@ -109,50 +110,53 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             return;
         }
 
-        localStorage.setItem('token', data.token);
-        if (typeof persistUser === 'function') persistUser(data.user);
-        else localStorage.setItem('user', JSON.stringify(data.user));
-        successEl.textContent = 'Account created! You are signed in.';
+        saveSessionAndRedirect(data);
         closeModal();
         updateNavbar();
-        if (typeof refreshProfileFromServer === 'function') {
-            await refreshProfileFromServer();
-        }
+        if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
+        if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }
 });
 
+// ── Navbar ──
 function updateNavbar() {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const actionsDiv = document.querySelector('.navbar-actions');
+    const loginBtn = document.getElementById('openAuthModal');
 
     if (user) {
-        openAuthBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
 
         const old = actionsDiv.querySelector('.user-info');
         if (old) old.remove();
 
+        const displayName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
         const userInfo = document.createElement('div');
         userInfo.className = 'user-info';
         userInfo.innerHTML = `
-            <span class="user-name">${user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User'}</span>
+            <span class="user-name">${displayName}</span>
             <button class="btn-logout" id="logoutBtn" type="button">
                 <i data-lucide="log-out" class="icon"></i>
                 <span>Logout</span>
             </button>
         `;
-        actionsDiv.insertBefore(userInfo, actionsDiv.querySelector('.theme-toggle'));
-        lucide.createIcons();
+        const themeBtn = actionsDiv.querySelector('.theme-toggle');
+        if (themeBtn) actionsDiv.insertBefore(userInfo, themeBtn);
+        else actionsDiv.appendChild(userInfo);
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
             location.reload();
         });
     } else {
-        openAuthBtn.style.display = 'flex';
+        if (loginBtn) loginBtn.style.display = 'flex';
         const old = actionsDiv.querySelector('.user-info');
         if (old) old.remove();
     }
