@@ -38,7 +38,7 @@ async function getRoleForUser(userId, client) {
     if (!client) return null;
     const { data, error } = await client.from('profiles').select('role').eq('id', userId).maybeSingle();
     if (error || !data) return null;
-    return data.role || null;
+    return data.role ? data.role.toLowerCase() : null;
 }
 
 async function userHasAnyRole(userId, roleSlugs, client) {

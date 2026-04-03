@@ -25,19 +25,20 @@ app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, async () => {
-        console.log(`🚀 Server is running on http://localhost:${PORT}`);
-        
-        
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, async () => {
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+
+    try {
         const { data, error } = await supabase.from('profiles').select('count', { count: 'exact', head: true });
         if (error) {
             console.error('❌ Supabase bağlantı hatası:', error.message);
         } else {
             console.log('✅ Supabase bağlantısı başarılı! AGU Campus Events hazır.');
         }
-    });
-}
+    } catch (e) {
+        console.error('❌ Supabase bağlantı hatası:', e.message);
+    }
+});
 
 module.exports = app;

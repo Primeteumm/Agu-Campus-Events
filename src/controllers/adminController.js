@@ -1,4 +1,4 @@
-const { createSupabaseForToken, getSupabaseAdmin } = require('../supabase');
+const { getSupabaseAdmin } = require('../supabase');
 const { ROLE } = require('../constants/roles');
 const { getRoleForUser, roleToDisplayLabel } = require('../utils/userRoles');
 
@@ -13,14 +13,15 @@ function getAdminClient() {
 // GET /api/admin/users
 const listUsers = async (req, res) => {
     try {
-        const sb = createSupabaseForToken(req.accessToken);
-        const myRole = await getRoleForUser(req.user.id, sb);
+        console.log('[admin] listUsers called, userId:', req.user.id);
+        const admin = getAdminClient();
+        const myRole = await getRoleForUser(req.user.id, admin);
+        console.log('[admin] myRole:', myRole);
 
         if (!myRole || !ADMIN_ROLES.includes(myRole)) {
+            console.log('[admin] ACCESS DENIED - role not in ADMIN_ROLES');
             return res.status(403).json({ message: 'Access denied.' });
         }
-
-        const admin = getAdminClient();
         const { data: profiles, error } = await admin
             .from('profiles')
             .select('id, first_name, last_name, email, role')
@@ -72,14 +73,12 @@ const changeRole = async (req, res) => {
             return res.status(400).json({ message: 'Invalid role.' });
         }
 
-        const sb = createSupabaseForToken(req.accessToken);
-        const myRole = await getRoleForUser(req.user.id, sb);
+        const admin = getAdminClient();
+        const myRole = await getRoleForUser(req.user.id, admin);
 
         if (!myRole || !ADMIN_ROLES.includes(myRole)) {
             return res.status(403).json({ message: 'Access denied.' });
         }
-
-        const admin = getAdminClient();
 
         const { data: target, error: tErr } = await admin
             .from('profiles')

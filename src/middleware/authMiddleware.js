@@ -4,12 +4,15 @@ const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         const token = authHeader && authHeader.split(' ')[1];
+        console.log('[auth] verifyToken called, path:', req.path, 'hasToken:', !!token);
 
         if (!token) {
+            console.log('[auth] NO TOKEN');
             return res.status(401).json({ message: 'Access denied. No token provided.' });
         }
 
         const { data, error } = await supabase.auth.getUser(token);
+        console.log('[auth] getUser result - error:', error?.message || 'none', 'user:', data?.user?.id || 'null');
 
         if (error || !data.user) {
             return res.status(403).json({ message: 'Invalid or expired token.' });
