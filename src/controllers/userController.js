@@ -22,7 +22,7 @@ async function fetchProfile(client, id) {
 }
 
 function mapProfileToUser(profile, role, canPromote) {
-    const r = role || profile.role || 'student';
+    const r = role || profile.role || 'Student';
     return {
         id: profile.id,
         username: profile.username,
@@ -56,7 +56,7 @@ const getMe = async (req, res) => {
         const canPromote = await canAssignClubMember(req.user.id, sb);
 
         res.json({
-            user: mapProfileToUser(profile, role || 'student', canPromote),
+            user: mapProfileToUser(profile, role || 'Student', canPromote),
         });
     } catch (error) {
         console.error('getMe error:', error);
@@ -158,7 +158,7 @@ const updateMe = async (req, res) => {
 
         res.json({
             message: 'Profile updated successfully.',
-            user: mapProfileToUser(updated, role || 'student', canPromote),
+            user: mapProfileToUser(updated, role || 'Student', canPromote),
         });
     } catch (error) {
         console.error('updateMe error:', error);
@@ -236,7 +236,7 @@ const lookupUserByEmail = async (req, res) => {
             return res.status(404).json({ message: 'No user with that email.' });
         }
 
-        const r = row.role || 'student';
+        const r = row.role || 'Student';
         res.json({
             user: {
                 id: row.id,

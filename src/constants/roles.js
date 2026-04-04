@@ -1,13 +1,11 @@
-/** Role slugs stored in DB (user_roles.role) */
 const ROLE = {
-    STUDENT: 'student',
-    TEACHER: 'teacher',
-    CLUB_MEMBER: 'club_member',
-    CLUB_VICE_PRESIDENT: 'club_vice_president',
-    CLUB_PRESIDENT: 'club_president',
+    STUDENT: 'Student',
+    TEACHER: 'Teacher',
+    CLUB_MEMBER: 'Club Member',
+    CLUB_VICE_PRESIDENT: 'Club Vice President',
+    CLUB_PRESIDENT: 'Club President',
 };
 
-/** Human-readable labels for UI */
 const ROLE_LABELS = {
     [ROLE.STUDENT]: 'Student',
     [ROLE.TEACHER]: 'Teacher',
@@ -21,7 +19,6 @@ const DEFAULT_ACCOUNT_ROLES = {
     teacher: ROLE.TEACHER,
 };
 
-/** President or VP may assign Club Member */
 const CLUB_PROMOTER_ROLES = [ROLE.CLUB_PRESIDENT, ROLE.CLUB_VICE_PRESIDENT];
 
 module.exports = {

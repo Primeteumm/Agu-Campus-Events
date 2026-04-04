@@ -49,7 +49,7 @@
         const first = val(user, 'firstName', 'first_name');
         const last  = val(user, 'lastName', 'last_name');
         const name  = `${first} ${last}`.trim() || 'User';
-        const role  = val(user, 'role') || (user.roleLabels || user.roles || ['student'])[0] || 'student';
+        const role  = val(user, 'role') || (user.roleLabels || user.roles || ['Student'])[0] || 'Student';
 
         const avatarEl = document.getElementById('psAvatar');
         if (avatarEl) avatarEl.textContent = initials(first, last);

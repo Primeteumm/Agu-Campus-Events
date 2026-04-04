@@ -13,13 +13,10 @@ function getAdminClient() {
 // GET /api/admin/users
 const listUsers = async (req, res) => {
     try {
-        console.log('[admin] listUsers called, userId:', req.user.id);
         const admin = getAdminClient();
         const myRole = await getRoleForUser(req.user.id, admin);
-        console.log('[admin] myRole:', myRole);
 
         if (!myRole || !ADMIN_ROLES.includes(myRole)) {
-            console.log('[admin] ACCESS DENIED - role not in ADMIN_ROLES');
             return res.status(403).json({ message: 'Access denied.' });
         }
         const { data: profiles, error } = await admin

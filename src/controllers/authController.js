@@ -12,7 +12,7 @@ function buildClientUser(authUser, profile, role) {
         profile?.first_name ?? authUser.user_metadata?.first_name ?? '';
     const lastName = profile?.last_name ?? authUser.user_metadata?.last_name ?? '';
     const name = `${firstName} ${lastName}`.trim() || authUser.email || 'User';
-    const r = role || profile?.role || 'student';
+    const r = role || profile?.role || 'Student';
     return {
         id: authUser.id,
         username: profile?.username ?? null,
@@ -89,7 +89,9 @@ const register = async (req, res) => {
         }
 
         const sb = createSupabaseForToken(session.access_token);
-        const { data: profile } = await sb
+        const adminClient = getSupabaseAdmin();
+        const reader = adminClient || sb;
+        const { data: profile } = await reader
             .from('profiles')
             .select('*')
             .eq('id', user.id)
@@ -98,8 +100,7 @@ const register = async (req, res) => {
         let finalRole = profile?.role || defaultRole;
 
         if (profile && profile.role !== defaultRole) {
-            const admin = getSupabaseAdmin();
-            const client = admin || sb;
+            const client = adminClient || sb;
             const { error: roleErr } = await client
                 .from('profiles')
                 .update({ role: defaultRole })
@@ -152,19 +153,19 @@ const login = async (req, res) => {
 
         const { user, session } = data;
         const sb = createSupabaseForToken(session.access_token);
+        const admin = getSupabaseAdmin();
+        const reader = admin || sb;
 
-        await ensureDefaultRoleOnLogin(user.id, user, sb);
+        await ensureDefaultRoleOnLogin(user.id, user, reader);
 
-        let role = await getRoleForUser(user.id, sb);
+        const { data: profile } = await reader.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        let role = profile?.role || null;
+
         if (!role) {
-            await ensureProfileRow(sb, user, '', '', 'student');
-            role = await getRoleForUser(user.id, sb);
-            if (!role) role = 'student';
+            await ensureProfileRow(reader, user, '', '', 'Student');
+            role = await getRoleForUser(user.id, reader);
+            if (!role) role = 'Student';
         }
-
-        const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        const fetchedRole = await getRoleForUser(user.id, sb);
-        if (fetchedRole) role = fetchedRole;
 
         return res.json({
             success: true,

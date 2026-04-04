@@ -29,11 +29,11 @@
 
     function roleBadgeClass(role) {
         const map = {
-            teacher: 'admin-badge--teacher',
-            club_president: 'admin-badge--president',
-            club_vice_president: 'admin-badge--vp',
-            club_member: 'admin-badge--member',
-            student: 'admin-badge--student',
+            'Teacher': 'admin-badge--teacher',
+            'Club President': 'admin-badge--president',
+            'Club Vice President': 'admin-badge--vp',
+            'Club Member': 'admin-badge--member',
+            'Student': 'admin-badge--student',
         };
         return map[role] || 'admin-badge--student';
     }
@@ -43,27 +43,27 @@
 
         const r = user.role;
 
-        if (myRole === 'teacher') {
-            if (r === 'teacher') return '<span class="admin-muted">No actions</span>';
+        if (myRole === 'Teacher') {
+            if (r === 'Teacher') return '<span class="admin-muted">No actions</span>';
             const btns = [];
-            if (r !== 'club_president') {
-                btns.push(`<button class="admin-btn admin-btn--promote" data-id="${esc(user.id)}" data-role="club_president">Make President</button>`);
+            if (r !== 'Club President') {
+                btns.push(`<button class="admin-btn admin-btn--promote" data-id="${esc(user.id)}" data-role="Club President">Make President</button>`);
             }
-            if (r !== 'student') {
-                btns.push(`<button class="admin-btn admin-btn--demote" data-id="${esc(user.id)}" data-role="student">Demote to Student</button>`);
+            if (r !== 'Student') {
+                btns.push(`<button class="admin-btn admin-btn--demote" data-id="${esc(user.id)}" data-role="Student">Demote to Student</button>`);
             }
             return btns.join('') || '<span class="admin-muted">—</span>';
         }
 
-        if (myRole === 'club_president') {
-            if (r === 'club_president') {
+        if (myRole === 'Club President') {
+            if (r === 'Club President') {
                 return '<span class="admin-muted">No actions</span>';
             }
-            if (r === 'student' || r === 'club_member') {
-                return `<button class="admin-btn admin-btn--promote" data-id="${esc(user.id)}" data-role="club_vice_president">Make Vice President</button>`;
+            if (r === 'Student' || r === 'Club Member') {
+                return `<button class="admin-btn admin-btn--promote" data-id="${esc(user.id)}" data-role="Club Vice President">Make Vice President</button>`;
             }
-            if (r === 'club_vice_president') {
-                return `<button class="admin-btn admin-btn--demote" data-id="${esc(user.id)}" data-role="student">Demote to Student</button>`;
+            if (r === 'Club Vice President') {
+                return `<button class="admin-btn admin-btn--demote" data-id="${esc(user.id)}" data-role="Student">Demote to Student</button>`;
             }
             return '<span class="admin-muted">—</span>';
         }
@@ -194,9 +194,8 @@
 
             const tag = document.getElementById('adminRoleTag');
             if (tag) {
-                const label = myRole === 'teacher' ? 'Teacher' : 'Club President';
-                tag.textContent = label;
-                tag.className = `admin-role-tag ${myRole === 'teacher' ? 'admin-role-tag--teacher' : 'admin-role-tag--president'}`;
+                tag.textContent = myRole;
+                tag.className = `admin-role-tag ${myRole === 'Teacher' ? 'admin-role-tag--teacher' : 'admin-role-tag--president'}`;
             }
 
             renderTable(allUsers);

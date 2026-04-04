@@ -112,8 +112,8 @@ function showGuestSidebar() {
 function updateAdminLinkVisibility(user) {
     const link = document.getElementById('sidebarAdminLink');
     if (!link) return;
-    const role = (user?.role || (user?.roles && user.roles[0]) || '').toLowerCase();
-    const canSee = role === 'teacher' || role === 'club_president';
+    const role = user?.role || (user?.roles && user.roles[0]) || '';
+    const canSee = role === 'Teacher' || role === 'Club President';
     if (canSee) {
         link.classList.remove('hidden');
     } else {
