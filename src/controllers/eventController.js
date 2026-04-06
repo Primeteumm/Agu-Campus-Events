@@ -1,4 +1,6 @@
 const { supabase, createSupabaseForToken, getSupabaseAdmin } = require('../supabase');
+const { ROLE } = require('../constants/roles');
+const { getRoleForUser } = require('../utils/userRoles');
 
 /** Prefer service role for public aggregates (organizer names, counts) when set. */
 function dbReader() {
@@ -60,6 +62,13 @@ const createEvent = async (req, res) => {
 
         if (!req.accessToken) {
             return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const admin = getSupabaseAdmin();
+        const myRole = await getRoleForUser(req.user.id, admin || supabase);
+        const canCreate = myRole === ROLE.CLUB_PRESIDENT || myRole === ROLE.CLUB_VICE_PRESIDENT;
+        if (!canCreate) {
+            return res.status(403).json({ message: 'Only Club Presidents and Vice Presidents can create events.' });
         }
 
         const sb = createSupabaseForToken(req.accessToken);

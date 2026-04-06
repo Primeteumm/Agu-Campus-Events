@@ -98,29 +98,26 @@
             try { populate(JSON.parse(cached)); } catch { /* ignore corrupt cache */ }
         }
 
-        try {
-            const res = await fetch(`${API}/users/me`, { headers: headers() });
-
-            if (res.status === 401 || res.status === 403) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('user');
-                gate.classList.remove('hidden');
-                content.classList.add('hidden');
-                return;
-            }
-            if (!res.ok) throw new Error();
-
-            const { user } = await res.json();
-            if (typeof persistUser === 'function') persistUser(user);
-            else localStorage.setItem('user', JSON.stringify(user));
-
-            populate(user);
-
-            if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
-        } catch {
-            // API failed — keep showing cached form data
+        if (typeof refreshProfileFromServer === 'function') {
+            await refreshProfileFromServer({ force: false });
         }
+
+        if (!localStorage.getItem('token')) {
+            gate.classList.remove('hidden');
+            content.classList.add('hidden');
+            return;
+        }
+
+        const raw = localStorage.getItem('user');
+        if (raw) {
+            try {
+                populate(JSON.parse(raw));
+            } catch {
+                /* ignore corrupt cache */
+            }
+        }
+
+        if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
     }
 
     /* ── Save changes ── */
@@ -175,8 +172,6 @@
             okEl.textContent = 'Profile updated successfully.';
             toast('Profile updated successfully.', false);
 
-            if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
-            if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
             if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
         } catch {
             errEl.textContent = 'Connection error. Please try again.';
@@ -222,7 +217,6 @@
             const data = await res.json();
             if (!res.ok) { errEl.textContent = data.message || 'Could not assign role.'; return; }
             toast(data.message || 'Role assigned.', false);
-            if (typeof refreshProfileFromServer === 'function') refreshProfileFromServer();
             if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
         } catch { errEl.textContent = 'Connection error.'; }
     });

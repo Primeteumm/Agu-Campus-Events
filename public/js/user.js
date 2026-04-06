@@ -3,6 +3,38 @@
  */
 const USER_API = '/api';
 
+/** Skip redundant /users/me within this window (sessionStorage). */
+const PROFILE_ME_TTL_MS = 45_000;
+const PROFILE_ME_OK_KEY = 'agu_profile_me_ok_at';
+
+let profileMeFetchPromise = null;
+
+function clearProfileMeCache() {
+    try {
+        sessionStorage.removeItem(PROFILE_ME_OK_KEY);
+    } catch {
+        /* ignore */
+    }
+}
+
+function markProfileMeFresh() {
+    try {
+        sessionStorage.setItem(PROFILE_ME_OK_KEY, String(Date.now()));
+    } catch {
+        /* ignore */
+    }
+}
+
+function isProfileMeFresh() {
+    try {
+        const t = sessionStorage.getItem(PROFILE_ME_OK_KEY);
+        if (!t) return false;
+        return Date.now() - Number(t) < PROFILE_ME_TTL_MS;
+    } catch {
+        return false;
+    }
+}
+
 function getAuthHeaders(includeJson = true) {
     const token = localStorage.getItem('token');
     const headers = {};
@@ -107,17 +139,25 @@ function showGuestSidebar() {
     if (userEl) userEl.classList.add('hidden');
     const adminLink = document.getElementById('sidebarAdminLink');
     if (adminLink) adminLink.classList.add('hidden');
+    const createLink = document.getElementById('sidebarCreateEvent');
+    if (createLink) createLink.classList.add('hidden');
 }
 
 function updateAdminLinkVisibility(user) {
     const link = document.getElementById('sidebarAdminLink');
-    if (!link) return;
-    const role = user?.role || (user?.roles && user.roles[0]) || '';
-    const canSee = role === 'Teacher' || role === 'Club President';
-    if (canSee) {
-        link.classList.remove('hidden');
-    } else {
-        link.classList.add('hidden');
+    if (link) {
+        const role = user?.role || (user?.roles && user.roles[0]) || '';
+        const canSeeAdmin = role === 'Teacher' || role === 'Club President';
+        if (canSeeAdmin) link.classList.remove('hidden');
+        else link.classList.add('hidden');
+    }
+
+    const createBtn = document.getElementById('sidebarCreateEvent');
+    if (createBtn) {
+        const role = user?.role || (user?.roles && user.roles[0]) || '';
+        const canCreate = role === 'Club President' || role === 'Club Vice President';
+        if (canCreate) createBtn.classList.remove('hidden');
+        else createBtn.classList.add('hidden');
     }
 }
 
@@ -152,37 +192,66 @@ function syncSidebarFromStorage() {
 }
 
 /**
- * Fetches fresh profile from API, updates localStorage + sidebar.
+ * Fetches profile from API, updates localStorage + sidebar.
+ * @param {{ force?: boolean }} options - force=true bypasses TTL (login, profile save, etc.)
  */
-async function refreshProfileFromServer() {
+async function refreshProfileFromServer(options = {}) {
+    const force = Boolean(options.force);
     const token = localStorage.getItem('token');
 
     if (!token) {
+        clearProfileMeCache();
         showGuestSidebar();
         return;
     }
 
-    // Show cached data immediately so sidebar never stays on "Guest"
     syncSidebarFromStorage();
 
-    try {
-        const res = await fetch(`${USER_API}/users/me`, { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error('me failed');
-        const data = await res.json();
-        persistUser(data.user);
-        showUserSidebar(data.user);
-    } catch {
-        // API failed — keep whatever syncSidebarFromStorage already rendered
-        if (!syncSidebarFromStorage()) {
-            showGuestSidebar();
+    if (!force && isProfileMeFresh() && localStorage.getItem('user')) {
+        return;
+    }
+
+    if (profileMeFetchPromise) {
+        return profileMeFetchPromise;
+    }
+
+    profileMeFetchPromise = (async () => {
+        try {
+            const res = await fetch(`${USER_API}/users/me`, { headers: getAuthHeaders() });
+
+            if (res.status === 401 || res.status === 403) {
+                clearProfileMeCache();
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+                showGuestSidebar();
+                return;
+            }
+
+            if (!res.ok) throw new Error('me failed');
+
+            const data = await res.json();
+            persistUser(data.user);
+            showUserSidebar(data.user);
+            markProfileMeFresh();
+        } catch {
+            if (!syncSidebarFromStorage()) {
+                showGuestSidebar();
+            }
         }
+    })();
+
+    try {
+        await profileMeFetchPromise;
+    } finally {
+        profileMeFetchPromise = null;
     }
 }
 
 // Re-sync when auth.js fires user-updated
 window.addEventListener('user-updated', () => {
     syncSidebarFromStorage();
-    refreshProfileFromServer();
+    refreshProfileFromServer({ force: true });
 });
 
 // ── Page load ──
@@ -194,3 +263,4 @@ window.refreshProfileFromServer = refreshProfileFromServer;
 window.syncSidebarFromStorage = syncSidebarFromStorage;
 window.persistUser = persistUser;
 window.dispatchUserUpdated = dispatchUserUpdated;
+window.clearProfileMeCache = clearProfileMeCache;

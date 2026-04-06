@@ -275,39 +275,53 @@ async function fetchJoinedIds() {
     }
 }
 
+let loadEventsPromise = null;
+
 async function loadEvents() {
-    try {
-        const [eventsRes, joinedIds] = await Promise.all([
-            fetch(EVENTS_API).then(r => r.json()),
-            fetchJoinedIds()
-        ]);
+    if (loadEventsPromise) {
+        return loadEventsPromise;
+    }
 
-        const data = eventsRes;
+    loadEventsPromise = (async () => {
+        try {
+            const [eventsRes, joinedIds] = await Promise.all([
+                fetch(EVENTS_API).then((r) => r.json()),
+                fetchJoinedIds(),
+            ]);
 
-        if (!data.events || data.events.length === 0) {
-            eventsContainer.innerHTML = '<p class="no-events">No events found. Be the first to create one!</p>';
-            return;
-        }
+            const data = eventsRes;
 
-        const isGrid = eventsContainer.classList.contains('grid-view');
+            if (!data.events || data.events.length === 0) {
+                eventsContainer.innerHTML = '<p class="no-events">No events found. Be the first to create one!</p>';
+                return;
+            }
 
-        if (isGrid) {
-            eventsContainer.innerHTML = data.events.map(e => renderGridCard(e, joinedIds)).join('');
-        } else {
-            eventsContainer.innerHTML = `
+            const isGrid = eventsContainer.classList.contains('grid-view');
+
+            if (isGrid) {
+                eventsContainer.innerHTML = data.events.map((e) => renderGridCard(e, joinedIds)).join('');
+            } else {
+                eventsContainer.innerHTML = `
                 <div class="event-list-header">
                     <span>Event</span>
                     <span>Details</span>
                     <span></span>
                 </div>
-                ${data.events.map(e => renderListItem(e, joinedIds)).join('')}
+                ${data.events.map((e) => renderListItem(e, joinedIds)).join('')}
             `;
-        }
+            }
 
-        lucide.createIcons();
-    } catch (err) {
-        eventsContainer.innerHTML = '<p class="no-events">Failed to load events. Please try again.</p>';
-        console.error('Load events error:', err);
+            lucide.createIcons();
+        } catch (err) {
+            eventsContainer.innerHTML = '<p class="no-events">Failed to load events. Please try again.</p>';
+            console.error('Load events error:', err);
+        }
+    })();
+
+    try {
+        await loadEventsPromise;
+    } finally {
+        loadEventsPromise = null;
     }
 }
 

@@ -155,6 +155,7 @@ function updateNavbar() {
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
         logoutBtn.addEventListener('click', () => {
+            if (typeof clearProfileMeCache === 'function') clearProfileMeCache();
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
