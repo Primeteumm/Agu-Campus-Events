@@ -62,13 +62,11 @@
 
         const fn = document.getElementById('editFirstName');
         const ln = document.getElementById('editLastName');
-        const un = document.getElementById('editUsername');
         const em = document.getElementById('editEmail');
         const rl = document.getElementById('editRole');
 
         if (fn) fn.value = first;
         if (ln) ln.value = last;
-        if (un) un.value = val(user, 'username') || '';
         if (em) em.value = val(user, 'email');
         if (rl) rl.value = fmtRole(role);
 
@@ -130,15 +128,12 @@
 
         const firstName = document.getElementById('editFirstName').value.trim();
         const lastName  = document.getElementById('editLastName').value.trim();
-        const username  = document.getElementById('editUsername').value.trim();
         const curPwd    = document.getElementById('currentPassword').value;
         const newPwd    = document.getElementById('newPassword').value;
 
         if (!firstName) { errEl.textContent = 'First name is required.'; return; }
 
         const body = { first_name: firstName, last_name: lastName };
-
-        if (username) body.username = username;
 
         if (newPwd) {
             if (!curPwd) { errEl.textContent = 'Current password is required to change your password.'; return; }
