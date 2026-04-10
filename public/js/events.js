@@ -185,6 +185,11 @@ function showTooltip(btn, message) {
     }, 2000);
 }
 
+window.toggleEventListAccordion = function(row, ev) {
+    if (ev.target.closest('button')) return;
+    row.classList.toggle('expanded');
+};
+
 function renderListItem(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
     const isJoined = joinedIds.has(String(event.id));
@@ -206,33 +211,46 @@ function renderListItem(event, joinedIds) {
     }
 
     return `
-        <div class="event-list-row">
-            <div class="event-list-info">
-                <span class="event-list-title">${esc(event.title)}</span>
-                <span class="event-list-meta">
-                    <i data-lucide="user" class="meta-icon"></i>
-                    ${esc(event.organizer_name)}
-                </span>
+        <div class="event-list-row" onclick="toggleEventListAccordion(this, event)">
+            <div class="event-list-main">
+                <div class="event-list-info">
+                    <span class="event-list-title">${esc(event.title)}</span>
+                    <span class="event-list-meta">
+                        <i data-lucide="user" class="meta-icon"></i>
+                        ${esc(event.organizer_name)}
+                    </span>
+                </div>
+                <div class="event-list-details">
+                    <span class="event-list-date">
+                        <i data-lucide="calendar" class="meta-icon"></i>
+                        ${esc(formatDate(event.date))}
+                    </span>
+                    <span class="event-list-location">
+                        <i data-lucide="map-pin" class="meta-icon"></i>
+                        ${esc(event.location)}
+                    </span>
+                    <span class="event-list-capacity ${isFull ? 'full' : ''}">
+                        <i data-lucide="users" class="meta-icon"></i>
+                        ${event.participant_count}/${event.capacity}
+                    </span>
+                </div>
+                <div class="event-list-actions">
+                    <button class="${btnClass}" 
+                            onclick="${btnOnclick}"
+                            ${btnDisabled}>
+                        ${btnText}
+                    </button>
+                    <div class="accordion-chevron">
+                        <i data-lucide="chevron-down" style="width:20px;height:20px;"></i>
+                    </div>
+                </div>
             </div>
-            <div class="event-list-details">
-                <span class="event-list-date">
-                    <i data-lucide="calendar" class="meta-icon"></i>
-                    ${esc(formatDate(event.date))}
-                </span>
-                <span class="event-list-location">
-                    <i data-lucide="map-pin" class="meta-icon"></i>
-                    ${esc(event.location)}
-                </span>
-                <span class="event-list-capacity ${isFull ? 'full' : ''}">
-                    <i data-lucide="users" class="meta-icon"></i>
-                    ${event.participant_count}/${event.capacity}
-                </span>
+            <div class="event-list-expanded">
+                <div class="event-list-expanded-inner">
+                    <p class="event-list-desc-title">About this event</p>
+                    <p class="event-list-desc">${esc(event.description || 'No description available.')}</p>
+                </div>
             </div>
-            <button class="${btnClass}" 
-                    onclick="${btnOnclick}"
-                    ${btnDisabled}>
-                ${btnText}
-            </button>
         </div>
     `;
 }
