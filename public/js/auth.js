@@ -77,6 +77,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
+        window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }
@@ -124,6 +125,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
+        window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }

@@ -374,3 +374,7 @@ async function loadEvents() {
 }
 
 loadEvents();
+
+window.addEventListener('auth-updated', () => {
+    loadEvents();
+});
