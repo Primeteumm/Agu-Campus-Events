@@ -88,9 +88,9 @@ async function joinEvent(eventId, btn) {
         btn.disabled = false;
         btn.setAttribute('onclick', `leaveEvent('${eventId}', this)`);
 
-        if (cachedJoinedIdsData) cachedJoinedIdsData.add(eventId);
+        if (cachedJoinedIdsData) cachedJoinedIdsData.add(String(eventId));
         if (cachedEventsData && cachedEventsData.events) {
-            const ev = cachedEventsData.events.find(e => e.id === eventId);
+            const ev = cachedEventsData.events.find(e => String(e.id) === String(eventId));
             if (ev) ev.participant_count++;
         }
 
@@ -144,9 +144,9 @@ async function leaveEvent(eventId, btn) {
         btn.disabled = false;
         btn.setAttribute('onclick', `joinEvent('${eventId}', this)`);
 
-        if (cachedJoinedIdsData) cachedJoinedIdsData.delete(eventId);
+        if (cachedJoinedIdsData) cachedJoinedIdsData.delete(String(eventId));
         if (cachedEventsData && cachedEventsData.events) {
-            const ev = cachedEventsData.events.find(e => e.id === eventId);
+            const ev = cachedEventsData.events.find(e => String(e.id) === String(eventId));
             if (ev) ev.participant_count = Math.max(0, ev.participant_count - 1);
         }
 
@@ -187,7 +187,7 @@ function showTooltip(btn, message) {
 
 function renderListItem(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
-    const isJoined = joinedIds.has(event.id);
+    const isJoined = joinedIds.has(String(event.id));
 
     let btnClass = 'btn-join list-join';
     let btnText = 'Join';
@@ -239,7 +239,7 @@ function renderListItem(event, joinedIds) {
 
 function renderGridCard(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
-    const isJoined = joinedIds.has(event.id);
+    const isJoined = joinedIds.has(String(event.id));
 
     let btnClass = 'btn-join grid-join';
     let btnText = 'Join Event';
@@ -288,7 +288,7 @@ async function fetchJoinedIds() {
         });
         if (!res.ok) return new Set();
         const data = await res.json();
-        return new Set(data.joinedEventIds);
+        return new Set((data.joinedEventIds || []).map(String));
     } catch {
         return new Set();
     }
