@@ -997,12 +997,18 @@ body.light-theme .modal-title {
     min-height: 20px;
     margin: 0;
 }
+.form-error:empty {
+    display: none;
+}
 
 .form-success {
     color: #51cf66;
     font-size: 0.85rem;
     min-height: 20px;
     margin: 0;
+}
+.form-success:empty {
+    display: none;
 }
 
 .btn-submit {
@@ -1762,12 +1768,12 @@ body.light-theme .admin-title {
     border-radius: 999px;
 }
 
-.admin-role-tag--teacher {
+.admin-role-tag--organizer {
     background: rgba(76, 175, 80, 0.2);
     color: #81c784;
 }
 
-body.light-theme .admin-role-tag--teacher {
+body.light-theme .admin-role-tag--organizer {
     background: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
 }
@@ -1960,12 +1966,12 @@ body.light-theme .admin-cell-email {
     white-space: nowrap;
 }
 
-.admin-badge--teacher {
+.admin-badge--organizer {
     background: rgba(76, 175, 80, 0.2);
     color: #81c784;
 }
 
-body.light-theme .admin-badge--teacher {
+body.light-theme .admin-badge--organizer {
     background: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
 }

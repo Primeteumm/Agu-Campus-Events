@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <nav class="navbar">
@@ -27,7 +29,8 @@
             <aside class="profile-sidebar" id="profileSidebar" aria-label="Profile">
                 <div class="profile-card profile-card--guest" id="profileCardGuest">
                     <div class="profile-avatar-wrap">
-                        <img class="profile-avatar" src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
+                        <img class="profile-avatar"
+                            src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
@@ -95,7 +98,8 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
+                        <input type="password" id="loginPassword" placeholder="Password" required
+                            autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
@@ -115,7 +119,8 @@
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required autocomplete="given-name">
+                        <input type="text" id="signupFirstName" placeholder="First name" required
+                            autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -127,13 +132,15 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required autocomplete="new-password">
+                        <input type="password" id="signupPassword" placeholder="Password" required
+                            autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
                         <legend class="account-type-legend">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
-                                <input type="radio" name="accountType" value="student" class="account-type-input" checked>
+                                <input type="radio" name="accountType" value="student" class="account-type-input"
+                                    checked>
                                 <span class="account-type-card-inner">
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="graduation-cap" class="account-type-icon"></i>
@@ -143,13 +150,13 @@
                                 </span>
                             </label>
                             <label class="account-type-card">
-                                <input type="radio" name="accountType" value="teacher" class="account-type-input">
+                                <input type="radio" name="accountType" value="organizer" class="account-type-input">
                                 <span class="account-type-card-inner">
                                     <span class="account-type-icon-wrap">
-                                        <i data-lucide="school" class="account-type-icon"></i>
+                                        <i data-lucide="mic" class="account-type-icon"></i>
                                     </span>
-                                    <span class="account-type-title">Teacher</span>
-                                    <span class="account-type-hint">Faculty account</span>
+                                    <span class="account-type-title">Organizer</span>
+                                    <span class="account-type-hint">Event creator</span>
                                 </span>
                             </label>
                         </div>
@@ -183,4 +190,5 @@
         });
     </script>
 </body>
+
 </html>

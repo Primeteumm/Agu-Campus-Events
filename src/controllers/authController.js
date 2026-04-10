@@ -46,7 +46,7 @@ const register = async (req, res) => {
 
         const type = (accountType || 'student').toLowerCase();
         const defaultRole =
-            type === 'teacher' ? DEFAULT_ACCOUNT_ROLES.teacher : DEFAULT_ACCOUNT_ROLES.student;
+            type === 'organizer' ? DEFAULT_ACCOUNT_ROLES.organizer : DEFAULT_ACCOUNT_ROLES.student;
 
         const { data, error } = await supabase.auth.signUp({
             email: String(email).trim(),
