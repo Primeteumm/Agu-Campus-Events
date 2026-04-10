@@ -73,8 +73,8 @@ const register = async (req, res) => {
             return res.status(400).json({ message: error.message || 'Registration failed.' });
         }
 
-        const user = data.user;
-        const session = data.session;
+        let user = data.user;
+        let session = data.session;
 
         if (!user) {
             return res.status(400).json({ message: 'Registration failed.' });
@@ -85,7 +85,22 @@ const register = async (req, res) => {
         }
 
         if (!session?.access_token) {
-            return res.status(400).json({ message: 'Registration failed. Please try again.' });
+            const loginResp = await supabase.auth.signInWithPassword({
+                email: String(email).trim(),
+                password,
+            });
+            if (loginResp.data?.session) {
+                session = loginResp.data.session;
+                user = loginResp.data.user;
+            }
+        }
+
+        if (!session?.access_token) {
+            return res.status(201).json({
+                success: true,
+                message: 'Registration successful. If required, please verify your email.',
+                user: buildClientUser(user, null, defaultRole),
+            });
         }
 
         const sb = createSupabaseForToken(session.access_token);

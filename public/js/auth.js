@@ -109,6 +109,16 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             return;
         }
 
+        if (!data.token && !data.access_token) {
+            successEl.style.color = 'var(--success)';
+            successEl.textContent = data.message || 'Registration successful. You can log in now.';
+            // Switch to login side slightly after viewing message
+            setTimeout(() => {
+                document.getElementById('goToLogin').click();
+            }, 3000);
+            return;
+        }
+
         saveSessionAndRedirect(data);
         closeModal();
         updateNavbar();
