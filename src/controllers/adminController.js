@@ -2,7 +2,7 @@ const { getSupabaseAdmin } = require('../supabase');
 const { ROLE } = require('../constants/roles');
 const { getRoleForUser, roleToDisplayLabel } = require('../utils/userRoles');
 
-const ADMIN_ROLES = [ROLE.TEACHER, ROLE.CLUB_PRESIDENT];
+const ADMIN_ROLES = [ROLE.ORGANIZER, ROLE.CLUB_PRESIDENT];
 
 function getAdminClient() {
     const admin = getSupabaseAdmin();
@@ -32,7 +32,7 @@ const listUsers = async (req, res) => {
         let users = profiles || [];
 
         if (myRole === ROLE.CLUB_PRESIDENT) {
-            users = users.filter((u) => u.role !== ROLE.TEACHER);
+            users = users.filter((u) => u.role !== ROLE.ORGANIZER);
         }
 
         res.json({
@@ -65,7 +65,7 @@ const changeRole = async (req, res) => {
             return res.status(400).json({ message: 'You cannot change your own role.' });
         }
 
-        const validRoles = [ROLE.STUDENT, ROLE.TEACHER, ROLE.CLUB_PRESIDENT, ROLE.CLUB_VICE_PRESIDENT, ROLE.CLUB_MEMBER];
+        const validRoles = [ROLE.STUDENT, ROLE.ORGANIZER, ROLE.CLUB_PRESIDENT, ROLE.CLUB_VICE_PRESIDENT, ROLE.CLUB_MEMBER];
         if (!validRoles.includes(newRole)) {
             return res.status(400).json({ message: 'Invalid role.' });
         }
@@ -89,20 +89,20 @@ const changeRole = async (req, res) => {
 
         const targetRole = target.role || ROLE.STUDENT;
 
-        // ── Teacher rules ──
-        if (myRole === ROLE.TEACHER) {
-            if (targetRole === ROLE.TEACHER) {
-                return res.status(403).json({ message: 'You cannot change another Teacher\'s role.' });
+        // ── Organizer rules ──
+        if (myRole === ROLE.ORGANIZER) {
+            if (targetRole === ROLE.ORGANIZER) {
+                return res.status(403).json({ message: 'You cannot change another Organizer\'s role.' });
             }
             if (![ROLE.CLUB_PRESIDENT, ROLE.STUDENT].includes(newRole)) {
-                return res.status(403).json({ message: 'Teachers can only set roles to Club President or Student.' });
+                return res.status(403).json({ message: 'Organizers can only set roles to Club President or Student.' });
             }
         }
 
         // ── Club President rules ──
         if (myRole === ROLE.CLUB_PRESIDENT) {
-            if (targetRole === ROLE.TEACHER) {
-                return res.status(403).json({ message: 'You cannot change a Teacher\'s role.' });
+            if (targetRole === ROLE.ORGANIZER) {
+                return res.status(403).json({ message: 'You cannot change an Organizer\'s role.' });
             }
             if (targetRole === ROLE.CLUB_PRESIDENT) {
                 return res.status(403).json({ message: 'You cannot change another Club President\'s role.' });

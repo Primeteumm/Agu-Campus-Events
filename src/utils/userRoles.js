@@ -63,7 +63,7 @@ async function ensureDefaultRoleOnLogin(userId, user, client) {
     if (role) return;
 
     const metaType = (user?.user_metadata?.account_type || 'student').toLowerCase();
-    const initialRole = metaType === 'teacher' ? ROLE.TEACHER : ROLE.STUDENT;
+    const initialRole = metaType === 'organizer' ? ROLE.ORGANIZER : ROLE.STUDENT;
     const authUser =
         user && user.id === userId
             ? user

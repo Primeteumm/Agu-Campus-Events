@@ -29,7 +29,7 @@
 
     function roleBadgeClass(role) {
         const map = {
-            'Teacher': 'admin-badge--teacher',
+            'Organizer': 'admin-badge--organizer',
             'Club President': 'admin-badge--president',
             'Club Vice President': 'admin-badge--vp',
             'Club Member': 'admin-badge--member',
@@ -43,8 +43,8 @@
 
         const r = user.role;
 
-        if (myRole === 'Teacher') {
-            if (r === 'Teacher') return '<span class="admin-muted">No actions</span>';
+        if (myRole === 'Organizer') {
+            if (r === 'Organizer') return '<span class="admin-muted">No actions</span>';
             const btns = [];
             if (r !== 'Club President') {
                 btns.push(`<button class="admin-btn admin-btn--promote" data-id="${esc(user.id)}" data-role="Club President">Make President</button>`);
@@ -195,7 +195,7 @@
             const tag = document.getElementById('adminRoleTag');
             if (tag) {
                 tag.textContent = myRole;
-                tag.className = `admin-role-tag ${myRole === 'Teacher' ? 'admin-role-tag--teacher' : 'admin-role-tag--president'}`;
+                tag.className = `admin-role-tag ${myRole === 'Organizer' ? 'admin-role-tag--organizer' : 'admin-role-tag--president'}`;
             }
 
             renderTable(allUsers);

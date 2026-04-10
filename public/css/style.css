@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+
 /* ===========================
    CSS Reset & Base
    =========================== */
@@ -45,10 +47,15 @@ body {
     margin: 0;
 }
 
+.navbar-brand {
+    font-family: 'Bungee', sans-serif;
+}
+
 .navbar-brand-link {
     color: #ffffff;
     text-decoration: none;
     font-size: 1.5rem;
+    font-family: 'Bungee', sans-serif;
     font-weight: 700;
     letter-spacing: 0.5px;
 }
@@ -997,12 +1004,18 @@ body.light-theme .modal-title {
     min-height: 20px;
     margin: 0;
 }
+.form-error:empty {
+    display: none;
+}
 
 .form-success {
     color: #51cf66;
     font-size: 0.85rem;
     min-height: 20px;
     margin: 0;
+}
+.form-success:empty {
+    display: none;
 }
 
 .btn-submit {
@@ -1145,15 +1158,82 @@ body.light-theme .event-list-header {
 }
 
 .event-list-row {
-    display: grid;
-    grid-template-columns: 1.5fr 2fr 80px;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
     padding: 16px 20px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 10px;
     margin-bottom: 6px;
     transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
 }
+
+.event-list-main {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 100px;
+    align-items: center;
+    width: 100%;
+}
+
+.event-list-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.accordion-chevron {
+    color: #666;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.event-list-row.expanded .accordion-chevron {
+    transform: rotate(180deg);
+}
+
+.event-list-expanded {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), opacity 0.25s ease;
+    opacity: 0;
+    width: 100%;
+}
+
+.event-list-row.expanded .event-list-expanded {
+    max-height: 500px;
+    opacity: 1;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease 0.1s;
+}
+
+.event-list-expanded-inner {
+    padding-top: 16px;
+    margin-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .event-list-expanded-inner {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.event-list-desc-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #aaa;
+    margin-bottom: 6px;
+}
+
+body.light-theme .event-list-desc-title { color: #555; }
+
+.event-list-desc {
+    font-size: 0.95rem;
+    color: #eee;
+    line-height: 1.5;
+}
+
+body.light-theme .event-list-desc { color: #333; }
 
 .event-list-row:hover {
     background: rgba(255, 255, 255, 0.07);
@@ -1409,7 +1489,7 @@ body.light-theme .event-card-meta span {
    Desktop: Hover Slide-Up Effect
    =========================== */
 @media (hover: hover) and (min-width: 769px) {
-    .grid-join {
+    .grid-join:not(.joined) {
         opacity: 0;
         transform: translateY(-8px);
         transition: opacity 0.3s ease, transform 0.3s ease;
@@ -1425,7 +1505,7 @@ body.light-theme .event-card-meta span {
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     }
 
-    .event-grid-wrapper:hover .grid-join {
+    .event-grid-wrapper:hover .grid-join:not(.joined) {
         opacity: 1;
         transform: translateY(0px);
         pointer-events: auto;
@@ -1762,12 +1842,12 @@ body.light-theme .admin-title {
     border-radius: 999px;
 }
 
-.admin-role-tag--teacher {
+.admin-role-tag--organizer {
     background: rgba(76, 175, 80, 0.2);
     color: #81c784;
 }
 
-body.light-theme .admin-role-tag--teacher {
+body.light-theme .admin-role-tag--organizer {
     background: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
 }
@@ -1960,12 +2040,12 @@ body.light-theme .admin-cell-email {
     white-space: nowrap;
 }
 
-.admin-badge--teacher {
+.admin-badge--organizer {
     background: rgba(76, 175, 80, 0.2);
     color: #81c784;
 }
 
-body.light-theme .admin-badge--teacher {
+body.light-theme .admin-badge--organizer {
     background: rgba(76, 175, 80, 0.12);
     color: #2e7d32;
 }

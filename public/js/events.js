@@ -10,25 +10,32 @@ function esc(str) {
     return d.innerHTML;
 }
 
+let cachedEventsData = null;
+let cachedJoinedIdsData = null;
+
 listViewBtn.addEventListener('click', () => {
-    eventsContainer.classList.remove('grid-view');
-    eventsContainer.classList.add('list-view');
+    if (localStorage.getItem('eventsView') === 'list') return;
     listViewBtn.classList.add('active');
     gridViewBtn.classList.remove('active');
     localStorage.setItem('eventsView', 'list');
+    if (typeof renderCurrentView === 'function') renderCurrentView();
 });
 
 gridViewBtn.addEventListener('click', () => {
-    eventsContainer.classList.remove('list-view');
-    eventsContainer.classList.add('grid-view');
+    if (localStorage.getItem('eventsView') === 'grid') return;
     gridViewBtn.classList.add('active');
     listViewBtn.classList.remove('active');
     localStorage.setItem('eventsView', 'grid');
+    if (typeof renderCurrentView === 'function') renderCurrentView();
 });
 
 const savedView = localStorage.getItem('eventsView');
 if (savedView === 'grid') {
-    gridViewBtn.click();
+    gridViewBtn.classList.add('active');
+    listViewBtn.classList.remove('active');
+} else {
+    listViewBtn.classList.add('active');
+    gridViewBtn.classList.remove('active');
 }
 
 function formatDate(dateStr) {
@@ -81,6 +88,12 @@ async function joinEvent(eventId, btn) {
         btn.disabled = false;
         btn.setAttribute('onclick', `leaveEvent('${eventId}', this)`);
 
+        if (cachedJoinedIdsData) cachedJoinedIdsData.add(String(eventId));
+        if (cachedEventsData && cachedEventsData.events) {
+            const ev = cachedEventsData.events.find(e => String(e.id) === String(eventId));
+            if (ev) ev.participant_count++;
+        }
+
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
@@ -131,6 +144,12 @@ async function leaveEvent(eventId, btn) {
         btn.disabled = false;
         btn.setAttribute('onclick', `joinEvent('${eventId}', this)`);
 
+        if (cachedJoinedIdsData) cachedJoinedIdsData.delete(String(eventId));
+        if (cachedEventsData && cachedEventsData.events) {
+            const ev = cachedEventsData.events.find(e => String(e.id) === String(eventId));
+            if (ev) ev.participant_count = Math.max(0, ev.participant_count - 1);
+        }
+
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
@@ -166,9 +185,14 @@ function showTooltip(btn, message) {
     }, 2000);
 }
 
+window.toggleEventListAccordion = function(row, ev) {
+    if (ev.target.closest('button')) return;
+    row.classList.toggle('expanded');
+};
+
 function renderListItem(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
-    const isJoined = joinedIds.has(event.id);
+    const isJoined = joinedIds.has(String(event.id));
 
     let btnClass = 'btn-join list-join';
     let btnText = 'Join';
@@ -187,40 +211,53 @@ function renderListItem(event, joinedIds) {
     }
 
     return `
-        <div class="event-list-row">
-            <div class="event-list-info">
-                <span class="event-list-title">${esc(event.title)}</span>
-                <span class="event-list-meta">
-                    <i data-lucide="user" class="meta-icon"></i>
-                    ${esc(event.organizer_name)}
-                </span>
+        <div class="event-list-row" onclick="toggleEventListAccordion(this, event)">
+            <div class="event-list-main">
+                <div class="event-list-info">
+                    <span class="event-list-title">${esc(event.title)}</span>
+                    <span class="event-list-meta">
+                        <i data-lucide="user" class="meta-icon"></i>
+                        ${esc(event.organizer_name)}
+                    </span>
+                </div>
+                <div class="event-list-details">
+                    <span class="event-list-date">
+                        <i data-lucide="calendar" class="meta-icon"></i>
+                        ${esc(formatDate(event.date))}
+                    </span>
+                    <span class="event-list-location">
+                        <i data-lucide="map-pin" class="meta-icon"></i>
+                        ${esc(event.location)}
+                    </span>
+                    <span class="event-list-capacity ${isFull ? 'full' : ''}">
+                        <i data-lucide="users" class="meta-icon"></i>
+                        ${event.participant_count}/${event.capacity}
+                    </span>
+                </div>
+                <div class="event-list-actions">
+                    <button class="${btnClass}" 
+                            onclick="${btnOnclick}"
+                            ${btnDisabled}>
+                        ${btnText}
+                    </button>
+                    <div class="accordion-chevron">
+                        <i data-lucide="chevron-down" style="width:20px;height:20px;"></i>
+                    </div>
+                </div>
             </div>
-            <div class="event-list-details">
-                <span class="event-list-date">
-                    <i data-lucide="calendar" class="meta-icon"></i>
-                    ${esc(formatDate(event.date))}
-                </span>
-                <span class="event-list-location">
-                    <i data-lucide="map-pin" class="meta-icon"></i>
-                    ${esc(event.location)}
-                </span>
-                <span class="event-list-capacity ${isFull ? 'full' : ''}">
-                    <i data-lucide="users" class="meta-icon"></i>
-                    ${event.participant_count}/${event.capacity}
-                </span>
+            <div class="event-list-expanded">
+                <div class="event-list-expanded-inner">
+                    <p class="event-list-desc-title">About this event</p>
+                    <p class="event-list-desc">${esc(event.description || 'No description available.')}</p>
+                </div>
             </div>
-            <button class="${btnClass}" 
-                    onclick="${btnOnclick}"
-                    ${btnDisabled}>
-                ${btnText}
-            </button>
         </div>
     `;
 }
 
 function renderGridCard(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
-    const isJoined = joinedIds.has(event.id);
+    const isJoined = joinedIds.has(String(event.id));
 
     let btnClass = 'btn-join grid-join';
     let btnText = 'Join Event';
@@ -269,10 +306,40 @@ async function fetchJoinedIds() {
         });
         if (!res.ok) return new Set();
         const data = await res.json();
-        return new Set(data.joinedEventIds);
+        return new Set((data.joinedEventIds || []).map(String));
     } catch {
         return new Set();
     }
+}
+
+function renderCurrentView() {
+    if (!cachedEventsData || !cachedEventsData.events) return;
+
+    if (cachedEventsData.events.length === 0) {
+        eventsContainer.innerHTML = '<p class="no-events">No events found. Be the first to create one!</p>';
+        return;
+    }
+
+    const isGrid = localStorage.getItem('eventsView') === 'grid';
+
+    if (isGrid) {
+        eventsContainer.classList.remove('list-view');
+        eventsContainer.classList.add('grid-view');
+        eventsContainer.innerHTML = cachedEventsData.events.map((e) => renderGridCard(e, cachedJoinedIdsData)).join('');
+    } else {
+        eventsContainer.classList.remove('grid-view');
+        eventsContainer.classList.add('list-view');
+        eventsContainer.innerHTML = `
+        <div class="event-list-header">
+            <span>Event</span>
+            <span>Details</span>
+            <span></span>
+        </div>
+        ${cachedEventsData.events.map((e) => renderListItem(e, cachedJoinedIdsData)).join('')}
+        `;
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 let loadEventsPromise = null;
@@ -289,29 +356,10 @@ async function loadEvents() {
                 fetchJoinedIds(),
             ]);
 
-            const data = eventsRes;
+            cachedEventsData = eventsRes;
+            cachedJoinedIdsData = joinedIds;
 
-            if (!data.events || data.events.length === 0) {
-                eventsContainer.innerHTML = '<p class="no-events">No events found. Be the first to create one!</p>';
-                return;
-            }
-
-            const isGrid = eventsContainer.classList.contains('grid-view');
-
-            if (isGrid) {
-                eventsContainer.innerHTML = data.events.map((e) => renderGridCard(e, joinedIds)).join('');
-            } else {
-                eventsContainer.innerHTML = `
-                <div class="event-list-header">
-                    <span>Event</span>
-                    <span>Details</span>
-                    <span></span>
-                </div>
-                ${data.events.map((e) => renderListItem(e, joinedIds)).join('')}
-            `;
-            }
-
-            lucide.createIcons();
+            renderCurrentView();
         } catch (err) {
             eventsContainer.innerHTML = '<p class="no-events">Failed to load events. Please try again.</p>';
             console.error('Load events error:', err);
@@ -324,8 +372,5 @@ async function loadEvents() {
         loadEventsPromise = null;
     }
 }
-
-listViewBtn.addEventListener('click', loadEvents);
-gridViewBtn.addEventListener('click', loadEvents);
 
 loadEvents();
