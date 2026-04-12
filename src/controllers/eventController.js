@@ -124,13 +124,21 @@ const createEvent = async (req, res) => {
 const getAllEvents = async (req, res) => {
     try {
         const reader = dbReader();
-        const { data: raw, error } = await reader.from('events').select('*').order('date', { ascending: true });
+        const includePassed = req.query.includePassed === 'true';
+        const now = new Date().toISOString();
+
+        let query = reader.from('events').select('*');
+        if (!includePassed) {
+            query = query.gte('date', now);
+        }
+        const { data: raw, error } = await query.order('date', { ascending: true });
 
         if (error) {
-            const { data: raw2, error: err2 } = await reader
-                .from('events')
-                .select('*')
-                .order('event_date', { ascending: true });
+            let query2 = reader.from('events').select('*');
+            if (!includePassed) {
+                query2 = query2.gte('event_date', now);
+            }
+            const { data: raw2, error: err2 } = await query2.order('event_date', { ascending: true });
             if (err2) {
                 console.error('Get events error:', error.message, err2.message);
                 return res.status(500).json({ message: 'Server error' });

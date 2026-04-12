@@ -1069,6 +1069,149 @@ body.light-theme .modal-title {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.events-toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Custom Checkbox */
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.filter-checkbox:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .filter-checkbox:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.filter-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.filter-checkbox-mark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.filter-checkbox-mark::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: solid transparent;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s ease, border-color 0.2s;
+    margin-top: -1px;
+}
+
+.filter-checkbox input:checked + .filter-checkbox-mark {
+    background: #1565c0;
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.18);
+}
+
+.filter-checkbox input:checked + .filter-checkbox-mark::after {
+    border-color: #fff;
+    transform: rotate(45deg) scale(1);
+}
+
+.filter-checkbox input:focus-visible + .filter-checkbox-mark {
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.35);
+}
+
+.filter-checkbox-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #999;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.filter-checkbox input:checked ~ .filter-checkbox-text {
+    color: #ccc;
+}
+
+body.light-theme .filter-checkbox-mark {
+    border-color: #bbb;
+}
+
+body.light-theme .filter-checkbox input:checked + .filter-checkbox-mark {
+    background: #1565c0;
+    border-color: #1565c0;
+}
+
+body.light-theme .filter-checkbox-text {
+    color: #777;
+}
+
+body.light-theme .filter-checkbox input:checked ~ .filter-checkbox-text {
+    color: #333;
+}
+
+/* Passed Event Visual Distinction */
+.event-list-row.passed {
+    opacity: 0.5;
+}
+
+.event-list-row.passed:hover {
+    opacity: 0.7;
+}
+
+.event-grid-wrapper.passed {
+    opacity: 0.5;
+}
+
+.event-grid-wrapper.passed:hover {
+    opacity: 0.7;
+}
+
+.passed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 80, 80, 0.15);
+    color: #ff8a8a;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+body.light-theme .passed-badge {
+    background: rgba(211, 47, 47, 0.1);
+    color: #d32f2f;
 }
 
 .events-title {

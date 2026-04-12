@@ -3,6 +3,7 @@ const EVENTS_API = '/api/events';
 const eventsContainer = document.getElementById('eventsContainer');
 const listViewBtn = document.getElementById('listViewBtn');
 const gridViewBtn = document.getElementById('gridViewBtn');
+const showPassedCheckbox = document.getElementById('showPassedCheckbox');
 
 function esc(str) {
     const d = document.createElement('div');
@@ -10,8 +11,21 @@ function esc(str) {
     return d.innerHTML;
 }
 
+function isPassed(dateStr) {
+    if (!dateStr) return false;
+    return new Date(dateStr) < new Date();
+}
+
 let cachedEventsData = null;
 let cachedJoinedIdsData = null;
+
+// Restore checkbox state from localStorage
+showPassedCheckbox.checked = localStorage.getItem('showPassedEvents') === 'true';
+
+showPassedCheckbox.addEventListener('change', () => {
+    localStorage.setItem('showPassedEvents', showPassedCheckbox.checked);
+    loadEvents();
+});
 
 listViewBtn.addEventListener('click', () => {
     if (localStorage.getItem('eventsView') === 'list') return;
@@ -193,6 +207,7 @@ window.toggleEventListAccordion = function(row, ev) {
 function renderListItem(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
     const isJoined = joinedIds.has(String(event.id));
+    const passed = isPassed(event.date);
 
     let btnClass = 'btn-join list-join';
     let btnText = 'Join';
@@ -200,7 +215,11 @@ function renderListItem(event, joinedIds) {
 
     let btnOnclick = `joinEvent('${event.id}', this)`;
 
-    if (isJoined) {
+    if (passed) {
+        btnClass += ' disabled';
+        btnText = 'Ended';
+        btnDisabled = 'disabled';
+    } else if (isJoined) {
         btnClass += ' joined';
         btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
         btnOnclick = `leaveEvent('${event.id}', this)`;
@@ -210,11 +229,14 @@ function renderListItem(event, joinedIds) {
         btnDisabled = 'disabled';
     }
 
+    const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
+    const rowClass = `event-list-row${passed ? ' passed' : ''}`;
+
     return `
-        <div class="event-list-row" onclick="toggleEventListAccordion(this, event)">
+        <div class="${rowClass}" onclick="toggleEventListAccordion(this, event)">
             <div class="event-list-main">
                 <div class="event-list-info">
-                    <span class="event-list-title">${esc(event.title)}</span>
+                    <span class="event-list-title">${esc(event.title)}${passedBadge}</span>
                     <span class="event-list-meta">
                         <i data-lucide="user" class="meta-icon"></i>
                         ${esc(event.organizer_name)}
@@ -258,6 +280,7 @@ function renderListItem(event, joinedIds) {
 function renderGridCard(event, joinedIds) {
     const isFull = event.participant_count >= event.capacity;
     const isJoined = joinedIds.has(String(event.id));
+    const passed = isPassed(event.date);
 
     let btnClass = 'btn-join grid-join';
     let btnText = 'Join Event';
@@ -265,7 +288,11 @@ function renderGridCard(event, joinedIds) {
 
     let btnOnclick = `joinEvent('${event.id}', this)`;
 
-    if (isJoined) {
+    if (passed) {
+        btnClass += ' disabled';
+        btnText = 'Ended';
+        btnDisabled = 'disabled';
+    } else if (isJoined) {
         btnClass += ' joined';
         btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
         btnOnclick = `leaveEvent('${event.id}', this)`;
@@ -275,10 +302,13 @@ function renderGridCard(event, joinedIds) {
         btnDisabled = 'disabled';
     }
 
+    const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
+    const wrapperClass = `event-grid-wrapper${passed ? ' passed' : ''}`;
+
     return `
-        <div class="event-grid-wrapper">
+        <div class="${wrapperClass}">
             <div class="event-grid-card">
-                <h3 class="event-card-title">${esc(event.title)}</h3>
+                <h3 class="event-card-title">${esc(event.title)}${passedBadge}</h3>
                 <p class="event-card-desc">${esc(event.description || 'No description available.')}</p>
                 <div class="event-card-meta">
                     <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(event.date))}</span>
@@ -351,8 +381,9 @@ async function loadEvents() {
 
     loadEventsPromise = (async () => {
         try {
+            const includePassed = showPassedCheckbox.checked;
             const [eventsRes, joinedIds] = await Promise.all([
-                fetch(EVENTS_API).then((r) => r.json()),
+                fetch(`${EVENTS_API}?includePassed=${includePassed}`).then((r) => r.json()),
                 fetchJoinedIds(),
             ]);
 
