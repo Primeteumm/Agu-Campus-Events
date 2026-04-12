@@ -1176,6 +1176,103 @@ body.light-theme .filter-checkbox input:checked ~ .filter-checkbox-text {
     color: #333;
 }
 
+/* Show Passed Events checkbox (toolbar) */
+.passed-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.passed-checkbox:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+body.light-theme .passed-checkbox:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.passed-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.passed-checkbox-mark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.passed-checkbox-mark::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: solid transparent;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s ease, border-color 0.2s;
+    margin-top: -1px;
+}
+
+.passed-checkbox input:checked + .passed-checkbox-mark {
+    background: #1565c0;
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.18);
+}
+
+.passed-checkbox input:checked + .passed-checkbox-mark::after {
+    border-color: #fff;
+    transform: rotate(45deg) scale(1);
+}
+
+.passed-checkbox input:focus-visible + .passed-checkbox-mark {
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.35);
+}
+
+.passed-checkbox-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #999;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.passed-checkbox input:checked ~ .passed-checkbox-text {
+    color: #ccc;
+}
+
+body.light-theme .passed-checkbox-mark {
+    border-color: #bbb;
+}
+
+body.light-theme .passed-checkbox input:checked + .passed-checkbox-mark {
+    background: #1565c0;
+    border-color: #1565c0;
+}
+
+body.light-theme .passed-checkbox-text {
+    color: #777;
+}
+
+body.light-theme .passed-checkbox input:checked ~ .passed-checkbox-text {
+    color: #333;
+}
+
 /* Passed Event Visual Distinction */
 .event-list-row.passed {
     opacity: 0.5;
