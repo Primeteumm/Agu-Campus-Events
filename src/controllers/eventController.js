@@ -121,45 +121,30 @@ const createEvent = async (req, res) => {
 };
 
 // GET /api/events
-// Query params: showPassed=true|false, from=ISO8601, to=ISO8601
 const getAllEvents = async (req, res) => {
     try {
         const reader = dbReader();
+        const includePassed = req.query.includePassed === 'true';
+        const now = new Date().toISOString();
 
-        // Parse filter params
-        const showPassed = req.query.showPassed === 'true';
-        const fromDate = req.query.from || null;
-        const toDate = req.query.to || null;
+        let query = reader.from('events').select('*');
+        if (!includePassed) {
+            query = query.gte('date', now);
+        }
+        const { data: raw, error } = await query.order('date', { ascending: true });
 
-        // Try ordering by 'date' column first, fall back to 'event_date'
-        let raw = null;
-        let usedCol = 'date';
-
-        const tryFetch = async (col) => {
-            let q = reader.from('events').select('*').order(col, { ascending: true });
-
-            if (!showPassed) {
-                const now = new Date().toISOString();
-                q = q.gte(col, now);
+        if (error) {
+            let query2 = reader.from('events').select('*');
+            if (!includePassed) {
+                query2 = query2.gte('event_date', now);
             }
-            if (fromDate) q = q.gte(col, fromDate);
-            if (toDate)   q = q.lte(col, toDate);
-
-            return q;
-        };
-
-        const { data: raw1, error: err1 } = await tryFetch('date');
-
-        if (err1) {
-            const { data: raw2, error: err2 } = await tryFetch('event_date');
+            const { data: raw2, error: err2 } = await query2.order('event_date', { ascending: true });
             if (err2) {
-                console.error('Get events error:', err1.message, err2.message);
+                console.error('Get events error:', error.message, err2.message);
                 return res.status(500).json({ message: 'Server error' });
             }
-            raw = raw2;
-            usedCol = 'event_date';
-        } else {
-            raw = raw1;
+            const events = await mapEventsWithMeta(raw2 || []);
+            return res.json({ events });
         }
 
         const events = await mapEventsWithMeta(raw || []);

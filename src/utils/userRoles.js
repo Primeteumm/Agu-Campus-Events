@@ -60,21 +60,25 @@ async function addRole(userId, roleSlug, client) {
 async function ensureDefaultRoleOnLogin(userId, user, client) {
     if (!client) return;
     const role = await getRoleForUser(userId, client);
-    if (role) return;
 
     const metaType = (user?.user_metadata?.account_type || 'student').toLowerCase();
-    const initialRole = metaType === 'organizer' ? ROLE.ORGANIZER : ROLE.STUDENT;
+    const expectedRole = metaType === 'organizer' ? ROLE.ORGANIZER : ROLE.STUDENT;
+
+    // Leave the role alone if it's already correct, or if it's a non-student role
+    // (e.g. Club President) that shouldn't be auto-overridden.
+    if (role && !(role === ROLE.STUDENT && expectedRole === ROLE.ORGANIZER)) return;
+
     const authUser =
         user && user.id === userId
             ? user
             : { id: userId, email: user?.email ?? null, user_metadata: user?.user_metadata ?? {} };
 
-    await ensureProfileRow(client, authUser, authUser.user_metadata?.first_name ?? '', authUser.user_metadata?.last_name ?? '', initialRole);
+    await ensureProfileRow(client, authUser, authUser.user_metadata?.first_name ?? '', authUser.user_metadata?.last_name ?? '', expectedRole);
 
     const roleAfter = await getRoleForUser(userId, client);
-    if (roleAfter) return;
+    if (roleAfter === expectedRole) return;
 
-    const { error } = await client.from('profiles').update({ role: initialRole }).eq('id', userId);
+    const { error } = await client.from('profiles').update({ role: expectedRole }).eq('id', userId);
     if (error) console.error('ensureDefaultRoleOnLogin:', error.message);
 }
 
