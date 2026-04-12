@@ -121,22 +121,45 @@ const createEvent = async (req, res) => {
 };
 
 // GET /api/events
+// Query params: showPassed=true|false, from=ISO8601, to=ISO8601
 const getAllEvents = async (req, res) => {
     try {
         const reader = dbReader();
-        const { data: raw, error } = await reader.from('events').select('*').order('date', { ascending: true });
 
-        if (error) {
-            const { data: raw2, error: err2 } = await reader
-                .from('events')
-                .select('*')
-                .order('event_date', { ascending: true });
+        // Parse filter params
+        const showPassed = req.query.showPassed === 'true';
+        const fromDate = req.query.from || null;
+        const toDate = req.query.to || null;
+
+        // Try ordering by 'date' column first, fall back to 'event_date'
+        let raw = null;
+        let usedCol = 'date';
+
+        const tryFetch = async (col) => {
+            let q = reader.from('events').select('*').order(col, { ascending: true });
+
+            if (!showPassed) {
+                const now = new Date().toISOString();
+                q = q.gte(col, now);
+            }
+            if (fromDate) q = q.gte(col, fromDate);
+            if (toDate)   q = q.lte(col, toDate);
+
+            return q;
+        };
+
+        const { data: raw1, error: err1 } = await tryFetch('date');
+
+        if (err1) {
+            const { data: raw2, error: err2 } = await tryFetch('event_date');
             if (err2) {
-                console.error('Get events error:', error.message, err2.message);
+                console.error('Get events error:', err1.message, err2.message);
                 return res.status(500).json({ message: 'Server error' });
             }
-            const events = await mapEventsWithMeta(raw2 || []);
-            return res.json({ events });
+            raw = raw2;
+            usedCol = 'event_date';
+        } else {
+            raw = raw1;
         }
 
         const events = await mapEventsWithMeta(raw || []);

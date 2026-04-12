@@ -62,7 +62,7 @@
             <div class="app-main">
                 <main class="main-content">
                     <div class="events-toolbar">
-                        <h2 class="events-title">Upcoming Events</h2>
+                        <h2 class="events-title" id="eventsTitle">Upcoming Events</h2>
                         <div class="view-toggle">
                             <button class="view-btn active" id="listViewBtn" title="List View">
                                 <i data-lucide="list" class="icon"></i>
@@ -71,6 +71,53 @@
                                 <i data-lucide="layout-grid" class="icon"></i>
                             </button>
                         </div>
+                    </div>
+
+                    <div class="filter-bar" id="filterBar">
+                        <div class="filter-search-wrap">
+                            <i data-lucide="search" class="filter-search-icon"></i>
+                            <input
+                                type="text"
+                                id="filterSearch"
+                                class="filter-search"
+                                placeholder="Search events or organizer…"
+                                autocomplete="off"
+                            >
+                            <button class="filter-search-clear hidden" id="filterSearchClear" title="Clear">
+                                <i data-lucide="x" class="icon"></i>
+                            </button>
+                        </div>
+
+                        <select id="filterDate" class="filter-select">
+                            <option value="all">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+
+                        <select id="filterStatus" class="filter-select">
+                            <option value="all">All Events</option>
+                            <option value="joined">Joined by Me</option>
+                            <option value="available">Available</option>
+                            <option value="full">Full</option>
+                        </select>
+
+                        <label class="filter-checkbox-label" id="showPassedLabel" title="Include past events">
+                            <input type="checkbox" id="showPassed" class="filter-checkbox">
+                            <span class="filter-checkbox-box">
+                                <i data-lucide="check" class="checkbox-check-icon"></i>
+                            </span>
+                            <span class="filter-checkbox-text">Show Passed</span>
+                        </label>
+
+                        <button class="filter-reset hidden" id="filterReset" title="Reset filters">
+                            <i data-lucide="rotate-ccw" class="icon"></i>
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="filter-results-info hidden" id="filterResultsInfo">
+                        <span id="filterResultsText"></span>
                     </div>
 
                     <div class="events-container list-view" id="eventsContainer">
