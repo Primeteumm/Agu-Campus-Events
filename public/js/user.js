@@ -155,7 +155,7 @@ function updateAdminLinkVisibility(user) {
     const createBtn = document.getElementById('sidebarCreateEvent');
     if (createBtn) {
         const role = user?.role || (user?.roles && user.roles[0]) || '';
-        const canCreate = role === 'Club President' || role === 'Club Vice President';
+        const canCreate = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
         if (canCreate) createBtn.classList.remove('hidden');
         else createBtn.classList.add('hidden');
     }

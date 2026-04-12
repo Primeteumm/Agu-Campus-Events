@@ -112,15 +112,17 @@ const register = async (req, res) => {
             .eq('id', user.id)
             .maybeSingle();
 
-        let finalRole = profile?.role || defaultRole;
+        let finalRole = defaultRole;
 
-        if (profile && profile.role !== defaultRole) {
+        if (!profile) {
+            await ensureProfileRow(adminClient || sb, user, first_name, last_name, defaultRole);
+        } else if (profile.role !== defaultRole) {
             const client = adminClient || sb;
             const { error: roleErr } = await client
                 .from('profiles')
                 .update({ role: defaultRole })
                 .eq('id', user.id);
-            if (!roleErr) finalRole = defaultRole;
+            if (roleErr) console.error('Failed to set role during registration:', roleErr.message);
         }
 
         return res.status(201).json({
