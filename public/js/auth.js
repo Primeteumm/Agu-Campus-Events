@@ -77,6 +77,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
+        window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }
@@ -109,11 +110,22 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             return;
         }
 
+        if (!data.token && !data.access_token) {
+            successEl.style.color = 'var(--success)';
+            successEl.textContent = data.message || 'Registration successful. You can log in now.';
+            // Switch to login side slightly after viewing message
+            setTimeout(() => {
+                document.getElementById('goToLogin').click();
+            }, 3000);
+            return;
+        }
+
         saveSessionAndRedirect(data);
         closeModal();
         updateNavbar();
         if (typeof syncSidebarFromStorage === 'function') syncSidebarFromStorage();
         if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
+        window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
     }

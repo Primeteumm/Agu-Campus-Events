@@ -66,9 +66,9 @@ const createEvent = async (req, res) => {
 
         const admin = getSupabaseAdmin();
         const myRole = await getRoleForUser(req.user.id, admin || supabase);
-        const canCreate = myRole === ROLE.CLUB_PRESIDENT || myRole === ROLE.CLUB_VICE_PRESIDENT;
+        const canCreate = myRole === ROLE.ORGANIZER || myRole === ROLE.CLUB_PRESIDENT || myRole === ROLE.CLUB_VICE_PRESIDENT;
         if (!canCreate) {
-            return res.status(403).json({ message: 'Only Club Presidents and Vice Presidents can create events.' });
+            return res.status(403).json({ message: 'Only Organizers, Club Presidents, and Vice Presidents can create events.' });
         }
 
         const sb = createSupabaseForToken(req.accessToken);

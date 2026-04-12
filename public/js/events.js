@@ -40,19 +40,19 @@ function formatDate(dateStr) {
 
 // ─── View toggle ─────────────────────────────────────────────────────────────
 listViewBtn.addEventListener('click', () => {
-    eventsContainer.classList.remove('grid-view');
-    eventsContainer.classList.add('list-view');
+    if (localStorage.getItem('eventsView') === 'list') return;
     listViewBtn.classList.add('active');
     gridViewBtn.classList.remove('active');
     localStorage.setItem('eventsView', 'list');
+    if (typeof renderCurrentView === 'function') renderCurrentView();
 });
 
 gridViewBtn.addEventListener('click', () => {
-    eventsContainer.classList.remove('list-view');
-    eventsContainer.classList.add('grid-view');
+    if (localStorage.getItem('eventsView') === 'grid') return;
     gridViewBtn.classList.add('active');
     listViewBtn.classList.remove('active');
     localStorage.setItem('eventsView', 'grid');
+    if (typeof renderCurrentView === 'function') renderCurrentView();
 });
 
 const savedView = localStorage.getItem('eventsView');
@@ -185,19 +185,11 @@ function renderListItem(event) {
                     ${esc(event.organizer_name)}
                 </span>
             </div>
-            <div class="event-list-details">
-                <span class="event-list-date">
-                    <i data-lucide="calendar" class="meta-icon"></i>
-                    ${esc(formatDate(event.date))}
-                </span>
-                <span class="event-list-location">
-                    <i data-lucide="map-pin" class="meta-icon"></i>
-                    ${esc(event.location)}
-                </span>
-                <span class="event-list-capacity ${isFull ? 'full' : ''}">
-                    <i data-lucide="users" class="meta-icon"></i>
-                    ${event.participant_count}/${event.capacity}
-                </span>
+            <div class="event-list-expanded">
+                <div class="event-list-expanded-inner">
+                    <p class="event-list-desc-title">About this event</p>
+                    <p class="event-list-desc">${esc(event.description || 'No description available.')}</p>
+                </div>
             </div>
             <button class="${btnClass}"
                     onclick="${btnOnclick}"
@@ -345,7 +337,7 @@ async function fetchJoinedIds() {
         const res  = await fetch(`${EVENTS_API}/my-joins`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) return new Set();
         const data = await res.json();
-        return new Set(data.joinedEventIds);
+        return new Set((data.joinedEventIds || []).map(String));
     } catch {
         return new Set();
     }
@@ -432,3 +424,7 @@ gridViewBtn.addEventListener('click', () => { if (allEvents.length) applyFilters
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 loadEvents();
+
+window.addEventListener('auth-updated', () => {
+    loadEvents();
+});

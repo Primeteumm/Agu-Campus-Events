@@ -1,6 +1,6 @@
 const ROLE = {
     STUDENT: 'Student',
-    TEACHER: 'Teacher',
+    ORGANIZER: 'Organizer',
     CLUB_MEMBER: 'Club Member',
     CLUB_VICE_PRESIDENT: 'Club Vice President',
     CLUB_PRESIDENT: 'Club President',
@@ -8,7 +8,7 @@ const ROLE = {
 
 const ROLE_LABELS = {
     [ROLE.STUDENT]: 'Student',
-    [ROLE.TEACHER]: 'Teacher',
+    [ROLE.ORGANIZER]: 'Organizer',
     [ROLE.CLUB_MEMBER]: 'Club Member',
     [ROLE.CLUB_VICE_PRESIDENT]: 'Club Vice President',
     [ROLE.CLUB_PRESIDENT]: 'Club President',
@@ -16,7 +16,7 @@ const ROLE_LABELS = {
 
 const DEFAULT_ACCOUNT_ROLES = {
     student: ROLE.STUDENT,
-    teacher: ROLE.TEACHER,
+    organizer: ROLE.ORGANIZER,
 };
 
 const CLUB_PROMOTER_ROLES = [ROLE.CLUB_PRESIDENT, ROLE.CLUB_VICE_PRESIDENT];
