@@ -2810,3 +2810,49 @@ body.light-theme .form-textarea {
 body.light-theme .form-textarea::placeholder {
     color: #999;
 }
+
+/* ===========================
+   Button Loading Spinner
+   =========================== */
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Applied to any button while an async request is in-flight */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.75;
+    cursor: not-allowed !important;
+}
+
+/* Hide the button's own text/children while loading */
+.btn-loading > * {
+    visibility: hidden;
+}
+
+/* Spinning ring pseudo-element */
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: btn-spin 0.65s linear infinite;
+}
+
+/* Smaller ring for compact buttons (e.g. list join) */
+.btn-join.btn-loading::after {
+    width: 14px;
+    height: 14px;
+}
+
+/* Dark-ring variant for light-theme secondary buttons */
+body.light-theme .btn-loading::after {
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.75);
+}

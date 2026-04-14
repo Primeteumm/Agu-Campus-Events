@@ -51,12 +51,20 @@ function saveSessionAndRedirect(data) {
 }
 
 // ── Login ──
+let _loginLoading = false;
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (_loginLoading) return;
+    _loginLoading = true;
+
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const errorEl = document.getElementById('loginError');
+    const submitBtn = document.querySelector('#loginForm .btn-submit');
     errorEl.textContent = '';
+
+    submitBtn.classList.add('btn-loading');
+    submitBtn.disabled = true;
 
     try {
         const res = await fetch(`${API_URL}/auth/login`, {
@@ -80,12 +88,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
+    } finally {
+        _loginLoading = false;
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.disabled = false;
     }
 });
 
 // ── Register (no email verification) ──
+let _signupLoading = false;
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (_signupLoading) return;
+    _signupLoading = true;
+
     const firstName = document.getElementById('signupFirstName').value.trim();
     const lastName = document.getElementById('signupLastName').value.trim();
     const email = document.getElementById('signupEmail').value;
@@ -93,8 +109,12 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const accountType = document.querySelector('input[name="accountType"]:checked')?.value || 'student';
     const errorEl = document.getElementById('signupError');
     const successEl = document.getElementById('signupSuccess');
+    const submitBtn = document.querySelector('#signupForm .btn-submit');
     errorEl.textContent = '';
     successEl.textContent = '';
+
+    submitBtn.classList.add('btn-loading');
+    submitBtn.disabled = true;
 
     try {
         const res = await fetch(`${API_URL}/auth/register`, {
@@ -128,6 +148,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         window.dispatchEvent(new CustomEvent('auth-updated', { detail: { token: localStorage.getItem('token'), user: data.user } }));
     } catch (err) {
         errorEl.textContent = 'Connection error. Please try again.';
+    } finally {
+        _signupLoading = false;
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.disabled = false;
     }
 });
 
