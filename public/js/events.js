@@ -70,10 +70,11 @@ async function joinEvent(eventId, btn) {
         return;
     }
 
+    if (btn.disabled) return;
+
     const isListBtn = btn.classList.contains('list-join');
     btn.disabled = true;
-
-    if (!isListBtn) btn.textContent = 'Joining...';
+    btn.classList.add('btn-loading');
 
     try {
         const res = await fetch(`${EVENTS_API}/${eventId}/join`, {
@@ -130,6 +131,8 @@ async function joinEvent(eventId, btn) {
             btn.textContent = 'Error';
             setTimeout(() => { btn.textContent = 'Join'; btn.disabled = false; }, 2000);
         }
+    } finally {
+        btn.classList.remove('btn-loading');
     }
 }
 
@@ -137,7 +140,10 @@ async function leaveEvent(eventId, btn) {
     const token = localStorage.getItem('token');
     if (!token) return;
 
+    if (btn.disabled) return;
+
     btn.disabled = true;
+    btn.classList.add('btn-loading');
 
     try {
         const res = await fetch(`${EVENTS_API}/${eventId}/join`, {
@@ -180,6 +186,8 @@ async function leaveEvent(eventId, btn) {
         }
     } catch (err) {
         btn.disabled = false;
+    } finally {
+        btn.classList.remove('btn-loading');
     }
 }
 
