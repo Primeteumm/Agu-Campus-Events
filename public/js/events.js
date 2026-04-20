@@ -52,6 +52,131 @@ if (savedView === 'grid') {
     gridViewBtn.classList.remove('active');
 }
 
+// --- Organizer rating helpers ---------------------------------------------
+// Round UP to 1 decimal (e.g. 4.11 -> 4.2).
+function ratingCeil1(v) {
+    if (v == null || isNaN(v)) return null;
+    return Math.ceil(v * 10) / 10;
+}
+
+// Color tier by rating value (0..5).
+function ratingTierClass(v) {
+    if (v == null) return 'rating-none';
+    if (v >= 4.0) return 'rating-green';
+    if (v >= 3.0) return 'rating-yellow';
+    if (v >= 2.0) return 'rating-orange';
+    return 'rating-red';
+}
+
+function organizerRatingPill(avg, count) {
+    if (avg == null || !count) {
+        return `<span class="organizer-rating rating-none" title="No ratings yet">
+            <i data-lucide="star" class="rating-icon"></i>
+            <span class="rating-value">—</span>
+        </span>`;
+    }
+    const rounded = ratingCeil1(avg);
+    const tier = ratingTierClass(rounded);
+    return `<span class="organizer-rating ${tier}" title="${count} rating${count === 1 ? '' : 's'}">
+        <i data-lucide="star" class="rating-icon"></i>
+        <span class="rating-value">${rounded.toFixed(1)}</span>
+    </span>`;
+}
+
+// 5-star interactive widget (clickable). Disabled if user cannot rate.
+function starWidget(event, opts) {
+    const current = event.my_rating || 0;
+    const disabled = !!opts?.disabled;
+    const reason = opts?.reason || '';
+    const wrapperClass = `star-rate${disabled ? ' disabled' : ''}`;
+    const stars = [1, 2, 3, 4, 5]
+        .map((n) => {
+            const filled = n <= current ? ' filled' : '';
+            const clickAttr = disabled
+                ? ''
+                : `onclick="event.stopPropagation(); rateOrganizer('${event.id}', ${n}, this)"`;
+            return `<button type="button" class="star-btn${filled}" data-value="${n}" ${clickAttr} ${disabled ? 'disabled' : ''} aria-label="${n} star${n === 1 ? '' : 's'}">
+                <i data-lucide="star" class="star-icon"></i>
+            </button>`;
+        })
+        .join('');
+    const hint = disabled
+        ? `<span class="star-hint">${esc(reason)}</span>`
+        : current
+          ? `<span class="star-hint">Your rating: ${current}/5</span>`
+          : `<span class="star-hint">Rate the organizer</span>`;
+    return `<div class="${wrapperClass}" onclick="event.stopPropagation()">
+        <div class="star-row">
+            ${stars}
+            <span class="star-spinner" aria-hidden="true"></span>
+        </div>
+        ${hint}
+    </div>`;
+}
+
+function canUserRate(event, joinedIds) {
+    const token = localStorage.getItem('token');
+    if (!token) return { ok: false, reason: 'Sign in to rate' };
+    if (!isPassed(event.date)) return { ok: false, reason: '' };
+    if (!joinedIds || !joinedIds.has(String(event.id))) return { ok: false, reason: 'Only attendees can rate' };
+
+    let myId = null;
+    try {
+        const raw = localStorage.getItem('user');
+        const u = raw ? JSON.parse(raw) : null;
+        myId = u?.id || null;
+    } catch { /* ignore */ }
+    if (myId && event.organizer_id === myId) return { ok: false, reason: "You can't rate yourself" };
+
+    return { ok: true };
+}
+
+async function rateOrganizer(eventId, value, btn) {
+    const token = localStorage.getItem('token');
+    if (!token) { document.getElementById('openAuthModal')?.click(); return; }
+
+    const widget = btn.closest('.star-rate');
+    if (!widget || widget.classList.contains('disabled')) return;
+    widget.classList.add('pending');
+
+    try {
+        const res = await fetch(`${EVENTS_API}/${eventId}/rate`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rating: value }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            widget.classList.remove('pending');
+            const hint = widget.querySelector('.star-hint');
+            if (hint) hint.textContent = data.message || 'Failed to save rating';
+            return;
+        }
+
+        // Update cache: my_rating + organizer avg across all their events.
+        if (cachedEventsData?.events) {
+            const target = cachedEventsData.events.find((e) => String(e.id) === String(eventId));
+            const orgId = target?.organizer_id;
+            for (const e of cachedEventsData.events) {
+                if (String(e.id) === String(eventId)) e.my_rating = value;
+                if (orgId && e.organizer_id === orgId) {
+                    e.organizer_rating_avg = data.organizer_rating_avg;
+                    e.organizer_rating_count = data.organizer_rating_count;
+                }
+            }
+        }
+        renderCurrentView();
+    } catch (err) {
+        console.error('rate error:', err);
+        widget.classList.remove('pending');
+    }
+}
+
+window.rateOrganizer = rateOrganizer;
+
 function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString('tr-TR', {
@@ -248,6 +373,7 @@ function renderListItem(event, joinedIds) {
                     <span class="event-list-meta">
                         <i data-lucide="user" class="meta-icon"></i>
                         ${esc(event.organizer_name)}
+                        ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}
                     </span>
                 </div>
                 <div class="event-list-details">
@@ -279,6 +405,10 @@ function renderListItem(event, joinedIds) {
                 <div class="event-list-expanded-inner">
                     <p class="event-list-desc-title">About this event</p>
                     <p class="event-list-desc">${esc(event.description || 'No description available.')}</p>
+                    ${passed ? `
+                        <p class="event-list-desc-title" style="margin-top:16px;">Rate the organizer</p>
+                        ${starWidget(event, canUserRate(event, joinedIds).ok ? {} : { disabled: true, reason: canUserRate(event, joinedIds).reason })}
+                    ` : ''}
                 </div>
             </div>
         </div>
@@ -321,11 +451,17 @@ function renderGridCard(event, joinedIds) {
                 <div class="event-card-meta">
                     <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(event.date))}</span>
                     <span><i data-lucide="map-pin" class="meta-icon"></i> ${esc(event.location)}</span>
-                    <span><i data-lucide="user" class="meta-icon"></i> ${esc(event.organizer_name)}</span>
+                    <span><i data-lucide="user" class="meta-icon"></i> ${esc(event.organizer_name)} ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}</span>
                     <span class="${isFull ? 'full' : ''}"><i data-lucide="users" class="meta-icon"></i> ${event.participant_count}/${event.capacity}</span>
                 </div>
+                ${passed ? `
+                    <div class="event-card-rate">
+                        <p class="event-card-rate-title">Rate the organizer</p>
+                        ${starWidget(event, canUserRate(event, joinedIds).ok ? {} : { disabled: true, reason: canUserRate(event, joinedIds).reason })}
+                    </div>
+                ` : ''}
             </div>
-            <button class="${btnClass}" 
+            <button class="${btnClass}"
                     onclick="${btnOnclick}"
                     ${btnDisabled}>
                 ${btnText}
@@ -390,8 +526,10 @@ async function loadEvents() {
     loadEventsPromise = (async () => {
         try {
             const includePassed = showPassedCheckbox.checked;
+            const token = localStorage.getItem('token');
+            const eventsHeaders = token ? { Authorization: `Bearer ${token}` } : undefined;
             const [eventsRes, joinedIds] = await Promise.all([
-                fetch(`${EVENTS_API}?includePassed=${includePassed}`).then((r) => r.json()),
+                fetch(`${EVENTS_API}?includePassed=${includePassed}`, { headers: eventsHeaders }).then((r) => r.json()),
                 fetchJoinedIds(),
             ]);
 
