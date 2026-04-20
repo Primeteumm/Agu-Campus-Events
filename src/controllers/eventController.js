@@ -20,7 +20,7 @@ function buildInsertDatePayload(bodyDate) {
     };
 }
 
-async function mapEventsWithMeta(rawEvents) {
+async function mapEventsWithMeta(rawEvents, viewerId = null) {
     if (!rawEvents?.length) return [];
 
     const reader = dbReader();
@@ -38,15 +38,49 @@ async function mapEventsWithMeta(rawEvents) {
         countMap[p.event_id] = (countMap[p.event_id] || 0) + 1;
     }
 
+    // Organizer average ratings (aggregate across all their events)
+    const orgAvg = {};
+    if (orgIds.length) {
+        const { data: orgRatings } = await reader
+            .from('organizer_ratings')
+            .select('organizer_id, rating')
+            .in('organizer_id', orgIds);
+        const acc = {};
+        for (const r of orgRatings || []) {
+            const a = acc[r.organizer_id] || { sum: 0, n: 0 };
+            a.sum += r.rating;
+            a.n += 1;
+            acc[r.organizer_id] = a;
+        }
+        for (const [id, a] of Object.entries(acc)) {
+            orgAvg[id] = { avg: a.sum / a.n, count: a.n };
+        }
+    }
+
+    // Viewer's own rating per event (optional)
+    const myRatingMap = {};
+    if (viewerId && evIds.length) {
+        const { data: mine } = await reader
+            .from('organizer_ratings')
+            .select('event_id, rating')
+            .eq('rater_id', viewerId)
+            .in('event_id', evIds);
+        for (const r of mine || []) myRatingMap[r.event_id] = r.rating;
+    }
+
     return rawEvents.map((e) => {
         const o = orgMap[e.organizer_id];
         const oname = o ? `${o.first_name || ''} ${o.last_name || ''}`.trim() : 'Unknown';
         const dv = eventDateValue(e);
+        const agg = orgAvg[e.organizer_id];
         return {
             ...e,
             date: dv,
             organizer_name: oname || 'Unknown',
             participant_count: countMap[e.id] || 0,
+            organizer_rating_avg: agg ? agg.avg : null,
+            organizer_rating_count: agg ? agg.count : 0,
+            my_rating: viewerId ? (myRatingMap[e.id] || null) : null,
         };
     });
 }
@@ -126,6 +160,7 @@ const getAllEvents = async (req, res) => {
         const reader = dbReader();
         const includePassed = req.query.includePassed === 'true';
         const now = new Date().toISOString();
+        const viewerId = req.user?.id || null;
 
         let query = reader.from('events').select('*');
         if (!includePassed) {
@@ -143,11 +178,11 @@ const getAllEvents = async (req, res) => {
                 console.error('Get events error:', error.message, err2.message);
                 return res.status(500).json({ message: 'Server error' });
             }
-            const events = await mapEventsWithMeta(raw2 || []);
+            const events = await mapEventsWithMeta(raw2 || [], viewerId);
             return res.json({ events });
         }
 
-        const events = await mapEventsWithMeta(raw || []);
+        const events = await mapEventsWithMeta(raw || [], viewerId);
         res.json({ events });
     } catch (error) {
         console.error('Get events error:', error);
@@ -166,11 +201,86 @@ const getEventById = async (req, res) => {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        const mapped = (await mapEventsWithMeta([ev]))[0];
+        const mapped = (await mapEventsWithMeta([ev], req.user?.id || null))[0];
 
         res.json({ event: mapped });
     } catch (error) {
         console.error('Get event error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// PUT /api/events/:id/rate  { rating: 1..5 }
+const rateEventOrganizer = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const rating = Number(req.body?.rating);
+        const userId = req.user?.id;
+
+        if (!req.accessToken || !userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            return res.status(400).json({ message: 'Rating must be an integer between 1 and 5.' });
+        }
+
+        const reader = dbReader();
+        const { data: event, error: evErr } = await reader.from('events').select('*').eq('id', id).maybeSingle();
+        if (evErr || !event) return res.status(404).json({ message: 'Event not found' });
+
+        const evDate = eventDateValue(event);
+        if (!evDate || new Date(evDate) > new Date()) {
+            return res.status(400).json({ message: 'You can only rate events that have already ended.' });
+        }
+        if (event.organizer_id === userId) {
+            return res.status(400).json({ message: 'You cannot rate yourself.' });
+        }
+
+        const { data: joined } = await reader
+            .from('event_participants')
+            .select('event_id')
+            .eq('event_id', id)
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (!joined) {
+            return res.status(403).json({ message: 'Only attendees can rate this event.' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+        const { error: upErr } = await sb
+            .from('organizer_ratings')
+            .upsert(
+                {
+                    event_id: id,
+                    organizer_id: event.organizer_id,
+                    rater_id: userId,
+                    rating,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: 'event_id,rater_id' },
+            );
+
+        if (upErr) {
+            console.error('Rate upsert error:', upErr);
+            return res.status(400).json({ message: upErr.message || 'Could not save rating.' });
+        }
+
+        // Return refreshed organizer aggregate
+        const { data: allRatings } = await reader
+            .from('organizer_ratings')
+            .select('rating')
+            .eq('organizer_id', event.organizer_id);
+        const n = allRatings?.length || 0;
+        const avg = n ? allRatings.reduce((s, r) => s + r.rating, 0) / n : null;
+
+        res.json({
+            message: 'Rating saved.',
+            my_rating: rating,
+            organizer_rating_avg: avg,
+            organizer_rating_count: n,
+        });
+    } catch (error) {
+        console.error('Rate event error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -297,4 +407,4 @@ const leaveEvent = async (req, res) => {
     }
 };
 
-module.exports = { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents };
+module.exports = { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents, rateEventOrganizer };
