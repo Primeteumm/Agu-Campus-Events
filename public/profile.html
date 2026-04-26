@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGU Campus Events</title>
+    <title>Profile Settings — AGU Campus Events</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
@@ -12,13 +12,13 @@
 <body>
     <div class="app-shell">
         <nav class="navbar">
-            <div class="navbar-brand">AGU Campus Events</div>
+            <a href="/" class="navbar-brand navbar-brand-link">AGU Campus Events</a>
             <div class="navbar-actions">
-                <button class="btn-login" id="openAuthModal">
+                <button class="btn-login" id="openAuthModal" type="button">
                     <i data-lucide="log-in" class="icon"></i>
                     <span>Login</span>
                 </button>
-                <button class="theme-toggle" id="themeToggle" title="Tema Değiştir">
+                <button class="theme-toggle" id="themeToggle" title="Tema Değiştir" type="button">
                     <i data-lucide="moon" class="icon icon-moon"></i>
                     <i data-lucide="sun" class="icon icon-sun"></i>
                 </button>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to see your profile and roles.</p>
+                        <p class="profile-guest-hint">Sign in to manage your profile.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -43,10 +43,10 @@
                     </div>
                     <div class="profile-name-block" id="profileDisplayName"></div>
                     <div class="profile-roles" id="profileRoles"></div>
-                    <span class="profile-settings-link profile-settings-link--current">
+                    <a href="/" class="profile-settings-link">
                         <i data-lucide="home" class="icon"></i>
                         Home
-                    </span>
+                    </a>
                     <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
                         Create Event
@@ -55,77 +55,100 @@
                         <i data-lucide="shield" class="icon"></i>
                         Control Panel
                     </a>
-                    <a href="/profile.html" class="profile-settings-link">
+                    <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="settings" class="icon"></i>
                         Profile settings
-                    </a>
+                    </span>
                 </div>
             </aside>
 
             <div class="app-main">
-                <main class="main-content">
-                    <div class="events-toolbar">
-                        <h2 class="events-title" id="eventsTitle">Upcoming Events</h2>
-                        <div class="view-toggle">
-                            <button class="view-btn active" id="listViewBtn" title="List View">
-                                <i data-lucide="list" class="icon"></i>
-                            </button>
-                            <button class="view-btn" id="gridViewBtn" title="Grid View">
-                                <i data-lucide="layout-grid" class="icon"></i>
-                            </button>
-                        </div>
+                <main class="main-content profile-page">
+
+                    <div id="profileGate" class="profile-gate hidden">
+                        <p class="profile-gate-text">Please sign in to view your profile settings.</p>
+                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
                     </div>
 
-                    <div class="filter-bar" id="filterBar">
-                        <div class="filter-search-wrap">
-                            <i data-lucide="search" class="filter-search-icon"></i>
-                            <input
-                                type="text"
-                                id="filterSearch"
-                                class="filter-search"
-                                placeholder="Search events or organizer…"
-                                autocomplete="off"
-                            >
-                            <button class="filter-search-clear hidden" id="filterSearchClear" title="Clear">
-                                <i data-lucide="x" class="icon"></i>
-                            </button>
-                        </div>
+                    <div id="profileContent" class="hidden">
+                        <h2 class="profile-page-title">Profile Settings</h2>
 
-                        <select id="filterDate" class="filter-select">
-                            <option value="all">All Dates</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                        </select>
+                        <!-- Avatar card -->
+                        <section class="settings-card ps-avatar-card">
+                            <div class="ps-avatar" id="psAvatar">US</div>
+                            <div class="ps-avatar-info">
+                                <div class="ps-avatar-name" id="psDisplayName">User</div>
+                                <span class="ps-role-badge" id="psRoleBadge">Student</span>
+                            </div>
+                        </section>
 
-                        <select id="filterStatus" class="filter-select">
-                            <option value="all">All Events</option>
-                            <option value="joined">Joined by Me</option>
-                            <option value="available">Available</option>
-                            <option value="full">Full</option>
-                        </select>
+                        <!-- Form -->
+                        <section class="settings-card">
+                            <h3 class="settings-card-title">Personal Information</h3>
+                            <form id="profileForm" class="ps-form">
+                                <div class="ps-field">
+                                    <label for="editFirstName">First Name</label>
+                                    <input type="text" id="editFirstName" name="first_name" autocomplete="given-name"
+                                        required placeholder="First name">
+                                </div>
+                                <div class="ps-field">
+                                    <label for="editLastName">Last Name</label>
+                                    <input type="text" id="editLastName" name="last_name" autocomplete="family-name"
+                                        placeholder="Last name">
+                                </div>
 
-                        <label class="filter-checkbox-label" id="showPassedLabel" title="Include past events">
-                            <input type="checkbox" id="showPassed" class="filter-checkbox">
-                            <span class="filter-checkbox-box">
-                                <i data-lucide="check" class="checkbox-check-icon"></i>
-                            </span>
-                            <span class="filter-checkbox-text">Show Passed</span>
-                        </label>
+                                <div class="ps-field">
+                                    <label for="editEmail">Email Address <span class="ps-lock-icon"><i
+                                                data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
+                                    <input type="email" id="editEmail" disabled readonly tabindex="-1"
+                                        class="ps-locked">
+                                </div>
+                                <div class="ps-field">
+                                    <label for="editRole">Role <span class="ps-lock-icon"><i data-lucide="lock"
+                                                style="width:12px;height:12px;"></i></span></label>
+                                    <input type="text" id="editRole" disabled readonly tabindex="-1" class="ps-locked">
+                                </div>
 
-                        <button class="filter-reset hidden" id="filterReset" title="Reset filters">
-                            <i data-lucide="rotate-ccw" class="icon"></i>
-                            Reset
-                        </button>
+                                <div class="ps-divider"></div>
+
+                                <h3 class="settings-card-title">Change Password</h3>
+                                <div class="ps-field">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" autocomplete="current-password"
+                                        placeholder="Required to change password">
+                                </div>
+                                <div class="ps-field">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" autocomplete="new-password"
+                                        placeholder="Leave blank to keep current">
+                                </div>
+
+                                <p class="form-error" id="profileFormError"></p>
+                                <p class="form-success" id="profileFormSuccess"></p>
+                                <button type="submit" class="btn-submit ps-save-btn">
+                                    <i data-lucide="save" style="width:16px;height:16px;"></i>
+                                    Save Changes
+                                </button>
+                            </form>
+                        </section>
+
+                        <section class="settings-card hidden" id="clubPromoteSection">
+                            <h3 class="settings-card-title">Club Member Assignment</h3>
+                            <p class="settings-hint">As Club President or Vice President you can assign the Club Member
+                                role.</p>
+                            <div class="promote-row">
+                                <input type="email" id="lookupEmail" class="promote-input"
+                                    placeholder="User email address" autocomplete="email">
+                                <button type="button" class="btn-submit promote-btn" id="lookupBtn">Find user</button>
+                            </div>
+                            <p class="form-error" id="lookupError"></p>
+                            <div id="lookupResult" class="lookup-result hidden"></div>
+                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member
+                                role</button>
+                        </section>
                     </div>
 
-                    <div class="filter-results-info hidden" id="filterResultsInfo">
-                        <span id="filterResultsText"></span>
-                    </div>
-
-                    <div class="events-container list-view" id="eventsContainer">
-                        <p class="loading-text">Loading events...</p>
-                    </div>
+                    <div id="profileToast" class="ps-toast"></div>
                 </main>
             </div>
         </div>
@@ -134,10 +157,9 @@
     <div class="modal-overlay" id="authModal">
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
-                <button class="modal-close" id="closeLogin">&times;</button>
+                <button class="modal-close" id="closeLogin" type="button">&times;</button>
                 <h2 class="modal-title">Welcome Back</h2>
                 <p class="modal-subtitle">Login to your account</p>
-
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
@@ -151,18 +173,15 @@
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
                 </form>
-
                 <p class="switch-text">
                     Don't have an account yet?
                     <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
                 </p>
             </div>
-
             <div class="modal-card card-back">
-                <button class="modal-close" id="closeSignup">&times;</button>
+                <button class="modal-close" id="closeSignup" type="button">&times;</button>
                 <h2 class="modal-title">Create Account</h2>
                 <p class="modal-subtitle">Sign up to get started</p>
-
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -203,7 +222,7 @@
                                         <i data-lucide="mic" class="account-type-icon"></i>
                                     </span>
                                     <span class="account-type-title">Organizer</span>
-                                    <span class="account-type-hint">Event creator</span>
+                                    <span class="account-type-hint">Event creator account</span>
                                 </span>
                             </label>
                         </div>
@@ -212,7 +231,6 @@
                     <p class="form-success" id="signupSuccess"></p>
                     <button type="submit" class="btn-submit">Sign Up</button>
                 </form>
-
                 <p class="switch-text">
                     Already have an account?
                     <a href="#" id="goToLogin" class="switch-link">Login</a>
@@ -222,14 +240,12 @@
     </div>
 
     <script src="/js/user.js"></script>
-    <script src="/js/events.js"></script>
     <script src="/js/auth.js"></script>
+    <script src="/js/profile.js"></script>
     <script>
         const saved = localStorage.getItem('theme');
         if (saved === 'light') document.body.classList.add('light-theme');
-
         lucide.createIcons();
-
         document.getElementById('themeToggle').addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const isLight = document.body.classList.contains('light-theme');

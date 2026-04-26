@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Primeteumm/Agu-Campus-Events#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
