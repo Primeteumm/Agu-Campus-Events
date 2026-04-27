@@ -4,7 +4,9 @@
     {
       "name": "agu-events",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeArgs": [
+        "start"
+      ],
       "port": 3000
     }
   ]

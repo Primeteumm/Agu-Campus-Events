@@ -128,8 +128,8 @@ function starWidget(event, opts) {
     const hint = disabled
         ? `<span class="star-hint">${esc(reason)}</span>`
         : current
-          ? `<span class="star-hint">Your rating: ${current}/5</span>`
-          : `<span class="star-hint">Rate the organizer</span>`;
+            ? `<span class="star-hint">Your rating: ${current}/5</span>`
+            : `<span class="star-hint">Rate the organizer</span>`;
     return `<div class="${wrapperClass}" onclick="event.stopPropagation()">
         <div class="star-row">
             ${stars}
@@ -262,7 +262,7 @@ async function joinEvent(eventId, btn) {
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
-                               wrapper.querySelector('.event-card-meta span:last-child');
+                wrapper.querySelector('.event-card-meta span:last-child');
             if (capacityEl) {
                 const text = capacityEl.textContent.trim();
                 const match = text.match(/(\d+)\/(\d+)/);
@@ -323,7 +323,7 @@ async function leaveEvent(eventId, btn) {
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
-                               wrapper.querySelector('.event-card-meta span:last-child');
+                wrapper.querySelector('.event-card-meta span:last-child');
             if (capacityEl) {
                 const text = capacityEl.textContent.trim();
                 const match = text.match(/(\d+)\/(\d+)/);
@@ -357,7 +357,7 @@ function showTooltip(btn, message) {
     }, 2000);
 }
 
-window.toggleEventListAccordion = function(row, ev) {
+window.toggleEventListAccordion = function (row, ev) {
     if (ev.target.closest('button')) return;
     row.classList.toggle('expanded');
 };
