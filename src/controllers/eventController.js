@@ -40,20 +40,31 @@ async function mapEventsWithMeta(rawEvents, viewerId = null) {
 
     // Organizer average ratings (aggregate across all their events)
     const orgAvg = {};
+    // Per-event average ratings
+    const eventAvg = {};
     if (orgIds.length) {
         const { data: orgRatings } = await reader
             .from('organizer_ratings')
-            .select('organizer_id, rating')
+            .select('organizer_id, event_id, rating')
             .in('organizer_id', orgIds);
         const acc = {};
+        const evAcc = {};
         for (const r of orgRatings || []) {
             const a = acc[r.organizer_id] || { sum: 0, n: 0 };
             a.sum += r.rating;
             a.n += 1;
             acc[r.organizer_id] = a;
+
+            const ea = evAcc[r.event_id] || { sum: 0, n: 0 };
+            ea.sum += r.rating;
+            ea.n += 1;
+            evAcc[r.event_id] = ea;
         }
         for (const [id, a] of Object.entries(acc)) {
             orgAvg[id] = { avg: a.sum / a.n, count: a.n };
+        }
+        for (const [id, a] of Object.entries(evAcc)) {
+            eventAvg[id] = { avg: a.sum / a.n, count: a.n };
         }
     }
 
@@ -73,6 +84,7 @@ async function mapEventsWithMeta(rawEvents, viewerId = null) {
         const oname = o ? `${o.first_name || ''} ${o.last_name || ''}`.trim() : 'Unknown';
         const dv = eventDateValue(e);
         const agg = orgAvg[e.organizer_id];
+        const eAgg = eventAvg[e.id];
         return {
             ...e,
             date: dv,
@@ -80,6 +92,8 @@ async function mapEventsWithMeta(rawEvents, viewerId = null) {
             participant_count: countMap[e.id] || 0,
             organizer_rating_avg: agg ? agg.avg : null,
             organizer_rating_count: agg ? agg.count : 0,
+            event_rating_avg: eAgg ? eAgg.avg : null,
+            event_rating_count: eAgg ? eAgg.count : 0,
             my_rating: viewerId ? (myRatingMap[e.id] || null) : null,
         };
     });
@@ -273,11 +287,21 @@ const rateEventOrganizer = async (req, res) => {
         const n = allRatings?.length || 0;
         const avg = n ? allRatings.reduce((s, r) => s + r.rating, 0) / n : null;
 
+        // Per-event aggregate
+        const { data: evRatings } = await reader
+            .from('organizer_ratings')
+            .select('rating')
+            .eq('event_id', id);
+        const en = evRatings?.length || 0;
+        const eAvg = en ? evRatings.reduce((s, r) => s + r.rating, 0) / en : null;
+
         res.json({
             message: 'Rating saved.',
             my_rating: rating,
             organizer_rating_avg: avg,
             organizer_rating_count: n,
+            event_rating_avg: eAvg,
+            event_rating_count: en,
         });
     } catch (error) {
         console.error('Rate event error:', error);

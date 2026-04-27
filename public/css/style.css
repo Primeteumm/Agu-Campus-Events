@@ -2156,6 +2156,7 @@ body.light-theme .event-list-header {
     margin-bottom: 6px;
     transition: background 0.2s, transform 0.2s;
     cursor: pointer;
+    position: relative;
 }
 
 .event-list-main {
@@ -3405,6 +3406,20 @@ body.light-theme .organizer-rating.rating-red {
     background: rgba(220, 38, 38, 0.14);
     border-color: rgba(220, 38, 38, 0.4);
     color: #b91c1c;
+}
+
+/* Event-card corner pill (top-right of cards/rows) */
+.organizer-rating.event-rating-corner {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    margin-left: 0;
+    z-index: 3;
+}
+
+.event-list-row .organizer-rating.event-rating-corner {
+    top: 10px;
+    right: 12px;
 }
 
 /* 5-star interactive widget */
