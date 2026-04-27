@@ -1,16 +1,42 @@
+/**
+ * Events API — backed by Supabase tables `events` and `event_participants` (+ `profiles` for organizer names).
+ */
 const express = require('express');
 const router = express.Router();
-const { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents } = require('../controllers/eventController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const {
+    createEvent,
+    getAllEvents,
+    getEventById,
+    joinEvent,
+    leaveEvent,
+    getMyJoinedEvents,
+    rateEventOrganizer,
+    getMyOrganizedEvents,
+    updateEvent,
+    deleteEvent,
+} = require('../controllers/eventController');
+const { verifyToken, attachUserIfPresent } = require('../middleware/authMiddleware');
 
-// GET /api/events — Get all events (public, no auth needed)
-router.get('/', getAllEvents);
+// GET /api/events — Get all events (public; attaches viewer if logged in so my_rating is populated)
+router.get('/', attachUserIfPresent, getAllEvents);
 
 // GET /api/events/my-joins — Get joined event IDs (auth required) — must be before /:id
 router.get('/my-joins', verifyToken, getMyJoinedEvents);
 
-// GET /api/events/:id — Get event details (public, no auth needed)
-router.get('/:id', getEventById);
+// GET /api/events/mine — Events organized by current user — must be before /:id
+router.get('/mine', verifyToken, getMyOrganizedEvents);
+
+// GET /api/events/:id — Get event details (public)
+router.get('/:id', attachUserIfPresent, getEventById);
+
+// PUT /api/events/:id/rate — Rate organizer for a past event (auth + attendance required)
+router.put('/:id/rate', verifyToken, rateEventOrganizer);
+
+// PUT /api/events/:id — Update event (owner only, future events only)
+router.put('/:id', verifyToken, updateEvent);
+
+// DELETE /api/events/:id — Delete event (owner only, future events only)
+router.delete('/:id', verifyToken, deleteEvent);
 
 // POST /api/events — Create event (auth required)
 router.post('/', verifyToken, createEvent);

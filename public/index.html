@@ -51,6 +51,10 @@
                         <i data-lucide="calendar-plus" class="icon"></i>
                         Create Event
                     </a>
+                    <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
+                        <i data-lucide="briefcase" class="icon"></i>
+                        Organizer Profile
+                    </a>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
                         Control Panel
@@ -65,63 +69,46 @@
             <div class="app-main">
                 <main class="main-content">
                     <div class="events-toolbar">
-                        <h2 class="events-title" id="eventsTitle">Upcoming Events</h2>
-                        <div class="view-toggle">
-                            <button class="view-btn active" id="listViewBtn" title="List View">
-                                <i data-lucide="list" class="icon"></i>
-                            </button>
-                            <button class="view-btn" id="gridViewBtn" title="Grid View">
-                                <i data-lucide="layout-grid" class="icon"></i>
-                            </button>
+                        <header class="events-header">
+                            <h1 class="events-header-title">AGU EVENTS</h1>
+                            <span class="events-header-accent"></span>
+                        </header>
+                        <div class="events-toolbar-controls">
+                            <label class="passed-checkbox" id="showPassedLabel">
+                                <input type="checkbox" id="showPassedCheckbox">
+                                <span class="passed-checkbox-mark"></span>
+                                <span class="passed-checkbox-text">Show Passed Events</span>
+                            </label>
+                            <div class="view-toggle">
+                                <button class="view-btn active" id="listViewBtn" title="List View">
+                                    <i data-lucide="list" class="icon"></i>
+                                </button>
+                                <button class="view-btn" id="gridViewBtn" title="Grid View">
+                                    <i data-lucide="layout-grid" class="icon"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="filter-bar" id="filterBar">
-                        <div class="filter-search-wrap">
-                            <i data-lucide="search" class="filter-search-icon"></i>
-                            <input
-                                type="text"
-                                id="filterSearch"
-                                class="filter-search"
-                                placeholder="Search events or organizer…"
-                                autocomplete="off"
-                            >
-                            <button class="filter-search-clear hidden" id="filterSearchClear" title="Clear">
-                                <i data-lucide="x" class="icon"></i>
-                            </button>
+                    <section class="events-filter-panel" aria-label="Event Filters">
+                        <div class="events-filter-grid">
+                            <label class="events-filter-field">
+                                <span class="events-filter-label">
+                                    <i data-lucide="search" class="events-filter-icon"></i>
+                                    Event Title
+                                </span>
+                                <input type="search" id="eventTitleFilter" placeholder="Search by title...">
+                            </label>
+                            <label class="events-filter-field">
+                                <span class="events-filter-label">
+                                    <i data-lucide="map-pin" class="events-filter-icon"></i>
+                                    Location (Optional)
+                                </span>
+                                <select id="eventLocationFilter">
+                                    <option value="">All locations</option>
+                                </select>
+                            </label>
                         </div>
-
-                        <select id="filterDate" class="filter-select">
-                            <option value="all">All Dates</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                        </select>
-
-                        <select id="filterStatus" class="filter-select">
-                            <option value="all">All Events</option>
-                            <option value="joined">Joined by Me</option>
-                            <option value="available">Available</option>
-                            <option value="full">Full</option>
-                        </select>
-
-                        <label class="filter-checkbox-label" id="showPassedLabel" title="Include past events">
-                            <input type="checkbox" id="showPassed" class="filter-checkbox">
-                            <span class="filter-checkbox-box">
-                                <i data-lucide="check" class="checkbox-check-icon"></i>
-                            </span>
-                            <span class="filter-checkbox-text">Show Passed</span>
-                        </label>
-
-                        <button class="filter-reset hidden" id="filterReset" title="Reset filters">
-                            <i data-lucide="rotate-ccw" class="icon"></i>
-                            Reset
-                        </button>
-                    </div>
-
-                    <div class="filter-results-info hidden" id="filterResultsInfo">
-                        <span id="filterResultsText"></span>
-                    </div>
+                    </section>
 
                     <div class="events-container list-view" id="eventsContainer">
                         <p class="loading-text">Loading events...</p>

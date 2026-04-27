@@ -47,9 +47,9 @@
     /* ── Populate form from user object ── */
     function populate(user) {
         const first = val(user, 'firstName', 'first_name');
-        const last = val(user, 'lastName', 'last_name');
-        const name = `${first} ${last}`.trim() || 'User';
-        const role = val(user, 'role') || (user.roleLabels || user.roles || ['Student'])[0] || 'Student';
+        const last  = val(user, 'lastName', 'last_name');
+        const name  = `${first} ${last}`.trim() || 'User';
+        const role  = val(user, 'role') || (user.roleLabels || user.roles || ['Student'])[0] || 'Student';
 
         const avatarEl = document.getElementById('psAvatar');
         if (avatarEl) avatarEl.textContent = initials(first, last);
@@ -78,9 +78,9 @@
 
     /* ── Auth check + load ── */
     async function load() {
-        const gate = document.getElementById('profileGate');
+        const gate    = document.getElementById('profileGate');
         const content = document.getElementById('profileContent');
-        const token = localStorage.getItem('token');
+        const token   = localStorage.getItem('token');
 
         if (!token) {
             gate.classList.remove('hidden');
@@ -119,25 +119,51 @@
     }
 
     /* ── Save changes ── */
+    let _profileSaving = false;
     document.getElementById('profileForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (_profileSaving) return;
+        _profileSaving = true;
+
         const errEl = document.getElementById('profileFormError');
-        const okEl = document.getElementById('profileFormSuccess');
+        const okEl  = document.getElementById('profileFormSuccess');
+        const saveBtn = document.querySelector('#profileForm [type="submit"]');
         errEl.textContent = '';
-        okEl.textContent = '';
+        okEl.textContent  = '';
+
+        saveBtn?.classList.add('btn-loading');
+        if (saveBtn) saveBtn.disabled = true;
 
         const firstName = document.getElementById('editFirstName').value.trim();
-        const lastName = document.getElementById('editLastName').value.trim();
-        const curPwd = document.getElementById('currentPassword').value;
-        const newPwd = document.getElementById('newPassword').value;
+        const lastName  = document.getElementById('editLastName').value.trim();
+        const curPwd    = document.getElementById('currentPassword').value;
+        const newPwd    = document.getElementById('newPassword').value;
 
-        if (!firstName) { errEl.textContent = 'First name is required.'; return; }
+        if (!firstName) {
+            errEl.textContent = 'First name is required.';
+            _profileSaving = false;
+            saveBtn?.classList.remove('btn-loading');
+            if (saveBtn) saveBtn.disabled = false;
+            return;
+        }
 
         const body = { first_name: firstName, last_name: lastName };
 
         if (newPwd) {
-            if (!curPwd) { errEl.textContent = 'Current password is required to change your password.'; return; }
-            if (newPwd.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; return; }
+            if (!curPwd) {
+                errEl.textContent = 'Current password is required to change your password.';
+                _profileSaving = false;
+                saveBtn?.classList.remove('btn-loading');
+                if (saveBtn) saveBtn.disabled = false;
+                return;
+            }
+            if (newPwd.length < 6) {
+                errEl.textContent = 'New password must be at least 6 characters.';
+                _profileSaving = false;
+                saveBtn?.classList.remove('btn-loading');
+                if (saveBtn) saveBtn.disabled = false;
+                return;
+            }
             body.password = newPwd;
             body.currentPassword = curPwd;
         }
@@ -171,21 +197,37 @@
         } catch {
             errEl.textContent = 'Connection error. Please try again.';
             toast('Connection error', true);
+        } finally {
+            _profileSaving = false;
+            saveBtn?.classList.remove('btn-loading');
+            if (saveBtn) saveBtn.disabled = false;
         }
     });
 
     /* ── Club member lookup ── */
+    let _lookupLoading = false;
     document.getElementById('lookupBtn')?.addEventListener('click', async () => {
-        const errEl = document.getElementById('lookupError');
+        if (_lookupLoading) return;
+        _lookupLoading = true;
+
+        const errEl    = document.getElementById('lookupError');
         const resultEl = document.getElementById('lookupResult');
         const assignBtn = document.getElementById('assignClubMemberBtn');
+        const lookupBtn = document.getElementById('lookupBtn');
         errEl.textContent = '';
         resultEl.classList.add('hidden');
         assignBtn.classList.add('hidden');
         lookedUpUserId = null;
 
         const email = document.getElementById('lookupEmail').value.trim();
-        if (!email) { errEl.textContent = 'Enter an email address.'; return; }
+        if (!email) {
+            errEl.textContent = 'Enter an email address.';
+            _lookupLoading = false;
+            return;
+        }
+
+        lookupBtn?.classList.add('btn-loading');
+        if (lookupBtn) lookupBtn.disabled = true;
 
         try {
             const res = await fetch(`${API}/users/lookup?q=${encodeURIComponent(email)}`, { headers: headers() });
@@ -200,20 +242,41 @@
                 <div class="lookup-roles">Role: ${(data.user.roleLabels || []).join(', ') || '—'}</div>
             `;
             assignBtn.classList.remove('hidden');
-        } catch { errEl.textContent = 'Connection error.'; }
+        } catch { errEl.textContent = 'Connection error.'; } finally {
+            _lookupLoading = false;
+            lookupBtn?.classList.remove('btn-loading');
+            if (lookupBtn) lookupBtn.disabled = false;
+        }
     });
 
+    let _assignLoading = false;
     document.getElementById('assignClubMemberBtn')?.addEventListener('click', async () => {
+        if (_assignLoading) return;
+        _assignLoading = true;
+
         const errEl = document.getElementById('lookupError');
+        const assignBtn = document.getElementById('assignClubMemberBtn');
         errEl.textContent = '';
-        if (!lookedUpUserId) { errEl.textContent = 'Find a user first.'; return; }
+        if (!lookedUpUserId) {
+            errEl.textContent = 'Find a user first.';
+            _assignLoading = false;
+            return;
+        }
+
+        assignBtn?.classList.add('btn-loading');
+        if (assignBtn) assignBtn.disabled = true;
+
         try {
             const res = await fetch(`${API}/users/${lookedUpUserId}/roles/club-member`, { method: 'POST', headers: headers() });
             const data = await res.json();
             if (!res.ok) { errEl.textContent = data.message || 'Could not assign role.'; return; }
             toast(data.message || 'Role assigned.', false);
             if (typeof dispatchUserUpdated === 'function') dispatchUserUpdated();
-        } catch { errEl.textContent = 'Connection error.'; }
+        } catch { errEl.textContent = 'Connection error.'; } finally {
+            _assignLoading = false;
+            assignBtn?.classList.remove('btn-loading');
+            if (assignBtn) assignBtn.disabled = false;
+        }
     });
 
     /* ── Boot ── */

@@ -30,7 +30,7 @@
             user = null;
         }
         const role = user?.role || (user?.roles && user.roles[0]) || '';
-        const canCreate = role === 'Club President' || role === 'Club Vice President';
+        const canCreate = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
         if (!canCreate) {
             gateRole?.classList.remove('hidden');
             return;
@@ -77,7 +77,8 @@
 
         const title = document.getElementById('eventTitle').value.trim();
         const description = document.getElementById('eventDescription').value.trim();
-        const date = document.getElementById('eventDate').value;
+        const dateRaw = document.getElementById('eventDate').value;
+        const date = dateRaw ? new Date(dateRaw).toISOString() : '';
         const locationVal = document.getElementById('eventLocation').value.trim();
         const capacity = document.getElementById('eventCapacity').value;
 

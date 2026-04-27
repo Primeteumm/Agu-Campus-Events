@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
-
 <body>
     <div class="app-shell">
         <nav class="navbar">
@@ -29,8 +27,7 @@
             <aside class="profile-sidebar" id="profileSidebar" aria-label="Profile">
                 <div class="profile-card profile-card--guest" id="profileCardGuest">
                     <div class="profile-avatar-wrap">
-                        <img class="profile-avatar"
-                            src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
+                        <img class="profile-avatar" src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
@@ -50,6 +47,10 @@
                     <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
                         Create Event
+                    </a>
+                    <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
+                        <i data-lucide="briefcase" class="icon"></i>
+                        Organizer Profile
                     </a>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
@@ -71,7 +72,10 @@
                     </div>
 
                     <div id="profileContent" class="hidden">
-                        <h2 class="profile-page-title">Profile Settings</h2>
+                        <header class="events-header" style="margin-bottom: 24px;">
+                            <h1 class="events-header-title">PROFILE SETTINGS</h1>
+                            <span class="events-header-accent"></span>
+                        </header>
 
                         <!-- Avatar card -->
                         <section class="settings-card ps-avatar-card">
@@ -88,24 +92,19 @@
                             <form id="profileForm" class="ps-form">
                                 <div class="ps-field">
                                     <label for="editFirstName">First Name</label>
-                                    <input type="text" id="editFirstName" name="first_name" autocomplete="given-name"
-                                        required placeholder="First name">
+                                    <input type="text" id="editFirstName" name="first_name" autocomplete="given-name" required placeholder="First name">
                                 </div>
                                 <div class="ps-field">
                                     <label for="editLastName">Last Name</label>
-                                    <input type="text" id="editLastName" name="last_name" autocomplete="family-name"
-                                        placeholder="Last name">
+                                    <input type="text" id="editLastName" name="last_name" autocomplete="family-name" placeholder="Last name">
                                 </div>
 
                                 <div class="ps-field">
-                                    <label for="editEmail">Email Address <span class="ps-lock-icon"><i
-                                                data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
-                                    <input type="email" id="editEmail" disabled readonly tabindex="-1"
-                                        class="ps-locked">
+                                    <label for="editEmail">Email Address <span class="ps-lock-icon"><i data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
+                                    <input type="email" id="editEmail" disabled readonly tabindex="-1" class="ps-locked">
                                 </div>
                                 <div class="ps-field">
-                                    <label for="editRole">Role <span class="ps-lock-icon"><i data-lucide="lock"
-                                                style="width:12px;height:12px;"></i></span></label>
+                                    <label for="editRole">Role <span class="ps-lock-icon"><i data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
                                     <input type="text" id="editRole" disabled readonly tabindex="-1" class="ps-locked">
                                 </div>
 
@@ -114,13 +113,11 @@
                                 <h3 class="settings-card-title">Change Password</h3>
                                 <div class="ps-field">
                                     <label for="currentPassword">Current Password</label>
-                                    <input type="password" id="currentPassword" autocomplete="current-password"
-                                        placeholder="Required to change password">
+                                    <input type="password" id="currentPassword" autocomplete="current-password" placeholder="Required to change password">
                                 </div>
                                 <div class="ps-field">
                                     <label for="newPassword">New Password</label>
-                                    <input type="password" id="newPassword" autocomplete="new-password"
-                                        placeholder="Leave blank to keep current">
+                                    <input type="password" id="newPassword" autocomplete="new-password" placeholder="Leave blank to keep current">
                                 </div>
 
                                 <p class="form-error" id="profileFormError"></p>
@@ -134,17 +131,14 @@
 
                         <section class="settings-card hidden" id="clubPromoteSection">
                             <h3 class="settings-card-title">Club Member Assignment</h3>
-                            <p class="settings-hint">As Club President or Vice President you can assign the Club Member
-                                role.</p>
+                            <p class="settings-hint">As Club President or Vice President you can assign the Club Member role.</p>
                             <div class="promote-row">
-                                <input type="email" id="lookupEmail" class="promote-input"
-                                    placeholder="User email address" autocomplete="email">
+                                <input type="email" id="lookupEmail" class="promote-input" placeholder="User email address" autocomplete="email">
                                 <button type="button" class="btn-submit promote-btn" id="lookupBtn">Find user</button>
                             </div>
                             <p class="form-error" id="lookupError"></p>
                             <div id="lookupResult" class="lookup-result hidden"></div>
-                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member
-                                role</button>
+                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member role</button>
                         </section>
                     </div>
 
@@ -167,8 +161,7 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required
-                            autocomplete="current-password">
+                        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
@@ -185,8 +178,7 @@
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required
-                            autocomplete="given-name">
+                        <input type="text" id="signupFirstName" placeholder="First name" required autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -198,15 +190,13 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required
-                            autocomplete="new-password">
+                        <input type="password" id="signupPassword" placeholder="Password" required autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
                         <legend class="account-type-legend">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
-                                <input type="radio" name="accountType" value="student" class="account-type-input"
-                                    checked>
+                                <input type="radio" name="accountType" value="student" class="account-type-input" checked>
                                 <span class="account-type-card-inner">
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="graduation-cap" class="account-type-icon"></i>
@@ -253,5 +243,4 @@
         });
     </script>
 </body>
-
 </html>
