@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Event — AGU Campus Events</title>
+    <title>Organizer Profile — AGU Campus Events</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
-
 <body>
     <div class="app-shell">
         <nav class="navbar">
@@ -29,12 +27,11 @@
             <aside class="profile-sidebar" id="profileSidebar" aria-label="Profile">
                 <div class="profile-card profile-card--guest" id="profileCardGuest">
                     <div class="profile-avatar-wrap">
-                        <img class="profile-avatar"
-                            src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
+                        <img class="profile-avatar" src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to create events.</p>
+                        <p class="profile-guest-hint">Sign in to manage your events.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -47,14 +44,14 @@
                         <i data-lucide="home" class="icon"></i>
                         Home
                     </a>
-                    <span class="profile-settings-link profile-settings-link--current">
+                    <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
                         Create Event
-                    </span>
-                    <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
+                    </a>
+                    <span class="profile-settings-link profile-settings-link--current" id="sidebarOrganizerProfile">
                         <i data-lucide="briefcase" class="icon"></i>
                         Organizer Profile
-                    </a>
+                    </span>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
                         Control Panel
@@ -69,67 +66,68 @@
             <div class="app-main">
                 <main class="main-content profile-page">
 
-                    <div id="createEventGateAuth" class="profile-gate hidden">
-                        <p class="profile-gate-text">Please sign in to create an event.</p>
+                    <div id="organizerGateAuth" class="profile-gate hidden">
+                        <p class="profile-gate-text">Please sign in to view your organizer profile.</p>
                         <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
                     </div>
 
-                    <div id="createEventGateRole" class="profile-gate hidden">
-                        <p class="profile-gate-text">Only Organizers, Club Presidents, and Vice Presidents can create
-                            events.</p>
+                    <div id="organizerGateRole" class="profile-gate hidden">
+                        <p class="profile-gate-text">Only Organizers, Club Presidents, and Vice Presidents have an organizer profile.</p>
                         <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
                     </div>
 
-                    <div id="createEventContent" class="hidden">
+                    <div id="organizerContent" class="hidden">
                         <header class="events-header">
-                            <h1 class="events-header-title">CREATE EVENT</h1>
+                            <h1 class="events-header-title">MY EVENTS</h1>
                             <span class="events-header-accent"></span>
                         </header>
-                        <p class="settings-hint" style="margin: 24px 0 20px;">Add a new campus event. Title, date, and
-                            location are required.</p>
-
-                        <section class="settings-card">
-                            <form id="createEventForm" class="ps-form">
-                                <div class="ps-field">
-                                    <label for="eventTitle">Title</label>
-                                    <input type="text" id="eventTitle" name="title" required autocomplete="off"
-                                        placeholder="Event title">
-                                </div>
-                                <div class="ps-field">
-                                    <label for="eventDescription">Description <span
-                                            class="ps-optional">(optional)</span></label>
-                                    <textarea id="eventDescription" name="description" rows="4"
-                                        placeholder="What is this event about?"></textarea>
-                                </div>
-                                <div class="ps-field">
-                                    <label for="eventDate">Date &amp; time</label>
-                                    <input type="datetime-local" id="eventDate" name="date" required>
-                                </div>
-                                <div class="ps-field">
-                                    <label for="eventLocation">Location</label>
-                                    <input type="text" id="eventLocation" name="location" required
-                                        placeholder="Building, room, or venue">
-                                </div>
-                                <div class="ps-field">
-                                    <label for="eventCapacity">Capacity <span class="ps-optional">(default
-                                            50)</span></label>
-                                    <input type="number" id="eventCapacity" name="capacity" min="1" max="10000"
-                                        placeholder="50">
-                                </div>
-                                <p class="form-error" id="createEventError"></p>
-                                <p class="form-success" id="createEventSuccess"></p>
-                                <button type="submit" class="btn-submit ps-save-btn">
-                                    <i data-lucide="calendar-plus" style="width:16px;height:16px;"></i>
-                                    Create Event
-                                </button>
-                            </form>
-                        </section>
+                        <div id="organizerEventsContainer" class="organizer-events">
+                            <p class="loading-text">Loading your events...</p>
+                        </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
 
+    <!-- Edit Event Modal -->
+    <div class="modal-overlay" id="editEventModal">
+        <div class="modal-card-container">
+            <div class="modal-card card-front" style="max-width: 480px;">
+                <button class="modal-close" id="closeEditEvent" type="button">&times;</button>
+                <h2 class="modal-title">Edit Event</h2>
+                <p class="modal-subtitle">Update your event details</p>
+                <form id="editEventForm" class="ps-form">
+                    <input type="hidden" id="editEventId">
+                    <div class="ps-field">
+                        <label for="editEventTitle">Title</label>
+                        <input type="text" id="editEventTitle" required autocomplete="off">
+                    </div>
+                    <div class="ps-field">
+                        <label for="editEventDescription">Description</label>
+                        <textarea id="editEventDescription" rows="3"></textarea>
+                    </div>
+                    <div class="ps-field">
+                        <label for="editEventDate">Date &amp; time</label>
+                        <input type="datetime-local" id="editEventDate" required>
+                    </div>
+                    <div class="ps-field">
+                        <label for="editEventLocation">Location</label>
+                        <input type="text" id="editEventLocation" required>
+                    </div>
+                    <div class="ps-field">
+                        <label for="editEventCapacity">Capacity</label>
+                        <input type="number" id="editEventCapacity" min="1" max="10000">
+                    </div>
+                    <p class="form-error" id="editEventError"></p>
+                    <p class="form-success" id="editEventSuccess"></p>
+                    <button type="submit" class="btn-submit ps-save-btn">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
@@ -143,8 +141,7 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required
-                            autocomplete="current-password">
+                        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
@@ -161,8 +158,7 @@
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required
-                            autocomplete="given-name">
+                        <input type="text" id="signupFirstName" placeholder="First name" required autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -174,18 +170,15 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required
-                            autocomplete="new-password">
+                        <input type="password" id="signupPassword" placeholder="Password" required autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
                         <legend class="account-type-legend">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
-                                <input type="radio" name="accountType" value="student" class="account-type-input"
-                                    checked>
+                                <input type="radio" name="accountType" value="student" class="account-type-input" checked>
                                 <span class="account-type-card-inner">
-                                    <span class="account-type-icon-wrap"><i data-lucide="graduation-cap"
-                                            class="account-type-icon"></i></span>
+                                    <span class="account-type-icon-wrap"><i data-lucide="graduation-cap" class="account-type-icon"></i></span>
                                     <span class="account-type-title">Student</span>
                                     <span class="account-type-hint">Events &amp; clubs</span>
                                 </span>
@@ -193,8 +186,7 @@
                             <label class="account-type-card">
                                 <input type="radio" name="accountType" value="organizer" class="account-type-input">
                                 <span class="account-type-card-inner">
-                                    <span class="account-type-icon-wrap"><i data-lucide="mic"
-                                            class="account-type-icon"></i></span>
+                                    <span class="account-type-icon-wrap"><i data-lucide="mic" class="account-type-icon"></i></span>
                                     <span class="account-type-title">Organizer</span>
                                     <span class="account-type-hint">Event creator account</span>
                                 </span>
@@ -215,7 +207,7 @@
 
     <script src="/js/user.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/create-event.js"></script>
+    <script src="/js/organizer.js"></script>
     <script>
         const saved = localStorage.getItem('theme');
         if (saved === 'light') document.body.classList.add('light-theme');
@@ -227,5 +219,4 @@
         });
     </script>
 </body>
-
 </html>

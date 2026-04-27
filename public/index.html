@@ -51,6 +51,10 @@
                         <i data-lucide="calendar-plus" class="icon"></i>
                         Create Event
                     </a>
+                    <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
+                        <i data-lucide="briefcase" class="icon"></i>
+                        Organizer Profile
+                    </a>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
                         Control Panel
@@ -65,7 +69,10 @@
             <div class="app-main">
                 <main class="main-content">
                     <div class="events-toolbar">
-                        <h2 class="events-title">Upcoming Events</h2>
+                        <header class="events-header">
+                            <h1 class="events-header-title">AGU EVENTS</h1>
+                            <span class="events-header-accent"></span>
+                        </header>
                         <div class="events-toolbar-controls">
                             <label class="passed-checkbox" id="showPassedLabel">
                                 <input type="checkbox" id="showPassedCheckbox">
@@ -82,6 +89,26 @@
                             </div>
                         </div>
                     </div>
+                    <section class="events-filter-panel" aria-label="Event Filters">
+                        <div class="events-filter-grid">
+                            <label class="events-filter-field">
+                                <span class="events-filter-label">
+                                    <i data-lucide="search" class="events-filter-icon"></i>
+                                    Event Title
+                                </span>
+                                <input type="search" id="eventTitleFilter" placeholder="Search by title...">
+                            </label>
+                            <label class="events-filter-field">
+                                <span class="events-filter-label">
+                                    <i data-lucide="map-pin" class="events-filter-icon"></i>
+                                    Location (Optional)
+                                </span>
+                                <select id="eventLocationFilter">
+                                    <option value="">All locations</option>
+                                </select>
+                            </label>
+                        </div>
+                    </section>
 
                     <div class="events-container list-view" id="eventsContainer">
                         <p class="loading-text">Loading events...</p>

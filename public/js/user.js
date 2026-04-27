@@ -141,12 +141,16 @@ function showGuestSidebar() {
     if (adminLink) adminLink.classList.add('hidden');
     const createLink = document.getElementById('sidebarCreateEvent');
     if (createLink) createLink.classList.add('hidden');
+    const organizerLink = document.getElementById('sidebarOrganizerProfile');
+    if (organizerLink) organizerLink.classList.add('hidden');
 }
 
 function updateAdminLinkVisibility(user) {
+    const role = user?.role || (user?.roles && user.roles[0]) || '';
+    const isOrganizerLike = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
+
     const link = document.getElementById('sidebarAdminLink');
     if (link) {
-        const role = user?.role || (user?.roles && user.roles[0]) || '';
         const canSeeAdmin = role === 'Teacher' || role === 'Club President';
         if (canSeeAdmin) link.classList.remove('hidden');
         else link.classList.add('hidden');
@@ -154,10 +158,14 @@ function updateAdminLinkVisibility(user) {
 
     const createBtn = document.getElementById('sidebarCreateEvent');
     if (createBtn) {
-        const role = user?.role || (user?.roles && user.roles[0]) || '';
-        const canCreate = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
-        if (canCreate) createBtn.classList.remove('hidden');
+        if (isOrganizerLike) createBtn.classList.remove('hidden');
         else createBtn.classList.add('hidden');
+    }
+
+    const organizerLink = document.getElementById('sidebarOrganizerProfile');
+    if (organizerLink) {
+        if (isOrganizerLike) organizerLink.classList.remove('hidden');
+        else organizerLink.classList.add('hidden');
     }
 }
 

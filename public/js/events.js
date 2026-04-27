@@ -4,6 +4,9 @@ const eventsContainer = document.getElementById('eventsContainer');
 const listViewBtn = document.getElementById('listViewBtn');
 const gridViewBtn = document.getElementById('gridViewBtn');
 const showPassedCheckbox = document.getElementById('showPassedCheckbox');
+const eventTitleFilter = document.getElementById('eventTitleFilter');
+const eventDateFilter = document.getElementById('eventDateFilter');
+const eventLocationFilter = document.getElementById('eventLocationFilter');
 
 function esc(str) {
     const d = document.createElement('div');
@@ -18,6 +21,9 @@ function isPassed(dateStr) {
 
 let cachedEventsData = null;
 let cachedJoinedIdsData = null;
+let loadEventsPromise = null;
+let activeRequestId = 0;
+let filterDebounceTimer = null;
 
 // Restore checkbox state from localStorage
 showPassedCheckbox.checked = localStorage.getItem('showPassedEvents') === 'true';
@@ -26,6 +32,25 @@ showPassedCheckbox.addEventListener('change', () => {
     localStorage.setItem('showPassedEvents', showPassedCheckbox.checked);
     loadEvents();
 });
+
+function scheduleLoadEvents() {
+    if (filterDebounceTimer) clearTimeout(filterDebounceTimer);
+    filterDebounceTimer = setTimeout(() => {
+        loadEvents();
+    }, 250);
+}
+
+if (eventTitleFilter) {
+    eventTitleFilter.addEventListener('input', () => {
+        if (typeof renderCurrentView === 'function') renderCurrentView();
+    });
+}
+
+if (eventLocationFilter) {
+    eventLocationFilter.addEventListener('change', () => {
+        if (typeof renderCurrentView === 'function') renderCurrentView();
+    });
+}
 
 listViewBtn.addEventListener('click', () => {
     if (localStorage.getItem('eventsView') === 'list') return;
@@ -103,8 +128,8 @@ function starWidget(event, opts) {
     const hint = disabled
         ? `<span class="star-hint">${esc(reason)}</span>`
         : current
-          ? `<span class="star-hint">Your rating: ${current}/5</span>`
-          : `<span class="star-hint">Rate the organizer</span>`;
+            ? `<span class="star-hint">Your rating: ${current}/5</span>`
+            : `<span class="star-hint">Rate the organizer</span>`;
     return `<div class="${wrapperClass}" onclick="event.stopPropagation()">
         <div class="star-row">
             ${stars}
@@ -237,7 +262,7 @@ async function joinEvent(eventId, btn) {
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
-                               wrapper.querySelector('.event-card-meta span:last-child');
+                wrapper.querySelector('.event-card-meta span:last-child');
             if (capacityEl) {
                 const text = capacityEl.textContent.trim();
                 const match = text.match(/(\d+)\/(\d+)/);
@@ -298,7 +323,7 @@ async function leaveEvent(eventId, btn) {
         const wrapper = btn.closest('.event-list-row') || btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capacityEl = wrapper.querySelector('.event-list-capacity') ||
-                               wrapper.querySelector('.event-card-meta span:last-child');
+                wrapper.querySelector('.event-card-meta span:last-child');
             if (capacityEl) {
                 const text = capacityEl.textContent.trim();
                 const match = text.match(/(\d+)\/(\d+)/);
@@ -332,7 +357,7 @@ function showTooltip(btn, message) {
     }, 2000);
 }
 
-window.toggleEventListAccordion = function(row, ev) {
+window.toggleEventListAccordion = function (row, ev) {
     if (ev.target.closest('button')) return;
     row.classList.toggle('expanded');
 };
@@ -489,8 +514,21 @@ async function fetchJoinedIds() {
 function renderCurrentView() {
     if (!cachedEventsData || !cachedEventsData.events) return;
 
-    if (cachedEventsData.events.length === 0) {
-        eventsContainer.innerHTML = '<p class="no-events">No events found. Be the first to create one!</p>';
+    const titleQuery = (eventTitleFilter?.value || '').trim().toLocaleLowerCase('tr');
+    const locationQuery = eventLocationFilter?.value || '';
+
+    const filtered = cachedEventsData.events.filter((e) => {
+        const titleMatch = !titleQuery ||
+            (e.title && e.title.toLocaleLowerCase('tr').includes(titleQuery));
+        const locationMatch = !locationQuery || e.location === locationQuery;
+        return titleMatch && locationMatch;
+    });
+
+    if (filtered.length === 0) {
+        const hasFilter = titleQuery || locationQuery;
+        eventsContainer.innerHTML = hasFilter
+            ? '<p class="no-events">The event you are looking for could not be found.</p>'
+            : '<p class="no-events">No events found.</p>';
         return;
     }
 
@@ -499,7 +537,7 @@ function renderCurrentView() {
     if (isGrid) {
         eventsContainer.classList.remove('list-view');
         eventsContainer.classList.add('grid-view');
-        eventsContainer.innerHTML = cachedEventsData.events.map((e) => renderGridCard(e, cachedJoinedIdsData)).join('');
+        eventsContainer.innerHTML = filtered.map((e) => renderGridCard(e, cachedJoinedIdsData)).join('');
     } else {
         eventsContainer.classList.remove('grid-view');
         eventsContainer.classList.add('list-view');
@@ -509,37 +547,83 @@ function renderCurrentView() {
             <span>Details</span>
             <span></span>
         </div>
-        ${cachedEventsData.events.map((e) => renderListItem(e, cachedJoinedIdsData)).join('')}
+        ${filtered.map((e) => renderListItem(e, cachedJoinedIdsData)).join('')}
         `;
     }
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-let loadEventsPromise = null;
+function updateLocationFilterOptions(events) {
+    if (!eventLocationFilter) return;
+
+    const previousValue = eventLocationFilter.value;
+    const uniqueLocations = [...new Set(
+        (events || [])
+            .map((event) => (event.location || '').trim())
+            .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'tr'));
+
+    const options = ['<option value="">All locations</option>'];
+    for (const location of uniqueLocations) {
+        const selectedAttr = location === previousValue ? ' selected' : '';
+        options.push(`<option value="${esc(location)}"${selectedAttr}>${esc(location)}</option>`);
+    }
+
+    if (previousValue && !uniqueLocations.includes(previousValue)) {
+        options.push(`<option value="${esc(previousValue)}" selected>${esc(previousValue)}</option>`);
+    }
+
+    eventLocationFilter.innerHTML = options.join('');
+}
 
 async function loadEvents() {
     if (loadEventsPromise) {
         return loadEventsPromise;
     }
 
+    const requestId = ++activeRequestId;
     loadEventsPromise = (async () => {
         try {
             const includePassed = showPassedCheckbox.checked;
+            const titleFilter = eventTitleFilter?.value?.trim() || '';
+            const dateFilter = eventDateFilter?.value || '';
+            const locationFilter = eventLocationFilter?.value || '';
             const token = localStorage.getItem('token');
             const eventsHeaders = token ? { Authorization: `Bearer ${token}` } : undefined;
+            const queryParams = new URLSearchParams({
+                includePassed: String(includePassed),
+            });
+
+            if (titleFilter) {
+                queryParams.set('title', titleFilter);
+                queryParams.set('search', titleFilter);
+            }
+            if (dateFilter) {
+                queryParams.set('fromDate', dateFilter);
+                queryParams.set('dateFrom', dateFilter);
+            }
+            if (locationFilter) {
+                queryParams.set('location', locationFilter);
+            }
+
+            eventsContainer.classList.add('events-container-updating');
             const [eventsRes, joinedIds] = await Promise.all([
-                fetch(`${EVENTS_API}?includePassed=${includePassed}`, { headers: eventsHeaders }).then((r) => r.json()),
+                fetch(`${EVENTS_API}?${queryParams.toString()}`, { headers: eventsHeaders }).then((r) => r.json()),
                 fetchJoinedIds(),
             ]);
 
+            if (requestId !== activeRequestId) return;
             cachedEventsData = eventsRes;
             cachedJoinedIdsData = joinedIds;
+            updateLocationFilterOptions(eventsRes?.events || []);
 
             renderCurrentView();
         } catch (err) {
             eventsContainer.innerHTML = '<p class="no-events">Failed to load events. Please try again.</p>';
             console.error('Load events error:', err);
+        } finally {
+            eventsContainer.classList.remove('events-container-updating');
         }
     })();
 

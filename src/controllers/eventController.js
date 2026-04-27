@@ -407,4 +407,179 @@ const leaveEvent = async (req, res) => {
     }
 };
 
-module.exports = { createEvent, getAllEvents, getEventById, joinEvent, leaveEvent, getMyJoinedEvents, rateEventOrganizer };
+// GET /api/events/mine — events organized by the current user
+const getMyOrganizedEvents = async (req, res) => {
+    try {
+        if (!req.accessToken || !req.user?.id) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const reader = dbReader();
+
+        let query = reader.from('events').select('*').eq('organizer_id', req.user.id);
+        let { data: raw, error } = await query.order('date', { ascending: true });
+
+        if (error) {
+            const fallback = await reader
+                .from('events')
+                .select('*')
+                .eq('organizer_id', req.user.id)
+                .order('event_date', { ascending: true });
+            if (fallback.error) {
+                console.error('Get my organized events error:', error.message, fallback.error.message);
+                return res.status(500).json({ message: 'Server error' });
+            }
+            raw = fallback.data;
+        }
+
+        const events = await mapEventsWithMeta(raw || [], req.user.id);
+        res.json({ events });
+    } catch (error) {
+        console.error('Get my organized events error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// PUT /api/events/:id — owner-only, future events only
+const updateEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user?.id;
+
+        if (!req.accessToken || !userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const reader = dbReader();
+        const { data: existing, error: fetchErr } = await reader
+            .from('events')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (fetchErr || !existing) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+        if (existing.organizer_id !== userId) {
+            return res.status(403).json({ message: 'You can only edit your own events.' });
+        }
+
+        const currentDate = eventDateValue(existing);
+        if (currentDate && new Date(currentDate) < new Date()) {
+            return res.status(400).json({ message: 'Past events cannot be edited.' });
+        }
+
+        const { title, description, date, location, capacity } = req.body || {};
+        const patch = {};
+        if (typeof title === 'string') patch.title = title;
+        if (typeof description === 'string' || description === null) patch.description = description;
+        if (typeof location === 'string') patch.location = location;
+        if (capacity !== undefined && capacity !== null && capacity !== '') {
+            const cap = Number(capacity);
+            if (!Number.isFinite(cap) || cap < 1) {
+                return res.status(400).json({ message: 'Capacity must be a positive number.' });
+            }
+            patch.capacity = cap;
+        }
+
+        if (date) {
+            const newDate = new Date(date);
+            if (isNaN(newDate.getTime())) {
+                return res.status(400).json({ message: 'Invalid date.' });
+            }
+            if (newDate < new Date()) {
+                return res.status(400).json({ message: 'New date cannot be in the past.' });
+            }
+            for (const key of ['date', 'event_date', 'starts_at']) {
+                if (existing[key] !== undefined) patch[key] = newDate.toISOString();
+            }
+            if (!('date' in patch) && !('event_date' in patch) && !('starts_at' in patch)) {
+                patch.date = newDate.toISOString();
+            }
+        }
+
+        if (Object.keys(patch).length === 0) {
+            return res.status(400).json({ message: 'No fields to update.' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+        const { data: updated, error: updErr } = await sb
+            .from('events')
+            .update(patch)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (updErr) {
+            console.error('Update event error:', updErr);
+            return res.status(400).json({ message: updErr.message || 'Could not update event.' });
+        }
+
+        const mapped = (await mapEventsWithMeta([updated], userId))[0];
+        res.json({ message: 'Event updated.', event: mapped });
+    } catch (error) {
+        console.error('Update event error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// DELETE /api/events/:id — owner-only, future events only
+const deleteEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user?.id;
+
+        if (!req.accessToken || !userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const reader = dbReader();
+        const { data: existing, error: fetchErr } = await reader
+            .from('events')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (fetchErr || !existing) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+        if (existing.organizer_id !== userId) {
+            return res.status(403).json({ message: 'You can only delete your own events.' });
+        }
+
+        const currentDate = eventDateValue(existing);
+        if (currentDate && new Date(currentDate) < new Date()) {
+            return res.status(400).json({ message: 'Past events cannot be deleted.' });
+        }
+
+        const sb = createSupabaseForToken(req.accessToken);
+
+        // Best-effort cleanup of dependent rows
+        await sb.from('event_participants').delete().eq('event_id', id);
+        await sb.from('organizer_ratings').delete().eq('event_id', id);
+
+        const { error: delErr } = await sb.from('events').delete().eq('id', id);
+        if (delErr) {
+            console.error('Delete event error:', delErr);
+            return res.status(400).json({ message: delErr.message || 'Could not delete event.' });
+        }
+
+        res.json({ message: 'Event deleted.' });
+    } catch (error) {
+        console.error('Delete event error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = {
+    createEvent,
+    getAllEvents,
+    getEventById,
+    joinEvent,
+    leaveEvent,
+    getMyJoinedEvents,
+    rateEventOrganizer,
+    getMyOrganizedEvents,
+    updateEvent,
+    deleteEvent,
+};
