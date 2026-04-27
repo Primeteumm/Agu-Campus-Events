@@ -9,3 +9,5 @@ node_modules/
 Thumbs.db
 
 .claude/
+.env.local
+/.vercel
