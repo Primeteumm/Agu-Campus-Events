@@ -108,6 +108,21 @@ function organizerRatingPill(avg, count) {
     </span>`;
 }
 
+function eventRatingPill(avg, count, extraClass = '') {
+    if (avg == null || !count) {
+        return `<span class="organizer-rating rating-none ${extraClass}" title="No ratings yet">
+            <i data-lucide="star" class="rating-icon"></i>
+            <span class="rating-value">—</span>
+        </span>`;
+    }
+    const rounded = ratingCeil1(avg);
+    const tier = ratingTierClass(rounded);
+    return `<span class="organizer-rating ${tier} ${extraClass}" title="${count} event rating${count === 1 ? '' : 's'}">
+        <i data-lucide="star" class="rating-icon"></i>
+        <span class="rating-value">${rounded.toFixed(1)}</span>
+    </span>`;
+}
+
 // 5-star interactive widget (clickable). Disabled if user cannot rate.
 function starWidget(event, opts) {
     const current = event.my_rating || 0;
@@ -190,6 +205,10 @@ async function rateOrganizer(eventId, value, btn) {
                 if (orgId && e.organizer_id === orgId) {
                     e.organizer_rating_avg = data.organizer_rating_avg;
                     e.organizer_rating_count = data.organizer_rating_count;
+                }
+                if (String(e.id) === String(eventId)) {
+                    e.event_rating_avg = data.event_rating_avg;
+                    e.event_rating_count = data.event_rating_count;
                 }
             }
         }
@@ -392,6 +411,7 @@ function renderListItem(event, joinedIds) {
 
     return `
         <div class="${rowClass}" onclick="toggleEventListAccordion(this, event)">
+            ${eventRatingPill(event.event_rating_avg, event.event_rating_count, 'event-rating-corner')}
             <div class="event-list-main">
                 <div class="event-list-info">
                     <span class="event-list-title">${esc(event.title)}${passedBadge}</span>
@@ -471,6 +491,7 @@ function renderGridCard(event, joinedIds) {
     return `
         <div class="${wrapperClass}">
             <div class="event-grid-card">
+                ${eventRatingPill(event.event_rating_avg, event.event_rating_count, 'event-rating-corner')}
                 <h3 class="event-card-title">${esc(event.title)}${passedBadge}</h3>
                 <p class="event-card-desc">${esc(event.description || 'No description available.')}</p>
                 <div class="event-card-meta">
