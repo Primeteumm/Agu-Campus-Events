@@ -2350,23 +2350,31 @@ body.light-theme .btn-join.disabled {
     background: #c62828;
 }
 
-/* Hide "Joined ✓" text and show "Leave" on hover */
+/* Stack both labels in the same grid cell so the button width is
+   constant (sized by the widest label, "Joined ✓") and Leave matches. */
+.btn-join.joined {
+    display: inline-grid;
+    grid-template-areas: "stack";
+    align-items: center;
+    justify-items: center;
+}
+
+.btn-join.joined .join-text-default,
 .btn-join.joined .join-text-leave {
-    display: none;
-}
-
-.btn-join.joined .join-text-default {
-    display: inline-block;
+    grid-area: stack;
     line-height: 1;
 }
 
-.btn-join.joined:hover .join-text-leave {
-    display: inline-block;
-    line-height: 1;
+.btn-join.joined .join-text-leave {
+    visibility: hidden;
 }
 
 .btn-join.joined:hover .join-text-default {
-    display: none;
+    visibility: hidden;
+}
+
+.btn-join.joined:hover .join-text-leave {
+    visibility: visible;
 }
 
 /* Join Tooltip (list view) */
