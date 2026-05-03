@@ -420,11 +420,9 @@ function renderListItem(event, joinedIds) {
                 <div class="event-list-info">
                     <div class="event-card-top-club">
                         ${clubLinkHtml}
+                        ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}
                     </div>
                     <span class="event-list-title">${esc(event.title)}${passedBadge}</span>
-                    <span class="event-list-meta">
-                        ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}
-                    </span>
                 </div>
                 <div class="event-list-details">
                     <span class="event-list-date">
