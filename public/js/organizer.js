@@ -71,6 +71,35 @@
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
+    // Rating helpers — mirror events.js so organizer page uses the same star pill.
+    function ratingCeil1(v) {
+        if (v == null || isNaN(v)) return null;
+        return Math.ceil(v * 10) / 10;
+    }
+
+    function ratingTierClass(v) {
+        if (v == null) return 'rating-none';
+        if (v >= 4.0) return 'rating-green';
+        if (v >= 3.0) return 'rating-yellow';
+        if (v >= 2.0) return 'rating-orange';
+        return 'rating-red';
+    }
+
+    function ratingPill(avg, count, extraClass = '', emptyTitle = 'No ratings yet') {
+        if (avg == null || !count) {
+            return `<span class="organizer-rating rating-none ${extraClass}" title="${emptyTitle}">
+                <i data-lucide="star" class="rating-icon"></i>
+                <span class="rating-value">—</span>
+            </span>`;
+        }
+        const rounded = ratingCeil1(avg);
+        const tier = ratingTierClass(rounded);
+        return `<span class="organizer-rating ${tier} ${extraClass}" title="${count} rating${count === 1 ? '' : 's'}">
+            <i data-lucide="star" class="rating-icon"></i>
+            <span class="rating-value">${rounded.toFixed(1)}</span>
+        </span>`;
+    }
+
     function avatarUrl(name) {
         const safe = encodeURIComponent(name || 'Organizer');
         return `https://ui-avatars.com/api/?name=${safe}&background=00f2ff&color=1A1C1E&size=128&bold=true`;
@@ -167,11 +196,9 @@
         directoryView.classList.add('hidden');
         detailView.classList.remove('hidden');
 
-        detailName.textContent = org.name;
-        const ratingPart = org.ratingAvg
-            ? ` • ${org.ratingAvg.toFixed(1)}★ (${org.ratingCount} votes)`
-            : '';
-        detailMeta.textContent = `${org.eventCount} events • ${org.upcomingCount} upcoming${ratingPart}`;
+        detailName.innerHTML = `${escHtml(org.name)} ${ratingPill(org.ratingAvg, org.ratingCount, 'organizer-detail-rating')}`;
+        detailMeta.textContent = `${org.eventCount} events • ${org.upcomingCount} upcoming`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         renderEvents();
     }
@@ -198,7 +225,7 @@
         listContainer.innerHTML = events.map((ev) => {
             const passed = isPassed(ev.date);
             const passedBadge = passed
-                ? '<span class="organizer-event-badge organizer-event-badge--past">Past</span>'
+                ? ratingPill(ev.event_rating_avg, ev.event_rating_count, 'organizer-event-rating')
                 : '<span class="organizer-event-badge organizer-event-badge--upcoming">Upcoming</span>';
 
             let actions = '';
@@ -256,6 +283,15 @@
             allEvents = data.events || [];
             organizers = buildOrganizers(allEvents);
             renderDirectory();
+
+            if (!selectedOrganizerId) {
+                const params = new URLSearchParams(window.location.search);
+                const urlId = params.get('id');
+                if (urlId && organizers.some((o) => String(o.id) === String(urlId))) {
+                    openOrganizer(urlId);
+                    return;
+                }
+            }
 
             if (selectedOrganizerId) {
                 const stillExists = organizers.some((o) => String(o.id) === String(selectedOrganizerId));
