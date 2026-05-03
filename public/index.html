@@ -12,7 +12,18 @@
 <body>
     <div class="app-shell">
         <nav class="navbar">
-            <div class="navbar-brand">AGU Campus Events</div>
+            <div class="navbar-brand">
+                <svg class="navbar-brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="36" height="36" rx="10" fill="#25282C"/>
+                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none"/>
+                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8"/>
+                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
+                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8"/>
+                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8"/>
+                </svg>
+                <div class="navbar-brand-text">AGÜ <span>CAMPUS EVENTS</span></div>
+            </div>
             <div class="navbar-actions">
                 <button class="btn-login Btn" id="openAuthModal" title="Login">
                     <div class="sign">
@@ -53,11 +64,14 @@
                 <div class="profile-card profile-card--guest" id="profileCardGuest">
                     <div class="profile-avatar-wrap">
                         <img class="profile-avatar"
-                            src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
+                            src="https://ui-avatars.com/api/?name=Guest&background=25282C&color=00F2FF&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
-                        <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to see your profile and roles.</p>
+                        <span class="profile-guest-label">Welcome! 👋</span>
+                        <p class="profile-guest-hint">Sign in to personalize your feed and join events.</p>
+                        <button class="profile-guest-cta" id="openAuthModalSidebar">
+                            Sign In
+                        </button>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -247,6 +261,14 @@
             document.body.classList.toggle('light-theme', isLight);
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
+
+        // Sidebar CTA → auth modal
+        const _sidebarCta = document.getElementById('openAuthModalSidebar');
+        if (_sidebarCta) {
+            _sidebarCta.addEventListener('click', () => {
+                document.getElementById('openAuthModal')?.click();
+            });
+        }
     </script>
 </body>
 
