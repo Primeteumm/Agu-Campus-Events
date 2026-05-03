@@ -10,7 +10,18 @@
 <body>
     <div class="app-shell">
         <nav class="navbar">
-            <a href="/" class="navbar-brand navbar-brand-link">AGU Campus Events</a>
+            <a href="/" class="navbar-brand" style="text-decoration:none; color:inherit;">
+                <svg class="navbar-brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="36" height="36" rx="10" fill="#25282C"/>
+                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none"/>
+                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8"/>
+                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
+                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8"/>
+                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8"/>
+                </svg>
+                <div class="navbar-brand-text">AGÜ <span>CAMPUS EVENTS</span></div>
+            </a>
             <div class="navbar-actions">
                 <button class="btn-login" id="openAuthModal" type="button">
                     <i data-lucide="log-in" class="icon"></i>
@@ -87,23 +98,42 @@
             <div class="app-main">
                 <main class="main-content profile-page">
 
-                    <div id="organizerGateAuth" class="profile-gate hidden">
-                        <p class="profile-gate-text">Please sign in to view your organizer profile.</p>
-                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
-                    </div>
-
-                    <div id="organizerGateRole" class="profile-gate hidden">
-                        <p class="profile-gate-text">Only Organizers, Club Presidents, and Vice Presidents have an organizer profile.</p>
-                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
-                    </div>
-
-                    <div id="organizerContent" class="hidden">
+                    <div id="organizerDirectoryView">
                         <header class="events-header">
-                            <h1 class="events-header-title">MY EVENTS</h1>
+                            <h1 class="events-header-title">ORGANIZERS</h1>
                             <span class="events-header-accent"></span>
                         </header>
+                        <p class="organizer-directory-hint">Discover event creators — click a card to see that organizer's events.</p>
+                        <div class="organizer-search">
+                            <i data-lucide="search" class="organizer-search-icon"></i>
+                            <input
+                                type="search"
+                                id="organizerSearchInput"
+                                class="organizer-search-input"
+                                placeholder="Search organizers by name..."
+                                autocomplete="off"
+                            >
+                            <button type="button" id="organizerSearchClear" class="organizer-search-clear hidden" aria-label="Clear search">
+                                <i data-lucide="x" class="icon"></i>
+                            </button>
+                        </div>
+                        <div id="organizerDirectoryGrid" class="organizer-directory">
+                            <p class="loading-text">Loading organizers...</p>
+                        </div>
+                    </div>
+
+                    <div id="organizerDetailView" class="hidden">
+                        <button type="button" id="organizerDetailBack" class="organizer-detail-back">
+                            <i data-lucide="arrow-left" class="icon"></i>
+                            <span>All organizers</span>
+                        </button>
+                        <header class="events-header organizer-detail-header">
+                            <h1 class="events-header-title" id="organizerDetailName">Organizer</h1>
+                            <span class="events-header-accent"></span>
+                        </header>
+                        <p class="organizer-detail-meta" id="organizerDetailMeta"></p>
                         <div id="organizerEventsContainer" class="organizer-events">
-                            <p class="loading-text">Loading your events...</p>
+                            <p class="loading-text">Loading events...</p>
                         </div>
                     </div>
                 </main>

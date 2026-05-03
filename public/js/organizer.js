@@ -1,9 +1,14 @@
 (function () {
     const EVENTS_API = '/api/events';
 
-    const gateAuth = document.getElementById('organizerGateAuth');
-    const gateRole = document.getElementById('organizerGateRole');
-    const content = document.getElementById('organizerContent');
+    const directoryView = document.getElementById('organizerDirectoryView');
+    const directoryGrid = document.getElementById('organizerDirectoryGrid');
+    const searchInput = document.getElementById('organizerSearchInput');
+    const searchClear = document.getElementById('organizerSearchClear');
+    const detailView = document.getElementById('organizerDetailView');
+    const detailBack = document.getElementById('organizerDetailBack');
+    const detailName = document.getElementById('organizerDetailName');
+    const detailMeta = document.getElementById('organizerDetailMeta');
     const listContainer = document.getElementById('organizerEventsContainer');
 
     const editModal = document.getElementById('editEventModal');
@@ -18,7 +23,10 @@
     const editSuccess = document.getElementById('editEventSuccess');
     const closeEditBtn = document.getElementById('closeEditEvent');
 
-    let cachedEvents = [];
+    let allEvents = [];
+    let organizers = [];
+    let selectedOrganizerId = null;
+    let searchQuery = '';
 
     function escHtml(s) {
         const d = document.createElement('div');
@@ -32,6 +40,14 @@
         if (token) h.Authorization = `Bearer ${token}`;
         if (json) h['Content-Type'] = 'application/json';
         return h;
+    }
+
+    function getViewerId() {
+        try {
+            const raw = localStorage.getItem('user');
+            const user = raw ? JSON.parse(raw) : null;
+            return user?.id || null;
+        } catch { return null; }
     }
 
     function isPassed(dateStr) {
@@ -55,27 +71,149 @@
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
-    function renderList() {
-        if (!cachedEvents.length) {
-            listContainer.innerHTML = '<p class="no-events">You have not organized any events yet.</p>';
+    function avatarUrl(name) {
+        const safe = encodeURIComponent(name || 'Organizer');
+        return `https://ui-avatars.com/api/?name=${safe}&background=00f2ff&color=1A1C1E&size=128&bold=true`;
+    }
+
+    function buildOrganizers(events) {
+        const byId = new Map();
+        for (const ev of events) {
+            const id = ev.organizer_id;
+            if (!id) continue;
+            const cur = byId.get(id) || {
+                id,
+                name: ev.organizer_name || 'Unknown',
+                eventCount: 0,
+                upcomingCount: 0,
+                ratingAvg: ev.organizer_rating_avg ?? null,
+                ratingCount: ev.organizer_rating_count ?? 0,
+            };
+            cur.eventCount += 1;
+            if (!isPassed(ev.date)) cur.upcomingCount += 1;
+            if (ev.organizer_rating_avg != null) {
+                cur.ratingAvg = ev.organizer_rating_avg;
+                cur.ratingCount = ev.organizer_rating_count ?? cur.ratingCount;
+            }
+            byId.set(id, cur);
+        }
+        return [...byId.values()].sort((a, b) => {
+            if (b.upcomingCount !== a.upcomingCount) return b.upcomingCount - a.upcomingCount;
+            return b.eventCount - a.eventCount;
+        });
+    }
+
+    function normalize(str) {
+        return (str || '')
+            .toLocaleLowerCase('tr-TR')
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '');
+    }
+
+    function getFilteredOrganizers() {
+        const q = normalize(searchQuery.trim());
+        if (!q) return organizers;
+        return organizers.filter((o) => normalize(o.name).includes(q));
+    }
+
+    function renderDirectory() {
+        if (!organizers.length) {
+            directoryGrid.innerHTML = '<p class="no-events">No organizers have created events yet.</p>';
+            return;
+        }
+        const filtered = getFilteredOrganizers();
+        if (!filtered.length) {
+            directoryGrid.innerHTML = `<p class="no-events">No organizers match "${escHtml(searchQuery.trim())}".</p>`;
+            return;
+        }
+        const viewerId = getViewerId();
+        directoryGrid.innerHTML = filtered.map((o) => {
+            const isYou = viewerId && String(viewerId) === String(o.id);
+            const ratingHtml = o.ratingAvg
+                ? `<span class="organizer-card-rating"><i data-lucide="star" class="meta-icon"></i> ${o.ratingAvg.toFixed(1)} <span class="organizer-card-rating-count">(${o.ratingCount})</span></span>`
+                : '<span class="organizer-card-rating organizer-card-rating--empty">No ratings yet</span>';
+            return `
+                <button type="button" class="organizer-card" data-id="${escHtml(o.id)}">
+                    <span class="organizer-card-avatar" aria-hidden="true">
+                        <img src="${avatarUrl(o.name)}" alt="">
+                    </span>
+                    <span class="organizer-card-body">
+                        <span class="organizer-card-name">
+                            ${escHtml(o.name)}
+                            ${isYou ? '<span class="organizer-card-you">You</span>' : ''}
+                        </span>
+                        <span class="organizer-card-stats">
+                            <span><i data-lucide="calendar" class="meta-icon"></i> ${o.eventCount} events</span>
+                            <span><i data-lucide="sparkles" class="meta-icon"></i> ${o.upcomingCount} upcoming</span>
+                        </span>
+                        ${ratingHtml}
+                    </span>
+                </button>
+            `;
+        }).join('');
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        directoryGrid.querySelectorAll('.organizer-card').forEach((btn) => {
+            btn.addEventListener('click', () => openOrganizer(btn.dataset.id));
+        });
+    }
+
+    function openOrganizer(organizerId) {
+        const org = organizers.find((o) => String(o.id) === String(organizerId));
+        if (!org) return;
+        selectedOrganizerId = org.id;
+
+        directoryView.classList.add('hidden');
+        detailView.classList.remove('hidden');
+
+        detailName.textContent = org.name;
+        const ratingPart = org.ratingAvg
+            ? ` • ${org.ratingAvg.toFixed(1)}★ (${org.ratingCount} votes)`
+            : '';
+        detailMeta.textContent = `${org.eventCount} events • ${org.upcomingCount} upcoming${ratingPart}`;
+
+        renderEvents();
+    }
+
+    function backToDirectory() {
+        selectedOrganizerId = null;
+        detailView.classList.add('hidden');
+        directoryView.classList.remove('hidden');
+    }
+
+    function renderEvents() {
+        const events = allEvents
+            .filter((e) => String(e.organizer_id) === String(selectedOrganizerId))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (!events.length) {
+            listContainer.innerHTML = '<p class="no-events">This organizer has no events yet.</p>';
             return;
         }
 
-        listContainer.innerHTML = cachedEvents.map((ev) => {
+        const viewerId = getViewerId();
+        const isOwner = viewerId && String(viewerId) === String(selectedOrganizerId);
+
+        listContainer.innerHTML = events.map((ev) => {
             const passed = isPassed(ev.date);
             const passedBadge = passed
                 ? '<span class="organizer-event-badge organizer-event-badge--past">Past</span>'
                 : '<span class="organizer-event-badge organizer-event-badge--upcoming">Upcoming</span>';
-            const actions = passed
-                ? '<span class="organizer-event-locked">Past events cannot be modified</span>'
-                : `
-                    <button type="button" class="btn-join organizer-event-edit" data-id="${escHtml(ev.id)}">
-                        <i data-lucide="pencil" class="icon" style="width:16px;height:16px;"></i> Edit
-                    </button>
-                    <button type="button" class="btn-join organizer-event-delete" data-id="${escHtml(ev.id)}">
-                        <i data-lucide="trash-2" class="icon" style="width:16px;height:16px;"></i> Delete
-                    </button>
-                `;
+
+            let actions = '';
+            if (isOwner) {
+                actions = passed
+                    ? '<span class="organizer-event-locked">Past events cannot be modified</span>'
+                    : `
+                        <button type="button" class="btn-join organizer-event-edit" data-id="${escHtml(ev.id)}">
+                            <i data-lucide="pencil" class="icon" style="width:16px;height:16px;"></i> Edit
+                        </button>
+                        <button type="button" class="btn-join organizer-event-delete" data-id="${escHtml(ev.id)}">
+                            <i data-lucide="trash-2" class="icon" style="width:16px;height:16px;"></i> Delete
+                        </button>
+                    `;
+            }
 
             return `
                 <article class="organizer-event-card ${passed ? 'is-past' : ''}">
@@ -89,44 +227,52 @@
                         <span><i data-lucide="map-pin" class="meta-icon"></i> ${escHtml(ev.location || '—')}</span>
                         <span><i data-lucide="users" class="meta-icon"></i> ${ev.participant_count ?? 0}/${ev.capacity ?? '—'}</span>
                     </div>
-                    <div class="organizer-event-actions">${actions}</div>
+                    ${actions ? `<div class="organizer-event-actions">${actions}</div>` : ''}
                 </article>
             `;
         }).join('');
 
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
-        listContainer.querySelectorAll('.organizer-event-edit').forEach((btn) => {
-            btn.addEventListener('click', () => openEditModal(btn.dataset.id));
-        });
-        listContainer.querySelectorAll('.organizer-event-delete').forEach((btn) => {
-            btn.addEventListener('click', () => confirmAndDelete(btn.dataset.id, btn));
-        });
+        if (isOwner) {
+            listContainer.querySelectorAll('.organizer-event-edit').forEach((btn) => {
+                btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+            });
+            listContainer.querySelectorAll('.organizer-event-delete').forEach((btn) => {
+                btn.addEventListener('click', () => confirmAndDelete(btn.dataset.id, btn));
+            });
+        }
     }
 
-    async function loadMyEvents() {
-        listContainer.innerHTML = '<p class="loading-text">Loading your events...</p>';
+    async function loadAll() {
+        directoryGrid.innerHTML = '<p class="loading-text">Loading organizers...</p>';
         try {
-            const res = await fetch(`${EVENTS_API}/mine`, { headers: authHeaders(false) });
+            const res = await fetch(`${EVENTS_API}?includePassed=true`, { headers: authHeaders(false) });
             if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
-                    listContainer.innerHTML = '<p class="no-events">Please sign in again.</p>';
-                    return;
-                }
-                listContainer.innerHTML = '<p class="no-events">Failed to load your events.</p>';
+                directoryGrid.innerHTML = '<p class="no-events">Failed to load organizers.</p>';
                 return;
             }
             const data = await res.json();
-            cachedEvents = data.events || [];
-            renderList();
+            allEvents = data.events || [];
+            organizers = buildOrganizers(allEvents);
+            renderDirectory();
+
+            if (selectedOrganizerId) {
+                const stillExists = organizers.some((o) => String(o.id) === String(selectedOrganizerId));
+                if (stillExists) {
+                    renderEvents();
+                } else {
+                    backToDirectory();
+                }
+            }
         } catch (err) {
-            console.error('Load my events error:', err);
-            listContainer.innerHTML = '<p class="no-events">Connection error.</p>';
+            console.error('Load organizers error:', err);
+            directoryGrid.innerHTML = '<p class="no-events">Connection error.</p>';
         }
     }
 
     function openEditModal(id) {
-        const ev = cachedEvents.find((e) => String(e.id) === String(id));
+        const ev = allEvents.find((e) => String(e.id) === String(id));
         if (!ev) return;
         if (isPassed(ev.date)) return;
 
@@ -149,6 +295,23 @@
     closeEditBtn?.addEventListener('click', closeEditModal);
     editModal?.addEventListener('click', (e) => {
         if (e.target === editModal) closeEditModal();
+    });
+
+    detailBack?.addEventListener('click', backToDirectory);
+
+    searchInput?.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        searchClear?.classList.toggle('hidden', !searchQuery);
+        renderDirectory();
+    });
+
+    searchClear?.addEventListener('click', () => {
+        if (!searchInput) return;
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.add('hidden');
+        renderDirectory();
+        searchInput.focus();
     });
 
     editForm?.addEventListener('submit', async (e) => {
@@ -196,7 +359,7 @@
             submitBtn.textContent = originalLabel;
             setTimeout(() => {
                 closeEditModal();
-                loadMyEvents();
+                loadAll();
             }, 600);
         } catch (err) {
             editError.textContent = 'Connection error.';
@@ -206,7 +369,7 @@
     });
 
     async function confirmAndDelete(id, btn) {
-        const ev = cachedEvents.find((e) => String(e.id) === String(id));
+        const ev = allEvents.find((e) => String(e.id) === String(id));
         if (!ev) return;
         const ok = confirm(`Delete event "${ev.title}"? This cannot be undone.`);
         if (!ok) return;
@@ -228,8 +391,9 @@
                 if (typeof lucide !== 'undefined') lucide.createIcons();
                 return;
             }
-            cachedEvents = cachedEvents.filter((e) => String(e.id) !== String(id));
-            renderList();
+            allEvents = allEvents.filter((e) => String(e.id) !== String(id));
+            organizers = buildOrganizers(allEvents);
+            renderEvents();
         } catch (err) {
             alert('Connection error.');
             btn.disabled = false;
@@ -238,41 +402,12 @@
         }
     }
 
-    function applyGates() {
-        gateAuth?.classList.add('hidden');
-        gateRole?.classList.add('hidden');
-        content?.classList.add('hidden');
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            gateAuth?.classList.remove('hidden');
-            return false;
-        }
-
-        let user = null;
-        try {
-            const raw = localStorage.getItem('user');
-            user = raw ? JSON.parse(raw) : null;
-        } catch { user = null; }
-        const role = user?.role || (user?.roles && user.roles[0]) || '';
-        const isOrganizer = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
-        if (!isOrganizer) {
-            gateRole?.classList.remove('hidden');
-            return false;
-        }
-
-        content?.classList.remove('hidden');
-        return true;
-    }
-
     async function boot() {
-        const ok = applyGates();
         if (typeof refreshProfileFromServer === 'function') {
             await refreshProfileFromServer({ force: false });
         }
-        const okAfter = applyGates();
         if (typeof lucide !== 'undefined') lucide.createIcons();
-        if (okAfter) loadMyEvents();
+        loadAll();
     }
 
     if (document.readyState === 'loading') {
@@ -281,12 +416,8 @@
         boot();
     }
 
-    window.addEventListener('user-updated', async () => {
-        if (typeof refreshProfileFromServer === 'function') {
-            await refreshProfileFromServer({ force: true });
-        }
-        const ok = applyGates();
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-        if (ok) loadMyEvents();
+    window.addEventListener('user-updated', () => {
+        renderDirectory();
+        if (selectedOrganizerId) renderEvents();
     });
 })();
