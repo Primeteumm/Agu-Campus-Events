@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,20 +8,21 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <nav class="navbar">
             <a href="/" class="navbar-brand" style="text-decoration:none; color:inherit;">
                 <svg class="navbar-brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="36" height="36" rx="10" fill="#25282C"/>
-                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none"/>
-                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8"/>
-                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
-                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
-                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8"/>
-                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8"/>
+                    <rect width="36" height="36" rx="10" fill="#25282C" />
+                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none" />
+                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8" />
+                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round" />
+                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round" />
+                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8" />
+                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8" />
                 </svg>
-                <div class="navbar-brand-text">AGÜ <span>CAMPUS EVENTS</span></div>
+                <div class="navbar-brand-text">AGU <span>CAMPUS EVENTS</span></div>
             </a>
             <div class="navbar-actions">
                 <button class="btn-login" id="openAuthModal" type="button">
@@ -31,24 +33,64 @@
                     <input id="themeToggle" type="checkbox" checked />
                     <div class="slider round">
                         <div class="sun-moon">
-                            <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="moon-dot-2" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="moon-dot-3" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="light-ray-1" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="light-ray-2" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="light-ray-3" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-1" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-2" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-3" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-4" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-5" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
-                            <svg id="cloud-6" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
+                            <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="moon-dot-2" class="moon-dot" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="moon-dot-3" class="moon-dot" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="light-ray-1" class="light-ray" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="light-ray-2" class="light-ray" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="light-ray-3" class="light-ray" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-1" class="cloud-dark" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-2" class="cloud-dark" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-3" class="cloud-dark" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-4" class="cloud-light" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-5" class="cloud-light" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
+                            <svg id="cloud-6" class="cloud-light" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="50"></circle>
+                            </svg>
                         </div>
                         <div class="stars">
-                            <svg id="star-1" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
-                            <svg id="star-2" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
-                            <svg id="star-3" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
-                            <svg id="star-4" class="star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"></path></svg>
+                            <svg id="star-1" class="star" viewBox="0 0 20 20">
+                                <path
+                                    d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                                </path>
+                            </svg>
+                            <svg id="star-2" class="star" viewBox="0 0 20 20">
+                                <path
+                                    d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                                </path>
+                            </svg>
+                            <svg id="star-3" class="star" viewBox="0 0 20 20">
+                                <path
+                                    d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                                </path>
+                            </svg>
+                            <svg id="star-4" class="star" viewBox="0 0 20 20">
+                                <path
+                                    d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z">
+                                </path>
+                            </svg>
                         </div>
                     </div>
                 </label>
@@ -59,7 +101,8 @@
             <aside class="profile-sidebar" id="profileSidebar" aria-label="Profile">
                 <div class="profile-card profile-card--guest" id="profileCardGuest">
                     <div class="profile-avatar-wrap">
-                        <img class="profile-avatar" src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
+                        <img class="profile-avatar"
+                            src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label">Guest</span>
@@ -114,8 +157,10 @@
                             <div class="admin-toolbar">
                                 <h3 class="settings-card-title" style="margin-bottom:0;">User Management</h3>
                                 <div class="admin-search-wrap">
-                                    <i data-lucide="search" class="icon" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#666;"></i>
-                                    <input type="text" id="adminSearch" class="admin-search" placeholder="Search users...">
+                                    <i data-lucide="search" class="icon"
+                                        style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#666;"></i>
+                                    <input type="text" id="adminSearch" class="admin-search"
+                                        placeholder="Search users...">
                                 </div>
                             </div>
 
@@ -130,7 +175,9 @@
                                         </tr>
                                     </thead>
                                     <tbody id="adminTableBody">
-                                        <tr><td colspan="4" class="admin-loading">Loading users...</td></tr>
+                                        <tr>
+                                            <td colspan="4" class="admin-loading">Loading users...</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -160,7 +207,8 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
+                        <input type="password" id="loginPassword" placeholder="Password" required
+                            autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
                     <button type="submit" class="btn-submit">Login</button>
@@ -177,7 +225,8 @@
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required autocomplete="given-name">
+                        <input type="text" id="signupFirstName" placeholder="First name" required
+                            autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
@@ -189,15 +238,18 @@
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required autocomplete="new-password">
+                        <input type="password" id="signupPassword" placeholder="Password" required
+                            autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
                         <legend class="account-type-legend">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
-                                <input type="radio" name="accountType" value="student" class="account-type-input" checked>
+                                <input type="radio" name="accountType" value="student" class="account-type-input"
+                                    checked>
                                 <span class="account-type-card-inner">
-                                    <span class="account-type-icon-wrap"><i data-lucide="graduation-cap" class="account-type-icon"></i></span>
+                                    <span class="account-type-icon-wrap"><i data-lucide="graduation-cap"
+                                            class="account-type-icon"></i></span>
                                     <span class="account-type-title">Student</span>
                                     <span class="account-type-hint">Events &amp; clubs</span>
                                 </span>
@@ -205,7 +257,8 @@
                             <label class="account-type-card">
                                 <input type="radio" name="accountType" value="organizer" class="account-type-input">
                                 <span class="account-type-card-inner">
-                                    <span class="account-type-icon-wrap"><i data-lucide="mic" class="account-type-icon"></i></span>
+                                    <span class="account-type-icon-wrap"><i data-lucide="mic"
+                                            class="account-type-icon"></i></span>
                                     <span class="account-type-title">Organizer</span>
                                     <span class="account-type-hint">Event creator account</span>
                                 </span>
@@ -240,4 +293,5 @@
         });
     </script>
 </body>
+
 </html>
