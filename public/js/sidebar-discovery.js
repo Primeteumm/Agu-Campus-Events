@@ -3,7 +3,19 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     renderTopGuilds();
-    // We will render trending events after events data is loaded in events.js
+    // On pages without events.js (e.g. club.html), fetch events ourselves so
+    // the Trending Events sidebar still populates.
+    if (!document.getElementById('eventsContainer')) {
+        fetch('/api/events')
+            .then(r => r.json())
+            .then(data => {
+                const events = Array.isArray(data) ? data : (data && data.events) || [];
+                if (typeof window.renderTrendingEvents === 'function') {
+                    window.renderTrendingEvents(events);
+                }
+            })
+            .catch(() => { /* silently ignore */ });
+    }
 });
 
 function renderTopGuilds() {
@@ -64,19 +76,43 @@ window.renderTrendingEvents = function(events) {
 };
 
 window.scrollToEvent = function(eventId) {
-    // Find the event card in the main feed
-    // In events.js, event wrappers don't have IDs. 
-    // Let's find the card by searching for the join button which has the ID logic, or we'll add IDs to cards.
-    // Assuming we add id="event-card-{id}" to the wrapper in events.js
+    // If we're not on the home/events page, redirect to home with a hash so
+    // the home page can scroll + glow the card after it loads.
+    if (!document.getElementById('eventsContainer')) {
+        window.location.href = `/#event-${eventId}`;
+        return;
+    }
     const el = document.getElementById(`event-card-${eventId}`);
     if (el) {
-        // Smooth scroll
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Add Cyan glow effect
         el.classList.add('glow-highlight');
         setTimeout(() => {
             el.classList.remove('glow-highlight');
         }, 2000);
     }
 };
+
+// On the home page, if the URL hash points to an event (e.g. "#event-123"),
+// trigger the same scroll + glow effect once events are rendered.
+(function handleEventHashOnHome() {
+    if (!document.getElementById('eventsContainer')) return;
+
+    function tryHighlightFromHash() {
+        const m = (window.location.hash || '').match(/^#event-(.+)$/);
+        if (!m) return false;
+        const el = document.getElementById(`event-card-${m[1]}`);
+        if (!el) return false;
+        // Defer slightly so layout settles after render.
+        setTimeout(() => window.scrollToEvent(m[1]), 60);
+        return true;
+    }
+
+    // Poll briefly because events.js renders asynchronously after fetch.
+    let attempts = 0;
+    const iv = setInterval(() => {
+        attempts++;
+        if (tryHighlightFromHash() || attempts > 40) clearInterval(iv);
+    }, 150);
+
+    window.addEventListener('hashchange', tryHighlightFromHash);
+})();

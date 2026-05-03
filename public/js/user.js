@@ -143,6 +143,8 @@ function showGuestSidebar() {
     if (createLink) createLink.classList.add('hidden');
     const organizerLink = document.getElementById('sidebarOrganizerProfile');
     if (organizerLink) organizerLink.classList.add('hidden');
+    const organizersLink = document.getElementById('sidebarOrganizers');
+    if (organizersLink) organizersLink.classList.add('hidden');
 }
 
 function updateAdminLinkVisibility(user) {
@@ -164,8 +166,19 @@ function updateAdminLinkVisibility(user) {
 
     const organizerLink = document.getElementById('sidebarOrganizerProfile');
     if (organizerLink) {
-        if (isOrganizerLike) organizerLink.classList.remove('hidden');
-        else organizerLink.classList.add('hidden');
+        if (isOrganizerLike) {
+            organizerLink.classList.remove('hidden');
+            if (organizerLink.tagName === 'A' && user?.id) {
+                organizerLink.setAttribute('href', `/organizer.html?id=${encodeURIComponent(user.id)}`);
+            }
+        } else {
+            organizerLink.classList.add('hidden');
+        }
+    }
+
+    const organizersLink = document.getElementById('sidebarOrganizers');
+    if (organizersLink) {
+        organizersLink.classList.remove('hidden');
     }
 }
 

@@ -122,6 +122,7 @@ body {
     max-height: 100vh;
     overflow-y: auto;
     backdrop-filter: blur(12px);
+    isolation: isolate;
 }
 
 body.light-theme .profile-sidebar {
@@ -145,13 +146,13 @@ body.light-theme .profile-sidebar {
     border: 3px solid transparent;
     background: linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
                 linear-gradient(135deg, var(--accent-cyan), var(--accent-coral)) border-box;
-    box-shadow: 0 0 0 4px var(--accent-cyan-dim), var(--shadow-glow-cyan);
+    box-shadow: 0 0 0 3px var(--accent-cyan-dim), 0 0 8px rgba(0,242,255,0.18);
     flex-shrink: 0;
     transition: box-shadow var(--transition-base);
 }
 
 .profile-avatar-wrap:hover {
-    box-shadow: 0 0 0 6px var(--accent-cyan-dim), 0 0 32px rgba(0,242,255,0.4);
+    box-shadow: 0 0 0 4px var(--accent-cyan-dim), 0 0 14px rgba(0,242,255,0.28);
 }
 
 body.light-theme .profile-avatar-wrap {
@@ -4442,7 +4443,7 @@ body.light-theme .sidebar-section-title {
     border-radius: 10px;
     background: rgba(255,255,255,0.02);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     border: 1px solid transparent;
 }
 
@@ -4507,7 +4508,7 @@ body.light-theme .sidebar-trending-org {
     cursor: pointer;
     text-decoration: none;
     color: var(--text-primary);
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
     border: 1px solid transparent;
 }
 
