@@ -101,6 +101,25 @@
                         Profile settings
                     </a>
                 </div>
+
+                <!-- SMART DISCOVERY SIDEBAR -->
+                <div class="sidebar-discovery" id="sidebarDiscovery">
+                    <!-- Trending Events -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-section-title"><span class="highlight-coral">Trending</span> Events</h3>
+                        <div class="sidebar-list" id="sidebarTrendingList">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Top Guilds -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-section-title">Top Guilds</h3>
+                        <div class="sidebar-list" id="sidebarGuildsList">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
             </aside>
 
             <div class="app-main">
@@ -246,7 +265,9 @@
     </div>
 
     <script src="/js/user.js"></script>
+    <script src="/js/clubs-data.js"></script>
     <script src="/js/events.js"></script>
+    <script src="/js/sidebar-discovery.js"></script>
     <script src="/js/auth.js"></script>
     <script>
         const saved = localStorage.getItem('theme');

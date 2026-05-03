@@ -107,3 +107,22 @@ create policy "participants_delete_own"
 create policy "profiles_select_if_event_organizer"
     on public.profiles for select
     using (exists (select 1 from public.events e where e.organizer_id = profiles.id));
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- MOCK DATA (Ghost Identities for SCRUM-48)
+-- Run these inserts AFTER creating a user in Supabase Auth and copying their UUID.
+-- Replace 'YOUR-USER-UUID-HERE' with an actual UUID from auth.users.
+-- ─────────────────────────────────────────────────────────────────────────────
+/*
+INSERT INTO public.profiles (id, username, first_name, last_name, roles)
+VALUES 
+    ('YOUR-USER-UUID-HERE', 'nebula_tech', 'Nebula Tech', 'Society', ARRAY['organizer']),
+    ('YOUR-USER-UUID-HERE-2', 'echo_arts', 'Echo Arts', 'Collective', ARRAY['organizer']);
+
+INSERT INTO public.events (title, description, date, location, capacity, organizer_id)
+VALUES 
+    ('The Great Syntax Run', 'A competitive algorithm challenge for students.', NOW() + INTERVAL '5 days', 'Lab 1', 100, 'YOUR-USER-UUID-HERE'),
+    ('Pixel Perfect Workshop', 'Learn advanced UI/UX techniques and Figma tricks.', NOW() + INTERVAL '10 days', 'Design Studio', 40, 'YOUR-USER-UUID-HERE'),
+    ('Sonic Vibes Night', 'Live electronic and jazz performances by campus artists.', NOW() + INTERVAL '2 days', 'Main Stage', 200, 'YOUR-USER-UUID-HERE-2'),
+    ('Infinite Loop Hackathon', '48-hour coding marathon to solve campus problems.', NOW() + INTERVAL '15 days', 'Incubation Center', 80, 'YOUR-USER-UUID-HERE');
+*/

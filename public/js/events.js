@@ -409,15 +409,20 @@ function renderListItem(event, joinedIds) {
     const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
     const rowClass = `event-list-row${passed ? ' passed' : ''}`;
 
+    const clubLinkHtml = typeof getClubIdFromName !== 'undefined' && getClubIdFromName(event.organizer_name) 
+                            ? `<a href="/club.html?id=${getClubIdFromName(event.organizer_name)}" class="club-link" onclick="event.stopPropagation()">${esc(event.organizer_name)}</a>`
+                            : `<span class="club-link-text">${esc(event.organizer_name)}</span>`;
+
     return `
-        <div class="${rowClass}" onclick="toggleEventListAccordion(this, event)">
+        <div class="${rowClass}" id="event-card-${event.id}" onclick="toggleEventListAccordion(this, event)">
             ${eventRatingPill(event.event_rating_avg, event.event_rating_count, 'event-rating-corner')}
             <div class="event-list-main">
                 <div class="event-list-info">
+                    <div class="event-card-top-club">
+                        ${clubLinkHtml}
+                    </div>
                     <span class="event-list-title">${esc(event.title)}${passedBadge}</span>
                     <span class="event-list-meta">
-                        <i data-lucide="user" class="meta-icon"></i>
-                        ${esc(event.organizer_name)}
                         ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}
                     </span>
                 </div>
@@ -488,16 +493,22 @@ function renderGridCard(event, joinedIds) {
     const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
     const wrapperClass = `event-grid-wrapper${passed ? ' passed' : ''}`;
 
+    const clubLinkHtml = typeof getClubIdFromName !== 'undefined' && getClubIdFromName(event.organizer_name) 
+                            ? `<a href="/club.html?id=${getClubIdFromName(event.organizer_name)}" class="club-link" onclick="event.stopPropagation()">${esc(event.organizer_name)}</a>`
+                            : `<span class="club-link-text">${esc(event.organizer_name)}</span>`;
+
     return `
-        <div class="${wrapperClass}">
+        <div class="${wrapperClass}" id="event-card-${event.id}">
             <div class="event-grid-card">
                 ${eventRatingPill(event.event_rating_avg, event.event_rating_count, 'event-rating-corner')}
+                <div class="event-card-top-club">
+                    ${clubLinkHtml}
+                </div>
                 <h3 class="event-card-title">${esc(event.title)}${passedBadge}</h3>
                 <p class="event-card-desc">${esc(event.description || 'No description available.')}</p>
                 <div class="event-card-meta">
                     <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(event.date))}</span>
                     <span><i data-lucide="map-pin" class="meta-icon"></i> ${esc(event.location)}</span>
-                    <span><i data-lucide="user" class="meta-icon"></i> ${esc(event.organizer_name)} ${organizerRatingPill(event.organizer_rating_avg, event.organizer_rating_count)}</span>
                     <span class="${isFull ? 'full' : ''}"><i data-lucide="users" class="meta-icon"></i> ${event.participant_count}/${event.capacity}</span>
                 </div>
                 ${passed ? `
@@ -570,6 +581,10 @@ function renderCurrentView() {
         </div>
         ${filtered.map((e) => renderListItem(e, cachedJoinedIdsData)).join('')}
         `;
+    }
+
+    if (typeof window.renderTrendingEvents === 'function') {
+        window.renderTrendingEvents(cachedEventsData.events);
     }
 
     if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -5,58 +5,7 @@
 
 'use strict';
 
-/* ── Demo Club Data ─────────────────────────────────────────────── */
-const CLUBS = {
-    'agu-tech': {
-        id: 'agu-tech',
-        name: 'AGÜ Tech Club',
-        tagline: "Building tomorrow's innovations, today.",
-        category: '💻 Technology',
-        memberCount: 142,
-        cover: null,
-        logo: 'https://ui-avatars.com/api/?name=TC&background=003344&color=00F2FF&size=256&bold=true',
-        about: [
-            'AGÜ Tech Club is the leading technology community at Abdullah Gül University. We bring together students passionate about software development, AI, hardware, and emerging technologies.',
-            'Our weekly workshops, hackathons, and speaker sessions provide hands-on experience with cutting-edge tools. Whether you\'re a beginner or an expert, there\'s a place for you in our community.',
-            'We collaborate with industry partners to offer internship opportunities, project mentoring, and career networking events throughout the academic year.',
-        ],
-        highlights: [
-            { icon: '🏆', title: 'Hackathon Winners', desc: '3x national hackathon champions (2023–2025)' },
-            { icon: '🤝', title: 'Industry Partners', desc: '12+ tech companies collaborate with us' },
-            { icon: '📚', title: 'Weekly Workshops', desc: 'Hands-on sessions every Wednesday' },
-            { icon: '🚀', title: 'Startup Incubation', desc: '5 startups founded by our members' },
-        ],
-        team: [
-            { name: 'Muhammed Ali Bakır', role: 'President',      initials: 'MB', color: '003344&color=00F2FF' },
-            { name: 'Enes Aydın',         role: 'Vice President', initials: 'EA', color: '1a0a0a&color=FF6B6B' },
-            { name: 'Mustafa Ateş',       role: 'Tech Lead',      initials: 'MA', color: '0d1a00&color=66FF66' },
-        ],
-    },
-    'agu-music': {
-        id: 'agu-music',
-        name: 'AGÜ Music Society',
-        tagline: 'Where every note tells a story.',
-        category: '🎵 Music & Arts',
-        memberCount: 98,
-        cover: null,
-        logo: 'https://ui-avatars.com/api/?name=MS&background=1a0a1a&color=FF6B6B&size=256&bold=true',
-        about: [
-            'The AGÜ Music Society is a vibrant community of musicians, composers, and music enthusiasts at Abdullah Gül University. We welcome all genres and skill levels.',
-            'From classical concerts to jazz nights and electronic music production workshops, we create diverse musical experiences for the entire campus.',
-        ],
-        highlights: [
-            { icon: '🎸', title: 'Live Concerts', desc: 'Monthly campus performances' },
-            { icon: '🎹', title: 'Rehearsal Rooms', desc: 'Dedicated practice spaces' },
-            { icon: '🎤', title: 'Open Mic Nights', desc: 'Every Friday evening' },
-            { icon: '🎼', title: 'Composition Lab', desc: 'Music production workshops' },
-        ],
-        team: [
-            { name: 'Muhammed Ali Bakır', role: 'President',      initials: 'MB', color: '1a0a1a&color=FF6B6B' },
-            { name: 'Enes Aydın',         role: 'Conductor',      initials: 'EA', color: '0a001a&color=CC88FF' },
-            { name: 'Mustafa Ateş',       role: 'Events Lead',    initials: 'MA', color: '001a0a&color=00FFAA' },
-        ],
-    },
-};
+
 
 /* ── State ──────────────────────────────────────────────────────── */
 let currentClub = null;
@@ -118,6 +67,31 @@ function renderClubHeader() {
     document.querySelectorAll('.club-back-link').forEach(el => {
         el.href = '/';
     });
+
+    // Check for "Manage Club" Admin Access
+    try {
+        const token = localStorage.getItem('token');
+        const rawUser = localStorage.getItem('user');
+        if (token && rawUser) {
+            const u = JSON.parse(rawUser);
+            // Simple check: if user has 'organizer' role, or if their roles array contains 'organizer'
+            const isManager = (u.roles && u.roles.includes('organizer')) || u.role === 'organizer';
+            if (isManager) {
+                const actionsContainer = document.querySelector('.club-actions');
+                if (actionsContainer && !document.getElementById('clubManageBtn')) {
+                    const manageBtn = document.createElement('button');
+                    manageBtn.id = 'clubManageBtn';
+                    manageBtn.className = 'club-btn-message'; // Reusing secondary button style
+                    manageBtn.innerHTML = `<i data-lucide="settings" style="width:16px;height:16px;"></i> Manage Club`;
+                    manageBtn.style.background = 'rgba(0, 242, 255, 0.1)';
+                    manageBtn.style.color = 'var(--accent-cyan)';
+                    manageBtn.style.borderColor = 'rgba(0, 242, 255, 0.3)';
+                    manageBtn.onclick = () => window.location.href = '/admin.html';
+                    actionsContainer.appendChild(manageBtn);
+                }
+            }
+        }
+    } catch(e) {}
 }
 
 function setText(id, val) {
