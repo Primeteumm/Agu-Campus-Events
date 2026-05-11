@@ -27,9 +27,9 @@
             <div class="navbar-actions">
                 <button class="btn-login" id="openAuthModal" type="button">
                     <i data-lucide="log-in" class="icon"></i>
-                    <span>Login</span>
+                    <span data-i18n="nav.login">Login</span>
                 </button>
-                <label class="switch" title="Tema Değiştir">
+                <label class="switch" data-i18n-title="nav.changeTheme" title="Change Theme">
                     <input id="themeToggle" type="checkbox" checked />
                     <div class="slider round">
                         <div class="sun-moon">
@@ -94,6 +94,10 @@
                         </div>
                     </div>
                 </label>
+                <div class="lang-toggle">
+                    <button class="lang-btn" id="langEN">EN</button>
+                    <button class="lang-btn" id="langTR">TR</button>
+                </div>
             </div>
         </nav>
 
@@ -105,8 +109,8 @@
                             src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
-                        <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to manage your profile.</p>
+                        <span class="profile-guest-label" data-i18n="sidebar.guestLabel">Guest</span>
+                        <p class="profile-guest-hint" data-i18n="sidebar.guestHintProfile">Sign in to manage your profile.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -117,27 +121,27 @@
                     <div class="profile-roles" id="profileRoles"></div>
                     <a href="/" class="profile-settings-link">
                         <i data-lucide="home" class="icon"></i>
-                        Home
+                        <span data-i18n="sidebar.home">Home</span>
                     </a>
                     <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
-                        Create Event
+                        <span data-i18n="sidebar.createEvent">Create Event</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizers">
                         <i data-lucide="users-round" class="icon"></i>
-                        Organizers
+                        <span data-i18n="sidebar.organizers">Organizers</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
                         <i data-lucide="briefcase" class="icon"></i>
-                        Organizer Profile
+                        <span data-i18n="sidebar.organizerProfile">Organizer Profile</span>
                     </a>
                     <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="shield" class="icon"></i>
-                        Control Panel
+                        <span data-i18n="sidebar.controlPanel">Control Panel</span>
                     </span>
                     <a href="/profile.html" class="profile-settings-link">
                         <i data-lucide="settings" class="icon"></i>
-                        Profile settings
+                        <span data-i18n="sidebar.profileSettings">Profile settings</span>
                     </a>
                 </div>
             </aside>
@@ -147,8 +151,8 @@
 
                     <!-- Access denied gate -->
                     <div id="adminGate" class="profile-gate hidden">
-                        <p class="profile-gate-text">You do not have permission to view this page.</p>
-                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
+                        <p class="profile-gate-text" data-i18n="admin.gateText">You do not have permission to view this page.</p>
+                        <a href="/" class="btn-submit profile-gate-btn" data-i18n="admin.gateBtn">Go to home</a>
                     </div>
 
                     <!-- Admin content -->
@@ -156,7 +160,7 @@
                         <div class="admin-header">
                             <h2 class="admin-title">
                                 <i data-lucide="shield" class="icon" style="width:24px;height:24px;"></i>
-                                Control Panel
+                                <span data-i18n="admin.pageTitle">Control Panel</span>
                             </h2>
                             <span class="admin-role-tag" id="adminRoleTag"></span>
                         </div>
@@ -206,51 +210,51 @@
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
                 <button class="modal-close" id="closeLogin" type="button">&times;</button>
-                <h2 class="modal-title">Welcome Back</h2>
-                <p class="modal-subtitle">Login to your account</p>
+                <h2 class="modal-title" data-i18n="auth.welcomeBack">Welcome Back</h2>
+                <p class="modal-subtitle" data-i18n="auth.loginSubtitle">Login to your account</p>
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="loginEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required
+                        <input type="password" id="loginPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
-                    <button type="submit" class="btn-submit">Login</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.login">Login</button>
                 </form>
                 <p class="switch-text">
-                    Don't have an account yet?
-                    <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
+                    <span data-i18n="auth.noAccount">Don't have an account yet?</span>
+                    <a href="#" id="goToSignup" class="switch-link" data-i18n="auth.signUp">Sign Up</a>
                 </p>
             </div>
             <div class="modal-card card-back">
                 <button class="modal-close" id="closeSignup" type="button">&times;</button>
-                <h2 class="modal-title">Create Account</h2>
-                <p class="modal-subtitle">Sign up to get started</p>
+                <h2 class="modal-title" data-i18n="auth.createAccount">Create Account</h2>
+                <p class="modal-subtitle" data-i18n="auth.signUpSubtitle">Sign up to get started</p>
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required
+                        <input type="text" id="signupFirstName" data-i18n-placeholder="auth.firstName" placeholder="First name" required
                             autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupLastName" placeholder="Last name" autocomplete="family-name">
+                        <input type="text" id="signupLastName" data-i18n-placeholder="auth.lastName" placeholder="Last name" autocomplete="family-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="signupEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="signupEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required
+                        <input type="password" id="signupPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
-                        <legend class="account-type-legend">I am a</legend>
+                        <legend class="account-type-legend" data-i18n="auth.iAm">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
                                 <input type="radio" name="accountType" value="student" class="account-type-input"
@@ -258,8 +262,8 @@
                                 <span class="account-type-card-inner">
                                     <span class="account-type-icon-wrap"><i data-lucide="graduation-cap"
                                             class="account-type-icon"></i></span>
-                                    <span class="account-type-title">Student</span>
-                                    <span class="account-type-hint">Events &amp; clubs</span>
+                                    <span class="account-type-title" data-i18n="auth.student">Student</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventsClubs">Events &amp; clubs</span>
                                 </span>
                             </label>
                             <label class="account-type-card">
@@ -267,24 +271,25 @@
                                 <span class="account-type-card-inner">
                                     <span class="account-type-icon-wrap"><i data-lucide="mic"
                                             class="account-type-icon"></i></span>
-                                    <span class="account-type-title">Organizer</span>
-                                    <span class="account-type-hint">Event creator account</span>
+                                    <span class="account-type-title" data-i18n="auth.organizer">Organizer</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventCreator">Event creator account</span>
                                 </span>
                             </label>
                         </div>
                     </fieldset>
                     <p class="form-error" id="signupError"></p>
                     <p class="form-success" id="signupSuccess"></p>
-                    <button type="submit" class="btn-submit">Sign Up</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.signUp">Sign Up</button>
                 </form>
                 <p class="switch-text">
-                    Already have an account?
-                    <a href="#" id="goToLogin" class="switch-link">Login</a>
+                    <span data-i18n="auth.haveAccount">Already have an account?</span>
+                    <a href="#" id="goToLogin" class="switch-link" data-i18n="auth.login">Login</a>
                 </p>
             </div>
         </div>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/user.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/admin.js"></script>

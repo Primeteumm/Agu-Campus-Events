@@ -32,9 +32,9 @@
                                 d="M217.9 105.9L340.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L217.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1L32 320c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM352 416l64 0c17.7 0 32-14.3 32-32l0-256c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c53 0 96 43 96 96l0 256c0 53-43 96-96 96l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32z" />
                         </svg>
                     </div>
-                    <div class="text">Login</div>
+                    <div class="text" data-i18n="nav.login">Login</div>
                 </button>
-                <label class="switch" title="Tema Değiştir">
+                <label class="switch" data-i18n-title="nav.changeTheme" title="Change Theme">
                     <input id="themeToggle" type="checkbox" checked />
                     <div class="slider round">
                         <div class="sun-moon">
@@ -99,6 +99,10 @@
                         </div>
                     </div>
                 </label>
+                <div class="lang-toggle">
+                    <button class="lang-btn" id="langEN">EN</button>
+                    <button class="lang-btn" id="langTR">TR</button>
+                </div>
             </div>
         </nav>
 
@@ -110,9 +114,9 @@
                             src="https://ui-avatars.com/api/?name=Guest&background=25282C&color=00F2FF&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
-                        <span class="profile-guest-label">Welcome! 👋</span>
-                        <p class="profile-guest-hint">Sign in to personalize your feed and join events.</p>
-                        <button class="profile-guest-cta" id="openAuthModalSidebar">
+                        <span class="profile-guest-label" data-i18n="sidebar.welcomeLabel">Welcome! 👋</span>
+                        <p class="profile-guest-hint" data-i18n="sidebar.welcomeHint">Sign in to personalize your feed and join events.</p>
+                        <button class="profile-guest-cta" id="openAuthModalSidebar" data-i18n="sidebar.signIn">
                             Sign In
                         </button>
                     </div>
@@ -125,27 +129,27 @@
                     <div class="profile-roles" id="profileRoles"></div>
                     <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="home" class="icon"></i>
-                        Home
+                        <span data-i18n="sidebar.home">Home</span>
                     </span>
                     <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
-                        Create Event
+                        <span data-i18n="sidebar.createEvent">Create Event</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizers">
                         <i data-lucide="users-round" class="icon"></i>
-                        Organizers
+                        <span data-i18n="sidebar.organizers">Organizers</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
                         <i data-lucide="briefcase" class="icon"></i>
-                        Organizer Profile
+                        <span data-i18n="sidebar.organizerProfile">Organizer Profile</span>
                     </a>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
-                        Control Panel
+                        <span data-i18n="sidebar.controlPanel">Control Panel</span>
                     </a>
                     <a href="/profile.html" class="profile-settings-link">
                         <i data-lucide="settings" class="icon"></i>
-                        Profile settings
+                        <span data-i18n="sidebar.profileSettings">Profile settings</span>
                     </a>
                 </div>
 
@@ -153,7 +157,7 @@
                 <div class="sidebar-discovery" id="sidebarDiscovery">
                     <!-- Trending Events -->
                     <div class="sidebar-section">
-                        <h3 class="sidebar-section-title"><span class="highlight-coral">Trending</span> Events</h3>
+                        <h3 class="sidebar-section-title" data-i18n="sidebar.trendingEvents"><span class="highlight-coral">Trending</span> Events</h3>
                         <div class="sidebar-list" id="sidebarTrendingList">
                             <!-- Populated via JS -->
                         </div>
@@ -161,7 +165,7 @@
 
                     <!-- Top Guilds -->
                     <div class="sidebar-section">
-                        <h3 class="sidebar-section-title">Top Clubs</h3>
+                        <h3 class="sidebar-section-title" data-i18n="sidebar.topClubs">Top Clubs</h3>
                         <div class="sidebar-list" id="sidebarGuildsList">
                             <!-- Populated via JS -->
                         </div>
@@ -173,14 +177,14 @@
                 <main class="main-content">
                     <div class="events-toolbar">
                         <header class="events-header">
-                            <h1 class="events-header-title">AGU EVENTS</h1>
+                            <h1 class="events-header-title" data-i18n="index.pageTitle">AGU EVENTS</h1>
                             <span class="events-header-accent"></span>
                         </header>
                         <div class="events-toolbar-controls">
                             <label class="passed-checkbox" id="showPassedLabel">
                                 <input type="checkbox" id="showPassedCheckbox">
                                 <span class="passed-checkbox-mark"></span>
-                                <span class="passed-checkbox-text">Show Passed Events</span>
+                                <span class="passed-checkbox-text" data-i18n="index.showPassed">Show Passed Events</span>
                             </label>
                             <div class="view-toggle">
                                 <button class="view-btn active" id="listViewBtn" title="List View">
@@ -197,17 +201,17 @@
                             <label class="events-filter-field">
                                 <span class="events-filter-label">
                                     <i data-lucide="search" class="events-filter-icon"></i>
-                                    Event Title
+                                    <span data-i18n="index.eventTitleLabel">Event Title</span>
                                 </span>
-                                <input type="search" id="eventTitleFilter" placeholder="Search by title...">
+                                <input type="search" id="eventTitleFilter" data-i18n-placeholder="index.searchPlaceholder" placeholder="Search by title...">
                             </label>
                             <label class="events-filter-field">
                                 <span class="events-filter-label">
                                     <i data-lucide="map-pin" class="events-filter-icon"></i>
-                                    Location (Optional)
+                                    <span data-i18n="index.locationLabel">Location (Optional)</span>
                                 </span>
                                 <select id="eventLocationFilter">
-                                    <option value="">All locations</option>
+                                    <option value="" data-i18n="index.allLocations">All locations</option>
                                 </select>
                             </label>
                         </div>
@@ -225,55 +229,55 @@
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
                 <button class="modal-close" id="closeLogin">&times;</button>
-                <h2 class="modal-title">Welcome Back</h2>
-                <p class="modal-subtitle">Login to your account</p>
+                <h2 class="modal-title" data-i18n="auth.welcomeBack">Welcome Back</h2>
+                <p class="modal-subtitle" data-i18n="auth.loginSubtitle">Login to your account</p>
 
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="loginEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required
+                        <input type="password" id="loginPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
-                    <button type="submit" class="btn-submit">Login</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.login">Login</button>
                 </form>
 
                 <p class="switch-text">
-                    Don't have an account yet?
-                    <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
+                    <span data-i18n="auth.noAccount">Don't have an account yet?</span>
+                    <a href="#" id="goToSignup" class="switch-link" data-i18n="auth.signUp">Sign Up</a>
                 </p>
             </div>
 
             <div class="modal-card card-back">
                 <button class="modal-close" id="closeSignup">&times;</button>
-                <h2 class="modal-title">Create Account</h2>
-                <p class="modal-subtitle">Sign up to get started</p>
+                <h2 class="modal-title" data-i18n="auth.createAccount">Create Account</h2>
+                <p class="modal-subtitle" data-i18n="auth.signUpSubtitle">Sign up to get started</p>
 
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required
+                        <input type="text" id="signupFirstName" data-i18n-placeholder="auth.firstName" placeholder="First name" required
                             autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupLastName" placeholder="Last name" autocomplete="family-name">
+                        <input type="text" id="signupLastName" data-i18n-placeholder="auth.lastName" placeholder="Last name" autocomplete="family-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="signupEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="signupEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required
+                        <input type="password" id="signupPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
-                        <legend class="account-type-legend">I am a</legend>
+                        <legend class="account-type-legend" data-i18n="auth.iAm">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
                                 <input type="radio" name="accountType" value="student" class="account-type-input"
@@ -282,8 +286,8 @@
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="graduation-cap" class="account-type-icon"></i>
                                     </span>
-                                    <span class="account-type-title">Student</span>
-                                    <span class="account-type-hint">Events &amp; clubs</span>
+                                    <span class="account-type-title" data-i18n="auth.student">Student</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventsClubs">Events &amp; clubs</span>
                                 </span>
                             </label>
                             <label class="account-type-card">
@@ -292,25 +296,26 @@
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="mic" class="account-type-icon"></i>
                                     </span>
-                                    <span class="account-type-title">Organizer</span>
-                                    <span class="account-type-hint">Event creator</span>
+                                    <span class="account-type-title" data-i18n="auth.organizer">Organizer</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventCreator">Event creator</span>
                                 </span>
                             </label>
                         </div>
                     </fieldset>
                     <p class="form-error" id="signupError"></p>
                     <p class="form-success" id="signupSuccess"></p>
-                    <button type="submit" class="btn-submit">Sign Up</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.signUp">Sign Up</button>
                 </form>
 
                 <p class="switch-text">
-                    Already have an account?
-                    <a href="#" id="goToLogin" class="switch-link">Login</a>
+                    <span data-i18n="auth.haveAccount">Already have an account?</span>
+                    <a href="#" id="goToLogin" class="switch-link" data-i18n="auth.login">Login</a>
                 </p>
             </div>
         </div>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/user.js"></script>
     <script src="/js/clubs-data.js"></script>
     <script src="/js/events.js"></script>

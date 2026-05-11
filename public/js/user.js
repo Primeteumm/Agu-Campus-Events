@@ -106,26 +106,32 @@ function renderProfileSidebar(user) {
         u.avatarUrl ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=1565c0&color=fff&size=128`;
 
+    const tRole = (label) => {
+        if (typeof i18nGet === 'function') return i18nGet('roles.' + label) || label;
+        return label;
+    };
+
     rolesEl.innerHTML = '';
     const labels = u.roleLabels && u.roleLabels.length ? u.roleLabels : [];
     if (labels.length) {
         labels.forEach((label) => {
             const span = document.createElement('span');
             span.className = 'role-pill';
-            span.textContent = label;
+            span.textContent = tRole(label);
             rolesEl.appendChild(span);
         });
     } else if (u.roles && u.roles.length) {
         u.roles.forEach((r) => {
+            const capitalized = r.charAt(0).toUpperCase() + r.slice(1);
             const span = document.createElement('span');
             span.className = 'role-pill';
-            span.textContent = r.charAt(0).toUpperCase() + r.slice(1);
+            span.textContent = tRole(capitalized);
             rolesEl.appendChild(span);
         });
     } else {
         const span = document.createElement('span');
         span.className = 'role-pill';
-        span.textContent = 'Student';
+        span.textContent = tRole('Student');
         rolesEl.appendChild(span);
     }
 
@@ -273,6 +279,11 @@ async function refreshProfileFromServer(options = {}) {
 window.addEventListener('user-updated', () => {
     syncSidebarFromStorage();
     refreshProfileFromServer({ force: true });
+});
+
+// Re-render role pills when language changes
+window.addEventListener('langchange', () => {
+    syncSidebarFromStorage();
 });
 
 // ── Page load ──
