@@ -82,7 +82,8 @@ function renderClubHeader() {
                     const manageBtn = document.createElement('button');
                     manageBtn.id = 'clubManageBtn';
                     manageBtn.className = 'club-btn-message'; // Reusing secondary button style
-                    manageBtn.innerHTML = `<i data-lucide="settings" style="width:16px;height:16px;"></i> Manage Club`;
+                    const tMC = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
+                    manageBtn.innerHTML = `<i data-lucide="settings" style="width:16px;height:16px;"></i> ${tMC('club.manageClub')}`;
                     manageBtn.style.background = 'rgba(0, 242, 255, 0.1)';
                     manageBtn.style.color = 'var(--accent-cyan)';
                     manageBtn.style.borderColor = 'rgba(0, 242, 255, 0.3)';
@@ -157,12 +158,13 @@ function initFollowBtn() {
 }
 
 function updateFollowBtn(btn) {
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     if (isFollowing) {
         btn.classList.add('following');
-        btn.innerHTML = `<i data-lucide="check" style="width:16px;height:16px;"></i> Following`;
+        btn.innerHTML = `<i data-lucide="check" style="width:16px;height:16px;"></i> ${t('club.following')}`;
     } else {
         btn.classList.remove('following');
-        btn.innerHTML = `<i data-lucide="plus" style="width:16px;height:16px;"></i> Follow`;
+        btn.innerHTML = `<i data-lucide="plus" style="width:16px;height:16px;"></i> ${t('club.follow')}`;
     }
     lucide.createIcons();
 }
@@ -172,10 +174,11 @@ async function loadFeedEvents() {
     const container = document.getElementById('clubFeedContainer');
     if (!container) return;
 
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     container.innerHTML = `
         <div class="club-loading">
             <div class="club-spinner"></div>
-            <span>Loading events...</span>
+            <span>${t('club.loadingEvents')}</span>
         </div>`;
 
     try {
@@ -213,7 +216,7 @@ async function loadFeedEvents() {
         container.innerHTML = `
             <div class="club-empty">
                 <span class="club-empty-icon">📅</span>
-                <p>Could not load events. Please try again.</p>
+                <p>${t('club.failedLoad')}</p>
             </div>`;
     }
 }
@@ -235,11 +238,12 @@ function esc(str) {
 }
 
 function renderFeedGrid(events, container) {
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     if (events.length === 0) {
         container.innerHTML = `
             <div class="club-empty">
                 <span class="club-empty-icon">🎉</span>
-                <p>No events from this club yet. Check back soon!</p>
+                <p>${t('club.noEvents')}</p>
             </div>`;
         return;
     }
@@ -250,16 +254,16 @@ function renderFeedGrid(events, container) {
         return `
         <div class="${wrapClass}" style="animation-delay:${0.05 + i * 0.06}s">
             <div class="event-grid-card">
-                ${passed ? '<span class="passed-badge">Passed</span>' : ''}
+                ${passed ? `<span class="passed-badge">${t('events.passed')}</span>` : ''}
                 <h3 class="event-card-title">${esc(ev.title)}</h3>
-                <p class="event-card-desc">${esc(ev.description || 'No description available.')}</p>
+                <p class="event-card-desc">${esc(ev.description || t('events.noDescription'))}</p>
                 <div class="event-card-meta">
                     <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(ev.date))}</span>
                     <span><i data-lucide="map-pin" class="meta-icon"></i> ${esc(ev.location)}</span>
                     <span><i data-lucide="users" class="meta-icon"></i> ${ev.participant_count}/${ev.capacity}</span>
                 </div>
             </div>
-            ${!passed ? `<button class="btn-join grid-join" onclick="joinFromClub('${ev.id}', this)">Join Event</button>` : ''}
+            ${!passed ? `<button class="btn-join grid-join" onclick="joinFromClub('${ev.id}', this)">${t('club.joinEvent')}</button>` : ''}
         </div>`;
     }).join('');
 
@@ -288,9 +292,10 @@ function renderAbout() {
             <div class="club-highlight-desc">${esc(h.desc)}</div>
         </div>`).join('');
 
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     container.innerHTML = `
         <div class="club-about-content">
-            <h2>About Us</h2>
+            <h2>${t('club.aboutUs')}</h2>
             ${paras}
             <div class="club-about-highlights">${highlights}</div>
         </div>`;
@@ -315,6 +320,18 @@ function renderTeam() {
             </div>`).join('')}
         </div>`;
 }
+
+/* ── Language change ────────────────────────────────────────────── */
+window.addEventListener('langchange', () => {
+    const container = document.getElementById('clubFeedContainer');
+    if (container && clubEvents.length > 0) renderFeedGrid(clubEvents, container);
+    updateFollowBtn(document.getElementById('clubFollowBtn'));
+    // Reset lazy-render flags so About/Team re-render with new language
+    const aboutContainer = document.getElementById('clubAboutContainer');
+    if (aboutContainer) delete aboutContainer.dataset.rendered;
+    const teamContainer = document.getElementById('clubTeamContainer');
+    if (teamContainer) delete teamContainer.dataset.rendered;
+});
 
 /* ── Theme Toggle ───────────────────────────────────────────────── */
 const themeInput = document.getElementById('themeToggle');

@@ -85,7 +85,8 @@
         return 'rating-red';
     }
 
-    function ratingPill(avg, count, extraClass = '', emptyTitle = 'No ratings yet') {
+    function ratingPill(avg, count, extraClass = '') {
+        const emptyTitle = typeof i18nGet === 'function' ? i18nGet('organizer.noRatings') : 'No ratings yet';
         if (avg == null || !count) {
             return `<span class="organizer-rating rating-none ${extraClass}" title="${emptyTitle}">
                 <i data-lucide="star" class="rating-icon"></i>
@@ -94,7 +95,10 @@
         }
         const rounded = ratingCeil1(avg);
         const tier = ratingTierClass(rounded);
-        return `<span class="organizer-rating ${tier} ${extraClass}" title="${count} rating${count === 1 ? '' : 's'}">
+        const ratingWord = typeof i18nGet === 'function'
+            ? i18nGet(count === 1 ? 'organizer.rating' : 'organizer.ratings')
+            : (count === 1 ? 'rating' : 'ratings');
+        return `<span class="organizer-rating ${tier} ${extraClass}" title="${count} ${ratingWord}">
             <i data-lucide="star" class="rating-icon"></i>
             <span class="rating-value">${rounded.toFixed(1)}</span>
         </span>`;
@@ -146,13 +150,14 @@
     }
 
     function renderDirectory() {
+        const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
         if (!organizers.length) {
-            directoryGrid.innerHTML = '<p class="no-events">No organizers have created events yet.</p>';
+            directoryGrid.innerHTML = `<p class="no-events">${t('organizer.noOrganizers')}</p>`;
             return;
         }
         const filtered = getFilteredOrganizers();
         if (!filtered.length) {
-            directoryGrid.innerHTML = `<p class="no-events">No organizers match "${escHtml(searchQuery.trim())}".</p>`;
+            directoryGrid.innerHTML = `<p class="no-events">${t('organizer.noMatch')} "${escHtml(searchQuery.trim())}".</p>`;
             return;
         }
         const viewerId = getViewerId();
@@ -160,7 +165,7 @@
             const isYou = viewerId && String(viewerId) === String(o.id);
             const ratingHtml = o.ratingAvg
                 ? `<span class="organizer-card-rating"><i data-lucide="star" class="meta-icon"></i> ${o.ratingAvg.toFixed(1)} <span class="organizer-card-rating-count">(${o.ratingCount})</span></span>`
-                : '<span class="organizer-card-rating organizer-card-rating--empty">No ratings yet</span>';
+                : `<span class="organizer-card-rating organizer-card-rating--empty">${t('organizer.noRatings')}</span>`;
             return `
                 <button type="button" class="organizer-card" data-id="${escHtml(o.id)}">
                     <span class="organizer-card-avatar" aria-hidden="true">
@@ -169,11 +174,11 @@
                     <span class="organizer-card-body">
                         <span class="organizer-card-name">
                             ${escHtml(o.name)}
-                            ${isYou ? '<span class="organizer-card-you">You</span>' : ''}
+                            ${isYou ? `<span class="organizer-card-you">${t('organizer.you')}</span>` : ''}
                         </span>
                         <span class="organizer-card-stats">
-                            <span><i data-lucide="calendar" class="meta-icon"></i> ${o.eventCount} events</span>
-                            <span><i data-lucide="sparkles" class="meta-icon"></i> ${o.upcomingCount} upcoming</span>
+                            <span><i data-lucide="calendar" class="meta-icon"></i> ${o.eventCount} ${t('organizer.events')}</span>
+                            <span><i data-lucide="sparkles" class="meta-icon"></i> ${o.upcomingCount} ${t('organizer.upcoming')}</span>
                         </span>
                         ${ratingHtml}
                     </span>
@@ -196,8 +201,9 @@
         directoryView.classList.add('hidden');
         detailView.classList.remove('hidden');
 
+        const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
         detailName.innerHTML = `${escHtml(org.name)} ${ratingPill(org.ratingAvg, org.ratingCount, 'organizer-detail-rating')}`;
-        detailMeta.textContent = `${org.eventCount} events • ${org.upcomingCount} upcoming`;
+        detailMeta.textContent = `${org.eventCount} ${t('organizer.events')} • ${org.upcomingCount} ${t('organizer.upcoming')}`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
 
         renderEvents();
@@ -210,12 +216,13 @@
     }
 
     function renderEvents() {
+        const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
         const events = allEvents
             .filter((e) => String(e.organizer_id) === String(selectedOrganizerId))
             .sort((a, b) => new Date(a.date) - new Date(b.date));
 
         if (!events.length) {
-            listContainer.innerHTML = '<p class="no-events">This organizer has no events yet.</p>';
+            listContainer.innerHTML = `<p class="no-events">${t('organizer.noOrgEvents')}</p>`;
             return;
         }
 
@@ -226,18 +233,18 @@
             const passed = isPassed(ev.date);
             const passedBadge = passed
                 ? ratingPill(ev.event_rating_avg, ev.event_rating_count, 'organizer-event-rating')
-                : '<span class="organizer-event-badge organizer-event-badge--upcoming">Upcoming</span>';
+                : `<span class="organizer-event-badge organizer-event-badge--upcoming">${t('organizer.upcomingBadge')}</span>`;
 
             let actions = '';
             if (isOwner) {
                 actions = passed
-                    ? '<span class="organizer-event-locked">Past events cannot be modified</span>'
+                    ? `<span class="organizer-event-locked">${t('organizer.pastLocked')}</span>`
                     : `
                         <button type="button" class="btn-join organizer-event-edit" data-id="${escHtml(ev.id)}">
-                            <i data-lucide="pencil" class="icon" style="width:16px;height:16px;"></i> Edit
+                            <i data-lucide="pencil" class="icon" style="width:16px;height:16px;"></i> ${t('organizer.editBtn')}
                         </button>
                         <button type="button" class="btn-join organizer-event-delete" data-id="${escHtml(ev.id)}">
-                            <i data-lucide="trash-2" class="icon" style="width:16px;height:16px;"></i> Delete
+                            <i data-lucide="trash-2" class="icon" style="width:16px;height:16px;"></i> ${t('organizer.deleteBtn')}
                         </button>
                     `;
             }
@@ -248,7 +255,7 @@
                         <h3 class="organizer-event-title">${escHtml(ev.title)}</h3>
                         ${passedBadge}
                     </div>
-                    <p class="organizer-event-desc">${escHtml(ev.description || 'No description.')}</p>
+                    <p class="organizer-event-desc">${escHtml(ev.description || t('organizer.noDescription'))}</p>
                     <div class="organizer-event-meta">
                         <span><i data-lucide="calendar" class="meta-icon"></i> ${escHtml(formatDate(ev.date))}</span>
                         <span><i data-lucide="map-pin" class="meta-icon"></i> ${escHtml(ev.location || '—')}</span>
@@ -272,11 +279,12 @@
     }
 
     async function loadAll() {
-        directoryGrid.innerHTML = '<p class="loading-text">Loading organizers...</p>';
+        const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
+        directoryGrid.innerHTML = `<p class="loading-text">${t('organizer.loading')}</p>`;
         try {
             const res = await fetch(`${EVENTS_API}?includePassed=true`, { headers: authHeaders(false) });
             if (!res.ok) {
-                directoryGrid.innerHTML = '<p class="no-events">Failed to load organizers.</p>';
+                directoryGrid.innerHTML = `<p class="no-events">${t('organizer.failedLoad')}</p>`;
                 return;
             }
             const data = await res.json();
@@ -303,7 +311,7 @@
             }
         } catch (err) {
             console.error('Load organizers error:', err);
-            directoryGrid.innerHTML = '<p class="no-events">Connection error.</p>';
+            directoryGrid.innerHTML = `<p class="no-events">${t('organizer.connectionError')}</p>`;
         }
     }
 
@@ -455,5 +463,13 @@
     window.addEventListener('user-updated', () => {
         renderDirectory();
         if (selectedOrganizerId) renderEvents();
+    });
+
+    window.addEventListener('langchange', () => {
+        if (selectedOrganizerId) {
+            renderEvents();
+        } else {
+            renderDirectory();
+        }
     });
 })();

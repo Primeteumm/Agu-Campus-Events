@@ -140,11 +140,12 @@ function starWidget(event, opts) {
             </button>`;
         })
         .join('');
+    const tSW = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     const hint = disabled
         ? `<span class="star-hint">${esc(reason)}</span>`
         : current
-            ? `<span class="star-hint">Your rating: ${current}/5</span>`
-            : `<span class="star-hint">Rate the organizer</span>`;
+            ? `<span class="star-hint">${tSW('events.yourRating')}: ${current}/5</span>`
+            : `<span class="star-hint">${tSW('events.rateOrganizer')}</span>`;
     return `<div class="${wrapperClass}" onclick="event.stopPropagation()">
         <div class="star-row">
             ${stars}
@@ -155,10 +156,11 @@ function starWidget(event, opts) {
 }
 
 function canUserRate(event, joinedIds) {
+    const tR = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     const token = localStorage.getItem('token');
-    if (!token) return { ok: false, reason: 'Sign in to rate' };
+    if (!token) return { ok: false, reason: tR('events.signInToRate') };
     if (!isPassed(event.date)) return { ok: false, reason: '' };
-    if (!joinedIds || !joinedIds.has(String(event.id))) return { ok: false, reason: 'Only attendees can rate' };
+    if (!joinedIds || !joinedIds.has(String(event.id))) return { ok: false, reason: tR('events.onlyAttendeesRate') };
 
     let myId = null;
     try {
@@ -166,7 +168,7 @@ function canUserRate(event, joinedIds) {
         const u = raw ? JSON.parse(raw) : null;
         myId = u?.id || null;
     } catch { /* ignore */ }
-    if (myId && event.organizer_id === myId) return { ok: false, reason: "You can't rate yourself" };
+    if (myId && event.organizer_id === myId) return { ok: false, reason: tR('events.cantRateSelf') };
 
     return { ok: true };
 }
@@ -267,7 +269,8 @@ async function joinEvent(eventId, btn) {
             return;
         }
 
-        btn.innerHTML = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
+        const tJ = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
+        btn.innerHTML = `<span class="join-text-default">${tJ('events.joinedCheck')}</span><span class="join-text-leave">${tJ('events.leave')}</span>`;
         btn.classList.add('joined');
         btn.disabled = false;
         btn.setAttribute('onclick', `leaveEvent('${eventId}', this)`);
@@ -328,7 +331,8 @@ async function leaveEvent(eventId, btn) {
             return;
         }
 
-        btn.textContent = btn.classList.contains('list-join') ? 'Join' : 'Join Event';
+        const tL = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
+        btn.textContent = btn.classList.contains('list-join') ? tL('events.join') : tL('events.joinEvent');
         btn.classList.remove('joined');
         btn.disabled = false;
         btn.setAttribute('onclick', `joinEvent('${eventId}', this)`);
@@ -386,27 +390,28 @@ function renderListItem(event, joinedIds) {
     const isJoined = joinedIds.has(String(event.id));
     const passed = isPassed(event.date);
 
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     let btnClass = 'btn-join list-join';
-    let btnText = 'Join';
+    let btnText = t('events.join');
     let btnDisabled = '';
 
     let btnOnclick = `joinEvent('${event.id}', this)`;
 
     if (passed) {
         btnClass += ' disabled';
-        btnText = 'Ended';
+        btnText = t('events.ended');
         btnDisabled = 'disabled';
     } else if (isJoined) {
         btnClass += ' joined';
-        btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
+        btnText = `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`;
         btnOnclick = `leaveEvent('${event.id}', this)`;
     } else if (isFull) {
         btnClass += ' disabled';
-        btnText = 'Full';
+        btnText = t('events.full');
         btnDisabled = 'disabled';
     }
 
-    const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
+    const passedBadge = passed ? `<span class="passed-badge">${t('events.passed')}</span>` : '';
     const rowClass = `event-list-row${passed ? ' passed' : ''}`;
 
     const clubLinkHtml = typeof getClubIdFromName !== 'undefined' && getClubIdFromName(event.organizer_name) 
@@ -451,10 +456,10 @@ function renderListItem(event, joinedIds) {
             </div>
             <div class="event-list-expanded">
                 <div class="event-list-expanded-inner">
-                    <p class="event-list-desc-title">About this event</p>
-                    <p class="event-list-desc">${esc(event.description || 'No description available.')}</p>
+                    <p class="event-list-desc-title">${t('events.aboutEvent')}</p>
+                    <p class="event-list-desc">${esc(event.description || t('events.noDescription'))}</p>
                     ${passed ? `
-                        <p class="event-list-desc-title" style="margin-top:16px;">Rate the organizer</p>
+                        <p class="event-list-desc-title" style="margin-top:16px;">${t('events.rateOrganizer')}</p>
                         ${starWidget(event, canUserRate(event, joinedIds).ok ? {} : { disabled: true, reason: canUserRate(event, joinedIds).reason })}
                     ` : ''}
                 </div>
@@ -468,27 +473,28 @@ function renderGridCard(event, joinedIds) {
     const isJoined = joinedIds.has(String(event.id));
     const passed = isPassed(event.date);
 
+    const t = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
     let btnClass = 'btn-join grid-join';
-    let btnText = 'Join Event';
+    let btnText = t('events.joinEvent');
     let btnDisabled = '';
 
     let btnOnclick = `joinEvent('${event.id}', this)`;
 
     if (passed) {
         btnClass += ' disabled';
-        btnText = 'Ended';
+        btnText = t('events.ended');
         btnDisabled = 'disabled';
     } else if (isJoined) {
         btnClass += ' joined';
-        btnText = '<span class="join-text-default">Joined ✓</span><span class="join-text-leave">Leave</span>';
+        btnText = `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`;
         btnOnclick = `leaveEvent('${event.id}', this)`;
     } else if (isFull) {
         btnClass += ' disabled';
-        btnText = 'Full';
+        btnText = t('events.full');
         btnDisabled = 'disabled';
     }
 
-    const passedBadge = passed ? '<span class="passed-badge">Passed</span>' : '';
+    const passedBadge = passed ? `<span class="passed-badge">${t('events.passed')}</span>` : '';
     const wrapperClass = `event-grid-wrapper${passed ? ' passed' : ''}`;
 
     const clubLinkHtml = typeof getClubIdFromName !== 'undefined' && getClubIdFromName(event.organizer_name) 
@@ -503,7 +509,7 @@ function renderGridCard(event, joinedIds) {
                     ${clubLinkHtml}
                 </div>
                 <h3 class="event-card-title">${esc(event.title)}${passedBadge}</h3>
-                <p class="event-card-desc">${esc(event.description || 'No description available.')}</p>
+                <p class="event-card-desc">${esc(event.description || t('events.noDescription'))}</p>
                 <div class="event-card-meta">
                     <span><i data-lucide="calendar" class="meta-icon"></i> ${esc(formatDate(event.date))}</span>
                     <span><i data-lucide="map-pin" class="meta-icon"></i> ${esc(event.location)}</span>
@@ -511,7 +517,7 @@ function renderGridCard(event, joinedIds) {
                 </div>
                 ${passed ? `
                     <div class="event-card-rate">
-                        <p class="event-card-rate-title">Rate the organizer</p>
+                        <p class="event-card-rate-title">${t('events.rateOrganizer')}</p>
                         ${starWidget(event, canUserRate(event, joinedIds).ok ? {} : { disabled: true, reason: canUserRate(event, joinedIds).reason })}
                     </div>
                 ` : ''}
@@ -556,9 +562,10 @@ function renderCurrentView() {
 
     if (filtered.length === 0) {
         const hasFilter = titleQuery || locationQuery;
+        const tE = (k) => typeof i18nGet === 'function' ? i18nGet(k) : k;
         eventsContainer.innerHTML = hasFilter
-            ? '<p class="no-events">The event you are looking for could not be found.</p>'
-            : '<p class="no-events">No events found.</p>';
+            ? `<p class="no-events">${tE('events.noEventsFilter')}</p>`
+            : `<p class="no-events">${tE('events.noEvents')}</p>`;
         return;
     }
 
@@ -654,7 +661,7 @@ async function loadEvents() {
 
             renderCurrentView();
         } catch (err) {
-            eventsContainer.innerHTML = '<p class="no-events">Failed to load events. Please try again.</p>';
+            eventsContainer.innerHTML = `<p class="no-events">${typeof i18nGet === 'function' ? i18nGet('events.failedLoad') : 'Failed to load events. Please try again.'}</p>`;
             console.error('Load events error:', err);
         } finally {
             eventsContainer.classList.remove('events-container-updating');
@@ -672,4 +679,8 @@ loadEvents();
 
 window.addEventListener('auth-updated', () => {
     loadEvents();
+});
+
+window.addEventListener('langchange', () => {
+    renderCurrentView();
 });

@@ -27,9 +27,9 @@
             <div class="navbar-actions">
                 <button class="btn-login" id="openAuthModal" type="button">
                     <i data-lucide="log-in" class="icon"></i>
-                    <span>Login</span>
+                    <span data-i18n="nav.login">Login</span>
                 </button>
-                <label class="switch" title="Tema Değiştir">
+                <label class="switch" data-i18n-title="nav.changeTheme" title="Change Theme">
                     <input id="themeToggle" type="checkbox" checked />
                     <div class="slider round">
                         <div class="sun-moon">
@@ -54,6 +54,10 @@
                         </div>
                     </div>
                 </label>
+                <div class="lang-toggle">
+                    <button class="lang-btn" id="langEN">EN</button>
+                    <button class="lang-btn" id="langTR">TR</button>
+                </div>
             </div>
         </nav>
 
@@ -65,8 +69,8 @@
                             src="https://ui-avatars.com/api/?name=Guest&background=37474f&color=fff&size=128" alt="">
                     </div>
                     <div class="profile-name-block">
-                        <span class="profile-guest-label">Guest</span>
-                        <p class="profile-guest-hint">Sign in to manage your profile.</p>
+                        <span class="profile-guest-label" data-i18n="sidebar.guestLabel">Guest</span>
+                        <p class="profile-guest-hint" data-i18n="sidebar.guestHintProfile">Sign in to manage your profile.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -77,27 +81,27 @@
                     <div class="profile-roles" id="profileRoles"></div>
                     <a href="/" class="profile-settings-link">
                         <i data-lucide="home" class="icon"></i>
-                        Home
+                        <span data-i18n="sidebar.home">Home</span>
                     </a>
                     <a href="/create-event.html" class="profile-settings-link hidden" id="sidebarCreateEvent">
                         <i data-lucide="calendar-plus" class="icon"></i>
-                        Create Event
+                        <span data-i18n="sidebar.createEvent">Create Event</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizers">
                         <i data-lucide="users-round" class="icon"></i>
-                        Organizers
+                        <span data-i18n="sidebar.organizers">Organizers</span>
                     </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
                         <i data-lucide="briefcase" class="icon"></i>
-                        Organizer Profile
+                        <span data-i18n="sidebar.organizerProfile">Organizer Profile</span>
                     </a>
                     <a href="/admin.html" class="profile-settings-link hidden" id="sidebarAdminLink">
                         <i data-lucide="shield" class="icon"></i>
-                        Control Panel
+                        <span data-i18n="sidebar.controlPanel">Control Panel</span>
                     </a>
                     <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="settings" class="icon"></i>
-                        Profile settings
+                        <span data-i18n="sidebar.profileSettings">Profile settings</span>
                     </span>
                 </div>
             </aside>
@@ -106,13 +110,13 @@
                 <main class="main-content profile-page">
 
                     <div id="profileGate" class="profile-gate hidden">
-                        <p class="profile-gate-text">Please sign in to view your profile settings.</p>
-                        <a href="/" class="btn-submit profile-gate-btn">Go to home</a>
+                        <p class="profile-gate-text" data-i18n="profile.gateText">Please sign in to view your profile settings.</p>
+                        <a href="/" class="btn-submit profile-gate-btn" data-i18n="profile.gateBtn">Go to home</a>
                     </div>
 
                     <div id="profileContent" class="hidden">
                         <header class="events-header" style="margin-bottom: 24px;">
-                            <h1 class="events-header-title">PROFILE SETTINGS</h1>
+                            <h1 class="events-header-title" data-i18n="profile.pageTitle">PROFILE SETTINGS</h1>
                             <span class="events-header-accent"></span>
                         </header>
 
@@ -127,66 +131,66 @@
 
                         <!-- Form -->
                         <section class="settings-card">
-                            <h3 class="settings-card-title">Personal Information</h3>
+                            <h3 class="settings-card-title" data-i18n="profile.personalInfo">Personal Information</h3>
                             <form id="profileForm" class="ps-form">
                                 <div class="ps-field">
-                                    <label for="editFirstName">First Name</label>
+                                    <label for="editFirstName" data-i18n="profile.labelFirstName">First Name</label>
                                     <input type="text" id="editFirstName" name="first_name" autocomplete="given-name"
-                                        required placeholder="First name">
+                                        required data-i18n-placeholder="auth.firstName" placeholder="First name">
                                 </div>
                                 <div class="ps-field">
-                                    <label for="editLastName">Last Name</label>
+                                    <label for="editLastName" data-i18n="profile.labelLastName">Last Name</label>
                                     <input type="text" id="editLastName" name="last_name" autocomplete="family-name"
-                                        placeholder="Last name">
+                                        data-i18n-placeholder="auth.lastName" placeholder="Last name">
                                 </div>
 
                                 <div class="ps-field">
-                                    <label for="editEmail">Email Address <span class="ps-lock-icon"><i
+                                    <label for="editEmail"><span data-i18n="profile.labelEmail">Email Address</span> <span class="ps-lock-icon"><i
                                                 data-lucide="lock" style="width:12px;height:12px;"></i></span></label>
                                     <input type="email" id="editEmail" disabled readonly tabindex="-1"
                                         class="ps-locked">
                                 </div>
                                 <div class="ps-field">
-                                    <label for="editRole">Role <span class="ps-lock-icon"><i data-lucide="lock"
+                                    <label for="editRole"><span data-i18n="profile.labelRole">Role</span> <span class="ps-lock-icon"><i data-lucide="lock"
                                                 style="width:12px;height:12px;"></i></span></label>
                                     <input type="text" id="editRole" disabled readonly tabindex="-1" class="ps-locked">
                                 </div>
 
                                 <div class="ps-divider"></div>
 
-                                <h3 class="settings-card-title">Change Password</h3>
+                                <h3 class="settings-card-title" data-i18n="profile.changePassword">Change Password</h3>
                                 <div class="ps-field">
-                                    <label for="currentPassword">Current Password</label>
+                                    <label for="currentPassword" data-i18n="profile.labelCurrentPassword">Current Password</label>
                                     <input type="password" id="currentPassword" autocomplete="current-password"
-                                        placeholder="Required to change password">
+                                        data-i18n-placeholder="profile.currentPasswordPlaceholder" placeholder="Required to change password">
                                 </div>
                                 <div class="ps-field">
-                                    <label for="newPassword">New Password</label>
+                                    <label for="newPassword" data-i18n="profile.labelNewPassword">New Password</label>
                                     <input type="password" id="newPassword" autocomplete="new-password"
-                                        placeholder="Leave blank to keep current">
+                                        data-i18n-placeholder="profile.newPasswordPlaceholder" placeholder="Leave blank to keep current">
                                 </div>
 
                                 <p class="form-error" id="profileFormError"></p>
                                 <p class="form-success" id="profileFormSuccess"></p>
                                 <button type="submit" class="btn-submit ps-save-btn">
                                     <i data-lucide="save" style="width:16px;height:16px;"></i>
-                                    Save Changes
+                                    <span data-i18n="profile.saveChanges">Save Changes</span>
                                 </button>
                             </form>
                         </section>
 
                         <section class="settings-card hidden" id="clubPromoteSection">
-                            <h3 class="settings-card-title">Club Member Assignment</h3>
-                            <p class="settings-hint">As Club President or Vice President you can assign the Club Member
+                            <h3 class="settings-card-title" data-i18n="profile.clubMemberTitle">Club Member Assignment</h3>
+                            <p class="settings-hint" data-i18n="profile.clubMemberHint">As Club President or Vice President you can assign the Club Member
                                 role.</p>
                             <div class="promote-row">
                                 <input type="email" id="lookupEmail" class="promote-input"
-                                    placeholder="User email address" autocomplete="email">
-                                <button type="button" class="btn-submit promote-btn" id="lookupBtn">Find user</button>
+                                    data-i18n-placeholder="profile.userEmailPlaceholder" placeholder="User email address" autocomplete="email">
+                                <button type="button" class="btn-submit promote-btn" id="lookupBtn" data-i18n="profile.findUser">Find user</button>
                             </div>
                             <p class="form-error" id="lookupError"></p>
                             <div id="lookupResult" class="lookup-result hidden"></div>
-                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn">Assign Club Member
+                            <button type="button" class="btn-submit hidden" id="assignClubMemberBtn" data-i18n="profile.assignRole">Assign Club Member
                                 role</button>
                         </section>
                     </div>
@@ -201,51 +205,51 @@
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
                 <button class="modal-close" id="closeLogin" type="button">&times;</button>
-                <h2 class="modal-title">Welcome Back</h2>
-                <p class="modal-subtitle">Login to your account</p>
+                <h2 class="modal-title" data-i18n="auth.welcomeBack">Welcome Back</h2>
+                <p class="modal-subtitle" data-i18n="auth.loginSubtitle">Login to your account</p>
                 <form id="loginForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="loginEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required
+                        <input type="password" id="loginPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="current-password">
                     </div>
                     <p class="form-error" id="loginError"></p>
-                    <button type="submit" class="btn-submit">Login</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.login">Login</button>
                 </form>
                 <p class="switch-text">
-                    Don't have an account yet?
-                    <a href="#" id="goToSignup" class="switch-link">Sign Up</a>
+                    <span data-i18n="auth.noAccount">Don't have an account yet?</span>
+                    <a href="#" id="goToSignup" class="switch-link" data-i18n="auth.signUp">Sign Up</a>
                 </p>
             </div>
             <div class="modal-card card-back">
                 <button class="modal-close" id="closeSignup" type="button">&times;</button>
-                <h2 class="modal-title">Create Account</h2>
-                <p class="modal-subtitle">Sign up to get started</p>
+                <h2 class="modal-title" data-i18n="auth.createAccount">Create Account</h2>
+                <p class="modal-subtitle" data-i18n="auth.signUpSubtitle">Sign up to get started</p>
                 <form id="signupForm" class="auth-form">
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupFirstName" placeholder="First name" required
+                        <input type="text" id="signupFirstName" data-i18n-placeholder="auth.firstName" placeholder="First name" required
                             autocomplete="given-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="user" class="form-icon"></i>
-                        <input type="text" id="signupLastName" placeholder="Last name" autocomplete="family-name">
+                        <input type="text" id="signupLastName" data-i18n-placeholder="auth.lastName" placeholder="Last name" autocomplete="family-name">
                     </div>
                     <div class="form-group">
                         <i data-lucide="mail" class="form-icon"></i>
-                        <input type="email" id="signupEmail" placeholder="Email" required autocomplete="email">
+                        <input type="email" id="signupEmail" data-i18n-placeholder="auth.email" placeholder="Email" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <i data-lucide="lock" class="form-icon"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required
+                        <input type="password" id="signupPassword" data-i18n-placeholder="auth.password" placeholder="Password" required
                             autocomplete="new-password">
                     </div>
                     <fieldset class="account-type-fieldset">
-                        <legend class="account-type-legend">I am a</legend>
+                        <legend class="account-type-legend" data-i18n="auth.iAm">I am a</legend>
                         <div class="account-type-grid" role="presentation">
                             <label class="account-type-card">
                                 <input type="radio" name="accountType" value="student" class="account-type-input"
@@ -254,8 +258,8 @@
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="graduation-cap" class="account-type-icon"></i>
                                     </span>
-                                    <span class="account-type-title">Student</span>
-                                    <span class="account-type-hint">Events &amp; clubs</span>
+                                    <span class="account-type-title" data-i18n="auth.student">Student</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventsClubs">Events &amp; clubs</span>
                                 </span>
                             </label>
                             <label class="account-type-card">
@@ -264,24 +268,25 @@
                                     <span class="account-type-icon-wrap">
                                         <i data-lucide="mic" class="account-type-icon"></i>
                                     </span>
-                                    <span class="account-type-title">Organizer</span>
-                                    <span class="account-type-hint">Event creator account</span>
+                                    <span class="account-type-title" data-i18n="auth.organizer">Organizer</span>
+                                    <span class="account-type-hint" data-i18n="auth.eventCreator">Event creator account</span>
                                 </span>
                             </label>
                         </div>
                     </fieldset>
                     <p class="form-error" id="signupError"></p>
                     <p class="form-success" id="signupSuccess"></p>
-                    <button type="submit" class="btn-submit">Sign Up</button>
+                    <button type="submit" class="btn-submit" data-i18n="auth.signUp">Sign Up</button>
                 </form>
                 <p class="switch-text">
-                    Already have an account?
-                    <a href="#" id="goToLogin" class="switch-link">Login</a>
+                    <span data-i18n="auth.haveAccount">Already have an account?</span>
+                    <a href="#" id="goToLogin" class="switch-link" data-i18n="auth.login">Login</a>
                 </p>
             </div>
         </div>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/user.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/profile.js"></script>
