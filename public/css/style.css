@@ -272,7 +272,8 @@ body.light-theme .role-pill--muted {
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: 10px;
-    transition: background var(--transition-base), color var(--transition-base);
+    border-left: 3px solid transparent;
+    transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base);
 }
 
 .profile-settings-link:hover {
@@ -295,13 +296,19 @@ body.light-theme .profile-settings-link:hover {
 }
 
 .profile-settings-link--current {
-    color: #b0bec5;
+    color: var(--accent-cyan);
     cursor: default;
     pointer-events: none;
+    background: rgba(0,242,255,0.08);
+    border-left-color: var(--accent-cyan);
+    box-shadow: inset 0 0 12px rgba(0,242,255,0.06);
 }
 
 body.light-theme .profile-settings-link--current {
-    color: #78909c;
+    color: #1565c0;
+    background: rgba(21,101,192,0.08);
+    border-left-color: #1565c0;
+    box-shadow: inset 0 0 12px rgba(21,101,192,0.06);
 }
 
 .account-type-fieldset {
