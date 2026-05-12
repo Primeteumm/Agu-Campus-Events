@@ -22,23 +22,28 @@ function renderTopGuilds() {
     const container = document.getElementById('sidebarGuildsList');
     if (!container) return;
 
-    let html = '';
-    // Show top 3 clubs
-    const topClubs = Object.values(CLUBS).slice(0, 3);
-    
-    topClubs.forEach(club => {
-        html += `
-            <a href="/club.html?id=${club.id}" class="sidebar-guild-item">
-                <img src="${club.logo}" alt="${esc(club.name)}" class="sidebar-guild-logo">
-                <div class="sidebar-guild-info">
-                    <div class="sidebar-guild-name">${esc(club.name)}</div>
-                    <div class="sidebar-guild-members">${club.memberCount} members</div>
-                </div>
-            </a>
-        `;
-    });
-
-    container.innerHTML = html;
+    fetch('/api/clubs')
+        .then(r => r.json())
+        .then(data => {
+            const clubs = (data.clubs || []).slice(0, 3);
+            if (!clubs.length) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = clubs.map(club => {
+                const logoSrc = club.logo_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(club.name)}&background=25282C&color=00F2FF&size=64&bold=true`;
+                return `
+                    <a href="/club.html?id=${esc(club.id)}" class="sidebar-guild-item">
+                        <img src="${esc(logoSrc)}" alt="${esc(club.name)}" class="sidebar-guild-logo">
+                        <div class="sidebar-guild-info">
+                            <div class="sidebar-guild-name">${esc(club.name)}</div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        })
+        .catch(() => { container.innerHTML = ''; });
 }
 
 // Called from events.js when events are loaded

@@ -1,5 +1,10 @@
 const { ROLE, ROLE_LABELS, CLUB_PROMOTER_ROLES } = require('../constants/roles');
 
+async function isSuperAdmin(userId, client) {
+    const role = await getRoleForUser(userId, client);
+    return role === ROLE.SUPER_ADMIN;
+}
+
 async function ensureProfileRow(client, user, firstName, lastName, roleValue) {
     if (!client || !user?.id) return { ok: false, error: new Error('missing client or user') };
 
@@ -98,6 +103,7 @@ module.exports = {
     getRoleForUser,
     userHasAnyRole,
     canAssignClubMember,
+    isSuperAdmin,
     addRole,
     ensureDefaultRoleOnLogin,
     roleToDisplayLabel,
