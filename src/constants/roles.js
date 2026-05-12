@@ -4,6 +4,7 @@ const ROLE = {
     CLUB_MEMBER: 'Club Member',
     CLUB_VICE_PRESIDENT: 'Club Vice President',
     CLUB_PRESIDENT: 'Club President',
+    SUPER_ADMIN: 'Super Admin',
 };
 
 const ROLE_LABELS = {
@@ -12,6 +13,7 @@ const ROLE_LABELS = {
     [ROLE.CLUB_MEMBER]: 'Club Member',
     [ROLE.CLUB_VICE_PRESIDENT]: 'Club Vice President',
     [ROLE.CLUB_PRESIDENT]: 'Club President',
+    [ROLE.SUPER_ADMIN]: 'Super Admin',
 };
 
 const DEFAULT_ACCOUNT_ROLES = {

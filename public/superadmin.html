@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizer Profile — AGU Campus Events</title>
+    <title>Super Admin Panel — AGU Campus Events</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://unpkg.com/lucide@0.474.0"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <nav class="navbar">
             <a href="/" class="navbar-brand" style="text-decoration:none; color:inherit;">
                 <svg class="navbar-brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="36" height="36" rx="10" fill="#25282C"/>
-                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none"/>
-                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8"/>
-                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
-                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round"/>
-                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8"/>
-                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8"/>
+                    <rect width="36" height="36" rx="10" fill="#25282C" />
+                    <rect x="8" y="10" width="20" height="17" rx="3" stroke="#00F2FF" stroke-width="1.8" fill="none" />
+                    <line x1="8" y1="15" x2="28" y2="15" stroke="#00F2FF" stroke-width="1.8" />
+                    <line x1="13" y1="10" x2="13" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round" />
+                    <line x1="23" y1="10" x2="23" y2="7" stroke="#FF6B6B" stroke-width="1.8" stroke-linecap="round" />
+                    <rect x="12" y="19" width="4" height="4" rx="1" fill="#00F2FF" opacity="0.8" />
+                    <rect x="20" y="19" width="4" height="4" rx="1" fill="#FF6B6B" opacity="0.8" />
                 </svg>
-                <div class="navbar-brand-text">AGÜ <span>CAMPUS EVENTS</span></div>
+                <div class="navbar-brand-text">AGU <span>CAMPUS EVENTS</span></div>
             </a>
             <div class="navbar-actions">
                 <button class="btn-login" id="openAuthModal" type="button">
@@ -67,7 +69,7 @@
                     </div>
                     <div class="profile-name-block">
                         <span class="profile-guest-label" data-i18n="sidebar.guestLabel">Guest</span>
-                        <p class="profile-guest-hint" data-i18n="sidebar.guestHintEvents">Sign in to manage your events.</p>
+                        <p class="profile-guest-hint" data-i18n="sidebar.guestHintProfile">Sign in to manage your profile.</p>
                     </div>
                 </div>
                 <div class="profile-card profile-card--user hidden" id="profileCardUser">
@@ -84,18 +86,18 @@
                         <i data-lucide="calendar-plus" class="icon"></i>
                         <span data-i18n="sidebar.createEvent">Create Event</span>
                     </a>
-                    <span class="profile-settings-link profile-settings-link--current" id="sidebarOrganizers">
+                    <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizers">
                         <i data-lucide="users-round" class="icon"></i>
                         <span data-i18n="sidebar.organizers">Organizers</span>
-                    </span>
+                    </a>
                     <a href="/organizer.html" class="profile-settings-link hidden" id="sidebarOrganizerProfile">
                         <i data-lucide="briefcase" class="icon"></i>
                         <span data-i18n="sidebar.organizerProfile">Organizer Profile</span>
                     </a>
-                    <a href="/superadmin.html" class="profile-settings-link hidden" id="sidebarSuperAdminLink">
+                    <span class="profile-settings-link profile-settings-link--current">
                         <i data-lucide="shield-check" class="icon"></i>
                         <span data-i18n="sidebar.superAdminPanel">Super Admin Panel</span>
-                    </a>
+                    </span>
                     <a href="/profile.html" class="profile-settings-link">
                         <i data-lucide="settings" class="icon"></i>
                         <span data-i18n="sidebar.profileSettings">Profile settings</span>
@@ -104,90 +106,169 @@
             </aside>
 
             <div class="app-main">
-                <main class="main-content profile-page">
+                <main class="main-content">
 
-                    <div id="organizerDirectoryView">
-                        <header class="events-header">
-                            <h1 class="events-header-title" data-i18n="organizer.pageTitle">ORGANIZERS</h1>
-                            <span class="events-header-accent"></span>
-                        </header>
-                        <p class="organizer-directory-hint" data-i18n="organizer.hint">Discover event creators — click a card to see that organizer's events.</p>
-                        <div class="organizer-search">
-                            <i data-lucide="search" class="organizer-search-icon"></i>
-                            <input
-                                type="search"
-                                id="organizerSearchInput"
-                                class="organizer-search-input"
-                                data-i18n-placeholder="organizer.searchPlaceholder"
-                                placeholder="Search organizers by name..."
-                                autocomplete="off"
-                            >
-                            <button type="button" id="organizerSearchClear" class="organizer-search-clear hidden" aria-label="Clear search">
-                                <i data-lucide="x" class="icon"></i>
+                    <!-- Access denied gate -->
+                    <div id="saGate" class="profile-gate hidden">
+                        <p class="profile-gate-text" data-i18n="superadmin.gateText">Access denied. Super Admin only.</p>
+                        <a href="/" class="btn-submit profile-gate-btn" data-i18n="superadmin.gateBtn">Go to home</a>
+                    </div>
+
+                    <!-- Super Admin content -->
+                    <div id="saContent" class="hidden">
+                        <div class="admin-header">
+                            <h2 class="admin-title">
+                                <i data-lucide="shield-check" class="icon" style="width:24px;height:24px;"></i>
+                                <span data-i18n="superadmin.pageTitle">SUPER ADMIN PANEL</span>
+                            </h2>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="sa-tabs">
+                            <button class="sa-tab sa-tab--active" id="tabUsers" data-tab="users">
+                                <i data-lucide="users" class="icon" style="width:16px;height:16px;"></i>
+                                <span data-i18n="superadmin.tabUsers">Users</span>
+                            </button>
+                            <button class="sa-tab" id="tabClubs" data-tab="clubs">
+                                <i data-lucide="building-2" class="icon" style="width:16px;height:16px;"></i>
+                                <span data-i18n="superadmin.tabClubs">Clubs</span>
                             </button>
                         </div>
-                        <div id="organizerDirectoryGrid" class="organizer-directory">
-                            <p class="loading-text" data-i18n="organizer.loading">Loading organizers...</p>
+
+                        <!-- ── Users Panel ── -->
+                        <div id="panelUsers" class="sa-panel">
+                            <section class="settings-card admin-card">
+                                <div class="admin-toolbar">
+                                    <h3 class="settings-card-title" style="margin-bottom:0;" data-i18n="superadmin.tabUsers">Users</h3>
+                                    <div class="admin-search-wrap">
+                                        <i data-lucide="search" class="icon" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#666;"></i>
+                                        <input type="text" id="saUserSearch" class="admin-search" data-i18n-placeholder="superadmin.searchUsersPlaceholder" placeholder="Search by name or email...">
+                                    </div>
+                                </div>
+                                <div class="admin-table-wrap">
+                                    <table class="admin-table" id="saUserTable">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="superadmin.colName">Name</th>
+                                                <th data-i18n="superadmin.colEmail">Email</th>
+                                                <th data-i18n="superadmin.tabClubs">Clubs</th>
+                                                <th data-i18n="superadmin.colRole">Role</th>
+                                                <th data-i18n="superadmin.colActions">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="saUserTableBody">
+                                            <tr><td colspan="5" class="admin-loading" data-i18n="superadmin.loadingUsers">Loading users...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="admin-count" id="saUserCount"></p>
+                            </section>
+                        </div>
+
+                        <!-- ── Clubs Panel ── -->
+                        <div id="panelClubs" class="sa-panel hidden">
+                            <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
+
+                                <!-- Club list -->
+                                <section class="settings-card admin-card" style="flex:1;min-width:260px;">
+                                    <div class="admin-toolbar">
+                                        <h3 class="settings-card-title" style="margin-bottom:0;" data-i18n="superadmin.tabClubs">Clubs</h3>
+                                        <button class="btn-submit" id="saCreateClubBtn" style="padding:6px 14px;font-size:.85rem;" data-i18n="superadmin.createClub">Create Club</button>
+                                    </div>
+                                    <ul class="sa-club-list" id="saClubList">
+                                        <li class="admin-loading" data-i18n="superadmin.loadingClubs">Loading clubs...</li>
+                                    </ul>
+                                </section>
+
+                                <!-- Members panel (shown after club selected) -->
+                                <section class="settings-card admin-card hidden" id="saMembersPanel" style="flex:2;min-width:320px;">
+                                    <div class="admin-toolbar">
+                                        <h3 class="settings-card-title" style="margin-bottom:0;" id="saMembersPanelTitle">Members</h3>
+                                        <button class="btn-submit" id="saAddMemberBtn" style="padding:6px 14px;font-size:.85rem;" data-i18n="superadmin.addMember">Add Member</button>
+                                    </div>
+                                    <div class="admin-table-wrap">
+                                        <table class="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th data-i18n="superadmin.colName">Name</th>
+                                                    <th data-i18n="superadmin.colEmail">Email</th>
+                                                    <th data-i18n="superadmin.clubRoleLabel">Club Role</th>
+                                                    <th data-i18n="superadmin.colActions">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="saMembersTableBody">
+                                                <tr><td colspan="4" class="admin-loading" data-i18n="superadmin.loadingMembers">Loading members...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
                     </div>
 
-                    <div id="organizerDetailView" class="hidden">
-                        <button type="button" id="organizerDetailBack" class="organizer-detail-back">
-                            <i data-lucide="arrow-left" class="icon"></i>
-                            <span data-i18n="organizer.allOrganizers">All organizers</span>
-                        </button>
-                        <header class="events-header organizer-detail-header">
-                            <h1 class="events-header-title" id="organizerDetailName">Organizer</h1>
-                            <span class="events-header-accent"></span>
-                        </header>
-                        <p class="organizer-detail-meta" id="organizerDetailMeta"></p>
-                        <div id="organizerEventsContainer" class="organizer-events">
-                            <p class="loading-text">Loading events...</p>
-                        </div>
-                    </div>
+                    <!-- Toast -->
+                    <div id="saToast" class="ps-toast"></div>
                 </main>
             </div>
         </div>
     </div>
 
-    <!-- Edit Event Modal -->
-    <div class="modal-overlay" id="editEventModal">
-        <div class="modal-card-container">
-            <div class="modal-card card-front" style="max-width: 480px;">
-                <button class="modal-close" id="closeEditEvent" type="button">&times;</button>
-                <h2 class="modal-title" data-i18n="organizer.editTitle">Edit Event</h2>
-                <p class="modal-subtitle" data-i18n="organizer.editSubtitle">Update your event details</p>
-                <form id="editEventForm" class="ps-form">
-                    <input type="hidden" id="editEventId">
-                    <div class="ps-field">
-                        <label for="editEventTitle" data-i18n="organizer.labelTitle">Title</label>
-                        <input type="text" id="editEventTitle" required autocomplete="off">
+    <!-- Club Create/Edit Modal -->
+    <div class="modal-overlay" id="saClubModal">
+        <div class="sa-modal-box">
+            <button class="modal-close" id="saClubModalClose" type="button">&times;</button>
+            <h2 class="modal-title" id="saClubModalTitle" data-i18n="superadmin.createClub">Create Club</h2>
+            <form id="saClubForm" class="auth-form">
+                <div class="form-group">
+                    <i data-lucide="building-2" class="form-icon"></i>
+                    <input type="text" id="saClubName" data-i18n-placeholder="superadmin.clubName" placeholder="Club Name" required>
+                </div>
+                <div class="form-group">
+                    <i data-lucide="align-left" class="form-icon"></i>
+                    <input type="text" id="saClubDescription" data-i18n-placeholder="superadmin.clubDescription" placeholder="Description">
+                </div>
+                <div class="form-group">
+                    <i data-lucide="image" class="form-icon"></i>
+                    <input type="url" id="saClubLogoUrl" data-i18n-placeholder="superadmin.clubLogoUrl" placeholder="Logo URL (optional)">
+                </div>
+                <p class="form-error" id="saClubFormError"></p>
+                <button type="submit" class="btn-submit" id="saClubSaveBtn" data-i18n="superadmin.saveClub">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal-overlay" id="saAddMemberModal">
+        <div class="sa-modal-box">
+            <button class="modal-close" id="saAddMemberModalClose" type="button">&times;</button>
+            <h2 class="modal-title" data-i18n="superadmin.addMember">Add Member</h2>
+            <div class="auth-form">
+                <div class="form-group">
+                    <i data-lucide="search" class="form-icon"></i>
+                    <input type="email" id="saMemberSearchInput" data-i18n-placeholder="superadmin.searchUserEmail" placeholder="Search user by email...">
+                </div>
+                <button type="button" class="btn-submit" id="saMemberSearchBtn" style="margin-bottom:12px;" data-i18n="superadmin.findUser">Search</button>
+
+                <div id="saMemberSearchResults" class="sa-search-results hidden"></div>
+
+                <div id="saMemberSelectedUser" class="sa-selected-user hidden">
+                    <div class="sa-selected-label" id="saMemberSelectedName"></div>
+                    <div class="form-group" style="margin-top:10px;">
+                        <i data-lucide="award" class="form-icon"></i>
+                        <select id="saMemberRoleSelect" class="admin-search" style="padding-left:36px;">
+                            <option value="member"        data-i18n="superadmin.clubRoleMember">Member</option>
+                            <option value="vice_president" data-i18n="superadmin.clubRoleVicePresident">Vice President</option>
+                            <option value="president"     data-i18n="superadmin.clubRolePresident">President</option>
+                        </select>
                     </div>
-                    <div class="ps-field">
-                        <label for="editEventDescription" data-i18n="organizer.labelDescription">Description</label>
-                        <textarea id="editEventDescription" rows="3"></textarea>
-                    </div>
-                    <div class="ps-field">
-                        <label for="editEventDate" data-i18n="organizer.labelDate">Date &amp; time</label>
-                        <input type="datetime-local" id="editEventDate" required>
-                    </div>
-                    <div class="ps-field">
-                        <label for="editEventLocation" data-i18n="organizer.labelLocation">Location</label>
-                        <input type="text" id="editEventLocation" required>
-                    </div>
-                    <div class="ps-field">
-                        <label for="editEventCapacity" data-i18n="organizer.labelCapacity">Capacity</label>
-                        <input type="number" id="editEventCapacity" min="1" max="10000">
-                    </div>
-                    <p class="form-error" id="editEventError"></p>
-                    <p class="form-success" id="editEventSuccess"></p>
-                    <button type="submit" class="btn-submit ps-save-btn" data-i18n="organizer.saveChanges">Save changes</button>
-                </form>
+                    <p class="form-error" id="saMemberAddError"></p>
+                    <button type="button" class="btn-submit" id="saMemberConfirmBtn" data-i18n="superadmin.addMember">Add Member</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Auth modal -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-card-container" id="cardContainer">
             <div class="modal-card card-front">
@@ -268,7 +349,7 @@
     <script src="/js/i18n.js"></script>
     <script src="/js/user.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/organizer.js"></script>
+    <script src="/js/superadmin.js"></script>
     <script>
         const saved = localStorage.getItem('theme');
         if (saved === 'light') document.body.classList.add('light-theme');
@@ -282,4 +363,5 @@
         });
     </script>
 </body>
+
 </html>

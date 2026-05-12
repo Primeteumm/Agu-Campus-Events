@@ -156,12 +156,12 @@ function showGuestSidebar() {
 function updateAdminLinkVisibility(user) {
     const role = user?.role || (user?.roles && user.roles[0]) || '';
     const isOrganizerLike = role === 'Organizer' || role === 'Club President' || role === 'Club Vice President';
+    const isSuperAdmin = role === 'Super Admin';
 
-    const link = document.getElementById('sidebarAdminLink');
-    if (link) {
-        const canSeeAdmin = role === 'Teacher' || role === 'Club President';
-        if (canSeeAdmin) link.classList.remove('hidden');
-        else link.classList.add('hidden');
+    const superAdminLink = document.getElementById('sidebarSuperAdminLink');
+    if (superAdminLink) {
+        if (isSuperAdmin) superAdminLink.classList.remove('hidden');
+        else superAdminLink.classList.add('hidden');
     }
 
     const createBtn = document.getElementById('sidebarCreateEvent');
