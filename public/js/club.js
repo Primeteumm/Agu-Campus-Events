@@ -199,9 +199,58 @@ function renderFeedGrid(events, container) {
     lucide.createIcons();
 }
 
-window.joinFromClub = function(eventId, btn) {
-    if (!localStorage.getItem('token')) { document.getElementById('openAuthModal')?.click(); return; }
-    if (typeof joinEvent === 'function') joinEvent(eventId, btn);
+window.joinFromClub = async function(eventId, btn) {
+    const token = localStorage.getItem('token');
+    if (!token) { document.getElementById('openAuthModal')?.click(); return; }
+    if (btn.disabled) return;
+
+    btn.disabled = true;
+    btn.classList.add('btn-loading');
+
+    try {
+        const isJoined = btn.classList.contains('joined');
+        const res = await fetch(`/api/events/${eventId}/join`, {
+            method: isJoined ? 'DELETE' : 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            btn.textContent = data.message || 'Failed';
+            setTimeout(() => { btn.textContent = t('club.joinEvent'); btn.disabled = false; }, 2000);
+            return;
+        }
+
+        if (isJoined) {
+            btn.textContent = t('club.joinEvent');
+            btn.classList.remove('joined');
+            btn.setAttribute('onclick', `joinFromClub('${eventId}', this)`);
+        } else {
+            btn.innerHTML = `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`;
+            btn.classList.add('joined');
+            btn.setAttribute('onclick', `joinFromClub('${eventId}', this)`);
+        }
+
+        // Update participant count in UI
+        const wrapper = btn.closest('.event-grid-wrapper');
+        if (wrapper) {
+            const capEl = wrapper.querySelector('.event-card-meta span:last-child');
+            if (capEl) {
+                const match = capEl.textContent.trim().match(/(\d+)\/(\d+)/);
+                if (match) {
+                    const delta = isJoined ? -1 : 1;
+                    capEl.innerHTML = `<i data-lucide="users" class="meta-icon"></i> ${parseInt(match[1]) + delta}/${match[2]}`;
+                    lucide.createIcons();
+                }
+            }
+        }
+    } catch (e) {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = t('club.joinEvent'); btn.disabled = false; }, 2000);
+    } finally {
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+    }
 };
 
 function renderAbout() {
