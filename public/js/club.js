@@ -4,6 +4,7 @@ let currentClub = null;
 let clubMembers = [];
 let isFollowing = false;
 let clubEvents = [];
+let joinedIds = new Set();
 
 function t(k) { return typeof i18nGet === 'function' ? i18nGet(k) : k; }
 function esc(str) {
@@ -16,19 +17,32 @@ function setText(id, val) {
     if (el) el.textContent = val;
 }
 
+async function fetchJoinedIds() {
+    const token = localStorage.getItem('token');
+    if (!token) return new Set();
+    try {
+        const res = await fetch('/api/events/my-joins', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return new Set();
+        const data = await res.json();
+        return new Set((data.joinedEventIds || []).map(String));
+    } catch {
+        return new Set();
+    }
+}
+
 async function initClubPage() {
     const params = new URLSearchParams(window.location.search);
     const clubId = params.get('id');
 
-    if (!clubId) {
-        showError('No club ID specified.');
-        return;
-    }
+    if (!clubId) { showError('No club ID specified.'); return; }
 
     try {
-        const [clubRes, membersRes] = await Promise.all([
+        const [clubRes, membersRes, fetchedJoinedIds] = await Promise.all([
             fetch(`/api/clubs/${clubId}`),
             fetch(`/api/clubs/${clubId}/members`),
+            fetchJoinedIds(),
         ]);
 
         if (!clubRes.ok) { showError('Club not found.'); return; }
@@ -38,6 +52,7 @@ async function initClubPage() {
 
         currentClub = clubData.club;
         clubMembers = membersData.members || [];
+        joinedIds = fetchedJoinedIds;
 
         renderClubHeader();
         initTabs();
@@ -54,7 +69,8 @@ async function initClubPage() {
 
 function showError(msg) {
     setText('clubName', msg);
-    document.getElementById('clubFeedContainer').innerHTML = `<div class="club-empty"><p>${esc(msg)}</p></div>`;
+    const c = document.getElementById('clubFeedContainer');
+    if (c) c.innerHTML = `<div class="club-empty"><p>${esc(msg)}</p></div>`;
 }
 
 function renderClubHeader() {
@@ -72,12 +88,10 @@ function renderClubHeader() {
     setText('clubCategory', '');
     setText('clubMemberCount', c.member_count ?? clubMembers.length);
 
-    // Update team tab badge
     const teamBadge = document.querySelector('#tab-team .club-tab-count');
     if (teamBadge) teamBadge.textContent = clubMembers.length;
 
     document.querySelectorAll('.club-back-link').forEach(el => { el.href = '/'; });
-
 }
 
 function initTabs() {
@@ -174,6 +188,16 @@ function formatDate(dateStr) {
 
 function isPassed(dateStr) { return dateStr && new Date(dateStr) < new Date(); }
 
+function joinBtnHTML(eventId, isJoined) {
+    if (isJoined) {
+        return `<button class="btn-join grid-join joined" onclick="joinFromClub('${eventId}', this)">
+            <span class="join-text-default">${t('events.joinedCheck')}</span>
+            <span class="join-text-leave">${t('events.leave')}</span>
+        </button>`;
+    }
+    return `<button class="btn-join grid-join" onclick="joinFromClub('${eventId}', this)">${t('club.joinEvent')}</button>`;
+}
+
 function renderFeedGrid(events, container) {
     if (events.length === 0) {
         container.innerHTML = `<div class="club-empty"><span class="club-empty-icon">🎉</span><p>${t('club.noEvents')}</p></div>`;
@@ -181,6 +205,7 @@ function renderFeedGrid(events, container) {
     }
     container.innerHTML = events.map((ev, i) => {
         const passed = isPassed(ev.date);
+        const isJoined = joinedIds.has(String(ev.id));
         return `
         <div class="event-grid-wrapper${passed ? ' passed' : ''}" style="animation-delay:${0.05 + i * 0.06}s">
             <div class="event-grid-card">
@@ -193,7 +218,7 @@ function renderFeedGrid(events, container) {
                     <span><i data-lucide="users" class="meta-icon"></i> ${ev.participant_count}/${ev.capacity}</span>
                 </div>
             </div>
-            ${!passed ? `<button class="btn-join grid-join" onclick="joinFromClub('${ev.id}', this)">${t('club.joinEvent')}</button>` : ''}
+            ${!passed ? joinBtnHTML(ev.id, isJoined) : ''}
         </div>`;
     }).join('');
     lucide.createIcons();
@@ -207,38 +232,44 @@ window.joinFromClub = async function(eventId, btn) {
     btn.disabled = true;
     btn.classList.add('btn-loading');
 
+    const wasJoined = btn.classList.contains('joined');
+
     try {
-        const isJoined = btn.classList.contains('joined');
         const res = await fetch(`/api/events/${eventId}/join`, {
-            method: isJoined ? 'DELETE' : 'POST',
+            method: wasJoined ? 'DELETE' : 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         const data = await res.json();
 
         if (!res.ok) {
             btn.textContent = data.message || 'Failed';
-            setTimeout(() => { btn.textContent = t('club.joinEvent'); btn.disabled = false; }, 2000);
+            setTimeout(() => {
+                btn.innerHTML = wasJoined
+                    ? `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`
+                    : t('club.joinEvent');
+                btn.disabled = false;
+            }, 2000);
             return;
         }
 
-        if (isJoined) {
-            btn.textContent = t('club.joinEvent');
+        if (wasJoined) {
+            btn.innerHTML = t('club.joinEvent');
             btn.classList.remove('joined');
-            btn.setAttribute('onclick', `joinFromClub('${eventId}', this)`);
+            joinedIds.delete(String(eventId));
         } else {
             btn.innerHTML = `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`;
             btn.classList.add('joined');
-            btn.setAttribute('onclick', `joinFromClub('${eventId}', this)`);
+            joinedIds.add(String(eventId));
         }
 
-        // Update participant count in UI
+        // Update participant count
         const wrapper = btn.closest('.event-grid-wrapper');
         if (wrapper) {
             const capEl = wrapper.querySelector('.event-card-meta span:last-child');
             if (capEl) {
                 const match = capEl.textContent.trim().match(/(\d+)\/(\d+)/);
                 if (match) {
-                    const delta = isJoined ? -1 : 1;
+                    const delta = wasJoined ? -1 : 1;
                     capEl.innerHTML = `<i data-lucide="users" class="meta-icon"></i> ${parseInt(match[1]) + delta}/${match[2]}`;
                     lucide.createIcons();
                 }
@@ -246,7 +277,9 @@ window.joinFromClub = async function(eventId, btn) {
         }
     } catch (e) {
         btn.textContent = 'Error';
-        setTimeout(() => { btn.textContent = t('club.joinEvent'); btn.disabled = false; }, 2000);
+        setTimeout(() => { btn.innerHTML = wasJoined
+            ? `<span class="join-text-default">${t('events.joinedCheck')}</span><span class="join-text-leave">${t('events.leave')}</span>`
+            : t('club.joinEvent'); btn.disabled = false; }, 2000);
     } finally {
         btn.classList.remove('btn-loading');
         btn.disabled = false;
@@ -262,7 +295,7 @@ function renderAbout() {
     container.innerHTML = `
         <div class="club-about-content">
             <h2>${t('club.aboutUs')}</h2>
-            ${desc ? `<p>${esc(desc)}</p>` : `<p class="club-empty-text">${t('club.noDescription') || 'No description available.'}</p>`}
+            ${desc ? `<p>${esc(desc)}</p>` : `<p class="club-empty-text">${t('club.noDescription')}</p>`}
         </div>`;
 }
 
@@ -272,13 +305,12 @@ function renderTeam() {
     container.dataset.rendered = 'true';
 
     if (clubMembers.length === 0) {
-        container.innerHTML = `<div class="club-empty"><p>${t('club.noMembers') || 'No team members yet.'}</p></div>`;
+        container.innerHTML = `<div class="club-empty"><p>${t('club.noMembers')}</p></div>`;
         return;
     }
 
     const roleOrder = { president: 0, vice_president: 1, member: 2 };
     const sorted = [...clubMembers].sort((a, b) => (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9));
-
     const roleLabel = { president: 'President', vice_president: 'Vice President', member: 'Member' };
     const colors = ['25282C', '1a2a3a', '2a1a3a', '1a3a2a', '3a2a1a'];
 
